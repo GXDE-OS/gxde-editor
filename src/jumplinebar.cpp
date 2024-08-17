@@ -24,6 +24,7 @@
 #include "jumplinebar.h"
 
 #include <QDebug>
+#include <QPainterPath>
 
 JumpLineBar::JumpLineBar(QWidget *parent)
     : QWidget(parent)

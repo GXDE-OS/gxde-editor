@@ -1,6 +1,6 @@
-# Deepin Editor
+# GXDE Editor
 
-Deepin Editor is a desktop text editor that supports common text editing features.
+GXDE Editor is a desktop text editor that supports common text editing features.
 
 ## Dependencies
 
@@ -22,27 +22,27 @@ mkdir build
 cd build
 qmake ..
 make
-sudo ./deepin-editor-daemon
+sudo ./gxde-editor-daemon
 ```
 
 * Build editor
 
 ```
-cd ./deepin-editor
+cd ./gxde-editor
 mkdir build
 cd build
 cmake ..
 make
-./deepin-editor
+./gxde-editor
 ```
 
 ## Usage
 
-Below is keymap list for deepin-editor:
+Below is keymap list for gxde-editor:
 
 ## Config file
 
-configure save at: ~/.config/deepin/deepin-editor/config.conf
+configure save at: ~/.config/deepin/gxde-editor/config.conf
 
 ## Getting help
 
@@ -62,4 +62,4 @@ We encourage you to report issues and contribute changes
 
 ## License
 
-Deepin Editor is licensed under [GPLv3](LICENSE).
+GXDE Editor is licensed under [GPLv3](LICENSE).

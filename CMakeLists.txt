@@ -4,7 +4,7 @@ if (NOT DEFINED VERSION)
     set(VERSION 1.2.2)
 endif ()
 
-project(deepin-editor)
+project(gxde-editor)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 11)
@@ -47,9 +47,9 @@ find_package(KF5Codecs)
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 # Tell CMake to create the executable
-add_executable(deepin-editor ${SRCS} src/deepin-editor.qrc)
-target_include_directories(deepin-editor PUBLIC ${DtkWidget_INCLUDE_DIRS} ${OBJECT_BINARY_DIR})
-target_link_libraries(deepin-editor
+add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
+target_include_directories(gxde-editor PUBLIC ${DtkWidget_INCLUDE_DIRS} ${OBJECT_BINARY_DIR})
+target_link_libraries(gxde-editor
     ${DtkWidget_LIBRARIES}
     ${DtkCore_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
@@ -68,10 +68,10 @@ add_subdirectory("dedit")
 # Install qm files
 file(GLOB QM_FILES "translations/*.qm")
 install(FILES ${QM_FILES}
-        DESTINATION share/deepin-editor/translations)
+        DESTINATION share/gxde-editor/translations)
 
-install(TARGETS deepin-editor DESTINATION bin)
-install(FILES deepin-editor.desktop DESTINATION share/applications)
+install(TARGETS gxde-editor DESTINATION bin)
+install(FILES gxde-editor.desktop DESTINATION share/applications)
 
 install(DIRECTORY src/themes
-        DESTINATION share/deepin-editor)
+        DESTINATION share/gxde-editor)

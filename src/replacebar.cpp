@@ -23,6 +23,7 @@
 #include "replacebar.h"
 #include "utils.h"
 
+#include <QPainterPath>
 #include <QDebug>
 
 ReplaceBar::ReplaceBar(QWidget *parent)

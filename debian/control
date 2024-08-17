@@ -1,13 +1,16 @@
-Source: deepin-editor
+Source: gxde-editor
 Section: editors
 Priority: optional
-Maintainer: Deepin Packages Builder <packages@linuxdeepin.com>
-Build-Depends: debhelper (>= 9), cmake, pkg-config, libqt5widgets5, libdtkcore-dev, libdtkwidget-dev, qt5-default, libpolkit-qt5-1-dev, libkf5syntaxhighlighting-dev, libkf5codecs-dev, qttools5-dev-tools, qtbase5-private-dev
+Maintainer: gfdgd xi <3025613752@qq.com>, Deepin Packages Builder <packages@linuxdeepin.com>
+Build-Depends: debhelper (>= 9), cmake, pkg-config, libqt5widgets5, libdtkcore2-dev, libdtkwidget2-dev, qtbase5-dev, libpolkit-qt5-1-dev, libkf5syntaxhighlighting-dev, libkf5codecs-dev, qttools5-dev-tools, qtbase5-private-dev
 Standards-Version: 3.9.8
-Homepage: https://www.deepin.org
+Homepage: https://gxde.gfdgdxi.top
 
-Package: deepin-editor
+Package: gxde-editor
 Architecture: any
+Breaks: deepin-editor
+Replaces: deepin-editor
+Provides: deepin-editor
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: dtk based text editor
  Advanced text editor based on dtk.

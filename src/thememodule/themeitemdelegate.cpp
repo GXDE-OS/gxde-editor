@@ -22,6 +22,7 @@
 #include "../utils.h"
 #include <QPainter>
 #include <QDebug>
+#include <QPainterPath>
 
 ThemeItemDelegate::ThemeItemDelegate(QObject *parent)
     : QAbstractItemDelegate(parent)

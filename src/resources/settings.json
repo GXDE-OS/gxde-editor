@@ -1859,7 +1859,7 @@
                             "key": "theme",
                             "hide": true,
                             "reset": true,
-                            "default": "/usr/share/deepin-editor/themes/deepin.theme"
+                            "default": "/usr/share/gxde-editor/themes/deepin.theme"
                         }
                     ]
                 }

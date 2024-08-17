@@ -23,6 +23,7 @@
 #include "findbar.h"
 #include "utils.h"
 
+#include <QPainterPath>
 #include <QDebug>
 
 FindBar::FindBar(QWidget *parent)

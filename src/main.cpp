@@ -48,18 +48,18 @@ int main(int argc, char *argv[])
     DApplication::loadDXcbPlugin();
 
     const char *descriptionText = QT_TRANSLATE_NOOP("MainWindow",
-                                                    "Deepin Editor is a desktop text editor that supports common text editing features.");
-    const QString acknowledgementLink = "https://www.deepin.org/original/deepin-editor/";
+                                                    "GXDE Editor is a desktop text editor that supports common text editing features.");
+    const QString acknowledgementLink = "https://gxde.gfdgdxi.top/";
 
     DApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
     app.loadTranslator();
-    app.setOrganizationName("deepin");
-    app.setApplicationName("deepin-editor");
-    app.setApplicationDisplayName(QObject::tr("Deepin Editor"));
+    app.setOrganizationName("GXDE");
+    app.setApplicationName("gxde-editor");
+    app.setApplicationDisplayName(QObject::tr("GXDE Editor"));
     app.setApplicationVersion(VERSION);
     app.setProductIcon(QIcon(Utils::getQrcPath("logo_96.svg")));
-    app.setProductName(DApplication::translate("MainWindow", "Deepin Editor"));
+    app.setProductName(DApplication::translate("MainWindow", "GXDE Editor"));
     app.setApplicationDescription(DApplication::translate("MainWindow", descriptionText) + "\n");
     app.setApplicationAcknowledgementPage(acknowledgementLink);
 

@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "widgets/toast.h"
 
+#include <QPainterPath>
 #include <DSettings>
 #include <DSettingsOption>
 #include <QRegularExpression>

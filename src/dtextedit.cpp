@@ -26,9 +26,9 @@
 #include "editwrapper.h"
 #include "widgets/bottombar.h"
 
-#include <KF5/KSyntaxHighlighting/definition.h>
-#include <KF5/KSyntaxHighlighting/syntaxhighlighter.h>
-#include <KF5/KSyntaxHighlighting/theme.h>
+#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/definition.h>
+#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/syntaxhighlighter.h>
+#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/theme.h>
 
 #include <QAbstractTextDocumentLayout>
 #include <QTextDocumentFragment>
