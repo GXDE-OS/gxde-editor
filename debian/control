@@ -8,7 +8,6 @@ Homepage: https://gxde.gfdgdxi.top
 
 Package: gxde-editor
 Architecture: any
-Breaks: deepin-editor
 Replaces: deepin-editor
 Provides: deepin-editor
 Depends: ${shlibs:Depends}, ${misc:Depends}
