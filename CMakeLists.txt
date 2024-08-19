@@ -63,6 +63,7 @@ target_link_libraries(gxde-editor
 
 set(CMAKE_INSTALL_PREFIX /usr)
 
+add_subdirectory("gxedit")
 add_subdirectory("dedit")
 
 # Install qm files
