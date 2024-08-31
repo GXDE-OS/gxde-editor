@@ -559,7 +559,8 @@ bool Utils::isMimeTypeSupport(const QString &filepath)
                       << "application/x-ruby"
                       << "application/x-mpegURL"
                       << "application/x-wine-extension-ini"
-                      << "model/vrml";
+                      << "model/vrml"
+                      << "application/toml";
 
     if (textMimeTypes.contains(mimeType)) {
         return true;
