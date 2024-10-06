@@ -8,7 +8,7 @@ MimeType=text/english;text/plain;text/x-makefile;text/x-c++hdr;text/x-c++src;tex
 Name=GXDE Editor
 StartupNotify=false
 Type=Application
-X-GXDE-Vendor=GXDE
+X-DDE-Vendor=deepin
 
 # Translations:
 # Do not manually modify!
@@ -100,6 +100,6 @@ Name[sk]=GXDE Editor
 Name[sr]=Дипин Уредник
 Name[tr]=GXDE Düzenleyici
 Name[uk]=Редактор GXDE
-Name[zh_CN]=极星编辑器
-Name[zh_TW]=极星編輯器
+Name[zh_CN]=GXDE 编辑器
+Name[zh_TW]=GXDE 編輯器
 
