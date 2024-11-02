@@ -251,72 +251,72 @@ void Window::activeTab(int index)
 void Window::addTab(const QString &filepath, bool activeTab)
 {
     // check whether it is an editable file thround mimeType.
-    if (Utils::isMimeTypeSupport(filepath)) {
-        const QString &curPath = m_tabbar->currentPath();
-        const QFileInfo fileInfo(filepath);
-        QString tabName = fileInfo.fileName();
-        EditWrapper *curWrapper = currentWrapper();
+    //if (Utils::isMimeTypeSupport(filepath)) {
+    const QString &curPath = m_tabbar->currentPath();
+    const QFileInfo fileInfo(filepath);
+    QString tabName = fileInfo.fileName();
+    EditWrapper *curWrapper = currentWrapper();
 
-        if (!fileInfo.isWritable() && fileInfo.isReadable()) {
-            tabName += QString(" (%1)").arg(tr("Read-Only"));
-        }
+    if (!fileInfo.isWritable() && fileInfo.isReadable()) {
+        tabName += QString(" (%1)").arg(tr("Read-Only"));
+    }
 
-        if (curWrapper) {
-            // if the current page is a draft file and is empty
-            // no need to create a new tab.
-            if (curWrapper->textEditor()->toPlainText().isEmpty() &&
+    if (curWrapper) {
+        // if the current page is a draft file and is empty
+        // no need to create a new tab.
+        if (curWrapper->textEditor()->toPlainText().isEmpty() &&
                 !m_wrappers.keys().contains(filepath) &&
                 Utils::isDraftFile(curPath))
-            {
-                QFile(curPath).remove();
-                m_tabbar->updateTab(m_tabbar->currentIndex(), filepath, tabName);
-                m_wrappers[filepath] = m_wrappers.take(curPath);
-                m_wrappers[filepath]->updatePath(filepath);
-                m_wrappers[filepath]->openFile(filepath);
+        {
+            QFile(curPath).remove();
+            m_tabbar->updateTab(m_tabbar->currentIndex(), filepath, tabName);
+            m_wrappers[filepath] = m_wrappers.take(curPath);
+            m_wrappers[filepath]->updatePath(filepath);
+            m_wrappers[filepath]->openFile(filepath);
 
-                return;
-            } else {
-                if (m_tabbar->indexOf(filepath) != -1) {
-                    m_tabbar->setCurrentIndex(m_tabbar->indexOf(filepath));
-                }
-            }
-        }
-
-        // check if have permission to read the file.
-        QFile file(filepath);
-        if (fileInfo.exists() && !file.open(QIODevice::ReadOnly)) {
-            file.close();
-            showNotify(QString(tr("You do not have permission to open %1")).arg(filepath));
             return;
-        }
-        file.close();
-
-        if (m_tabbar->indexOf(filepath) == -1) {
-            m_tabbar->addTab(filepath, tabName);
-
-            if (!m_wrappers.contains(filepath)) {
-                EditWrapper *wrapper = createEditor();
-                wrapper->openFile(filepath);
-
-                m_wrappers[filepath] = wrapper;
-
-                showNewEditor(wrapper);
+        } else {
+            if (m_tabbar->indexOf(filepath) != -1) {
+                m_tabbar->setCurrentIndex(m_tabbar->indexOf(filepath));
             }
         }
-
-        // Activate window.
-        activateWindow();
-
-        // Active tab if activeTab is true.
-        if (activeTab) {
-            int tabIndex = m_tabbar->indexOf(filepath);
-            if (tabIndex != -1) {
-                m_tabbar->setCurrentIndex(tabIndex);
-            }
-        }
-    } else {
-        showNotify(tr("Invalid file: %1").arg(QFileInfo(filepath).fileName()));
     }
+
+    // check if have permission to read the file.
+    QFile file(filepath);
+    if (fileInfo.exists() && !file.open(QIODevice::ReadOnly)) {
+        file.close();
+        showNotify(QString(tr("You do not have permission to open %1")).arg(filepath));
+        return;
+    }
+    file.close();
+
+    if (m_tabbar->indexOf(filepath) == -1) {
+        m_tabbar->addTab(filepath, tabName);
+
+        if (!m_wrappers.contains(filepath)) {
+            EditWrapper *wrapper = createEditor();
+            wrapper->openFile(filepath);
+
+            m_wrappers[filepath] = wrapper;
+
+            showNewEditor(wrapper);
+        }
+    }
+
+    // Activate window.
+    activateWindow();
+
+    // Active tab if activeTab is true.
+    if (activeTab) {
+        int tabIndex = m_tabbar->indexOf(filepath);
+        if (tabIndex != -1) {
+            m_tabbar->setCurrentIndex(tabIndex);
+        }
+    }
+    /*} else {
+        showNotify(tr("Invalid file: %1").arg(QFileInfo(filepath).fileName()));
+    }*/
 }
 
 void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, const QString &tabName, int index)
