@@ -1775,7 +1775,6 @@ void DTextEdit::setTheme(const KSyntaxHighlighting::Theme &theme, const QString 
     const QString textColor = textStylesMap["Normal"].toMap()["text-color"].toString();
 
     m_backgroundColor = QColor(jsonMap["editor-colors"].toMap()["background-color"].toString());
-    auto backgroundColorStr = jsonMap["editor-colors"].toMap()["background-color"].toString();
     m_currentLineColor = QColor(themeCurrentLineColor);
     m_currentLineNumberColor = QColor(jsonMap["editor-colors"].toMap()["current-line-number"].toString());
     m_lineNumbersColor = QColor(jsonMap["editor-colors"].toMap()["line-numbers"].toString());
@@ -1806,7 +1805,7 @@ void DTextEdit::setTheme(const KSyntaxHighlighting::Theme &theme, const QString 
                                         "color: %2;"
                                         "selection-color: %3;"
                                         "selection-background-color: %4;"
-                                        "}").arg(backgroundColorStr, textColor,
+                                        "}").arg(m_backgroundColor.name(), textColor,
                                                  m_selectionColor.name(), m_selectionBgColor.name());
     setStyleSheet(styleSheet);
 
