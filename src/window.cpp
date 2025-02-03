@@ -1245,8 +1245,11 @@ void Window::loadTheme(const QString &path)
     }
 
     // set background.
+    // 绘制背景的底色不应该设置 Alpha 通道，否则会绘制成黑色
+    QColor backgroundColorWithoutAlpha = QColor(backgroundColor);
+    backgroundColorWithoutAlpha.setAlpha(255);
     QPalette palette = this->palette();
-    palette.setColor(QPalette::Background, QColor(backgroundColor));
+    palette.setColor(QPalette::Background, backgroundColorWithoutAlpha);
     setPalette(palette);
 
     m_themePanel->setBackground(backgroundColor);
