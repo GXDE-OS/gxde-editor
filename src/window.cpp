@@ -163,6 +163,9 @@ Window::Window(DMainWindow *parent)
     connect(this, &Window::requestDropEvent, this, &Window::dropEvent);
 
     connect(qApp, &QGuiApplication::focusWindowChanged, this, &Window::handleFocusWindowChanged);
+
+    // 允许设置背景
+    setEnableWindowBackground(1);
 }
 
 Window::~Window()
