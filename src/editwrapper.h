@@ -24,6 +24,7 @@
 #include "dtextedit.h"
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
+#include "widgets/markdownpreviewwidget.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
@@ -75,6 +76,7 @@ private:
     void detectEndOfLine();
     void handleCursorModeChanged(DTextEdit::CursorMode mode);
     void handleHightlightChanged(const QString &name);
+    void handleTextChanged();
     void handleFileLoadFinished(const QByteArray &encode, const QString &content);
     void setTextCodec(QTextCodec *codec, bool reload = false);
 
@@ -86,6 +88,7 @@ private:
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
+    MarkdownPreviewWidget *m_markdownPreview;
 
     EndOfLineMode m_endOfLineMode;
     bool m_isLoadFinished;

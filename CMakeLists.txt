@@ -34,6 +34,7 @@ file(GLOB SRCS "src/*.h" "src/*.cpp"
 
 # Find the library
 find_package(PkgConfig REQUIRED)
+find_package(Qt5Network REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5DBus REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
@@ -48,7 +49,7 @@ include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
-target_include_directories(gxde-editor PUBLIC ${DtkWidget_INCLUDE_DIRS} ${OBJECT_BINARY_DIR})
+target_include_directories(gxde-editor PUBLIC ${DtkWidget_INCLUDE_DIRS} ${OBJECT_BINARY_DIR} ${CMARK_INCLUDE_DIRS})
 target_link_libraries(gxde-editor
     ${DtkWidget_LIBRARIES}
     ${DtkCore_LIBRARIES}
@@ -56,10 +57,12 @@ target_link_libraries(gxde-editor
     ${Qt5DBus_LIBRARIES}
     ${Qt5PrintSupport_LIBRARIES}
     ${Qt5Concurrent_LIBRARIES}
+    ${Qt5Network_LIBRARIES}
 
     KF5::Codecs
     KF5::SyntaxHighlighting
 )
+
 
 set(CMAKE_INSTALL_PREFIX /usr)
 

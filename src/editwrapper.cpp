@@ -21,6 +21,7 @@
 #include "fileloadthread.h"
 #include "editwrapper.h"
 #include "utils.h"
+#include "widgets/markdownpreviewwidget.h"
 #include <unistd.h>
 
 #include <QCoreApplication>
@@ -45,13 +46,16 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_endOfLineMode(eolUnix),
       m_isLoadFinished(true),
       m_toast(new Toast(this)),
-      m_isRefreshing(false)
+      m_isRefreshing(false),
+      m_markdownPreview(new MarkdownPreviewWidget)
 {
     // Init layout and widgets.
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
     m_layout->addWidget(m_textEdit->lineNumberArea);
     m_layout->addWidget(m_textEdit);
+    m_layout->addWidget(m_markdownPreview);
+    m_markdownPreview->setVisible(false);
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
     m_textEdit->setWrapper(this);
@@ -68,6 +72,7 @@ EditWrapper::EditWrapper(QWidget *parent)
 
     connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
     connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
+    connect(m_textEdit, &DTextEdit::textChanged, this, &EditWrapper::handleTextChanged);
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
     connect(m_toast, &Toast::closeBtnClicked, this, [=] {
         QFileInfo fi(filePath());
@@ -327,8 +332,16 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
     }
 }
 
+void EditWrapper::handleTextChanged()
+{
+    if (m_markdownPreview->isVisible()) {
+        m_markdownPreview->setMarkdown(m_textEdit->toPlainText());
+    }
+}
+
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
+    m_markdownPreview->setVisible(name == "Markdown");
     m_bottomBar->setHightlightName(name);
 }
 
