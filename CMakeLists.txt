@@ -76,6 +76,7 @@ install(FILES ${QM_FILES}
 
 install(TARGETS gxde-editor DESTINATION bin)
 install(FILES gxde-editor.desktop DESTINATION share/applications)
+install(FILES gxde-editor.svg DESTINATION share/icons/)
 
 install(DIRECTORY src/themes
         DESTINATION share/gxde-editor)
