@@ -12,6 +12,9 @@ target.path = $${PREFIX}/bin/
 desktop_files.path = $${PREFIX}/share/applications/
 desktop_files.files = $$PWD/*.desktop
 
+icon_files.path = $${PREFIX}/share/icons/
+icon_files.files = $$PWD/*.svg
+
 services.path = $${PREFIX}/share/dbus-1/system-services
 services.files = $$PWD/*.service
 
@@ -27,6 +30,6 @@ dman.files = $$PWD/dman/*
 translations.path = $${PREFIX}/share/$${TARGET}/translations
 translations.files = $$PWD/translations/*.qm
 
-INSTALLS += target translations desktop_files services dman config policy
+INSTALLS += target translations desktop_files icon_files services dman config policy
 
 

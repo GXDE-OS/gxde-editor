@@ -1,6 +1,7 @@
-gxde-editor (1.2.12) UNRELEASED; urgency=medium
+gxde-editor (1.3.0) UNRELEASED; urgency=medium
 
   * 新增支持设置背景图片标签
+  * 修复：安装时不带图标
 
  -- gfdgd_xi <3025613752@qq.com>  Mon, 03 Feb 2025 22:42:03 +0800
 
