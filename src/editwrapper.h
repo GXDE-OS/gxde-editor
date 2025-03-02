@@ -76,7 +76,6 @@ private:
     void detectEndOfLine();
     void handleCursorModeChanged(DTextEdit::CursorMode mode);
     void handleHightlightChanged(const QString &name);
-    void handleTextChanged();
     void handleFileLoadFinished(const QByteArray &encode, const QString &content);
     void setTextCodec(QTextCodec *codec, bool reload = false);
 

@@ -1,135 +1,152 @@
+// MarkdownPreviewWidget.cpp
 #include "markdownpreviewwidget.h"
-#include <QVBoxLayout>
-#include <QNetworkReply>
-#include <QTextCursor>
-#include <QTextCharFormat>
-#include <QRegularExpression>
-#include <QFile>
-#include <QTextStream>
 #include <QScrollBar>
-#include <QFileInfo>
-#include <QDesktopServices>
-#include <QBuffer>
+#include <QFile>
+#include <QWebEngineSettings>
+#include <QJsonDocument>
+#include <QLabel>
+#include <QJsonValue>
+#include <QJsonObject>
+#include <QJsonArray>
 
-MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget *parent) : QWidget(parent) {
-    // 设置布局
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    browser = new QTextBrowser(this);
-    layout->addWidget(browser);
+// 使用GitHub风格的Markdown样式
+const QString STYLE_LIGHT = R"(
+  <link rel="stylesheet" href="qrc:/markdown/github-markdown.css">
+  <style>
+    .markdown-body {
+      box-sizing: border-box;
+      min-width: 200px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 45px;
+    }
+    @media (max-width: 767px) {
+      .markdown-body {
+        padding: 15px;
+      }
+    }
+  </style>
+)";
 
-    browser->setOpenLinks(false);
-    browser->setOpenExternalLinks(false);
+const QString STYLE_DARK = R"(
+  <link rel="stylesheet" href="qrc:/markdown/github-markdown-dark.css">
+  <style>
+    .markdown-body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+    }
+  </style>
+)";
 
-    connect(browser, &QTextBrowser::anchorClicked, this, &MarkdownPreviewWidget::openUrl);
-
-    // 设置网络管理器用于加载网络图片
-    networkManager = new QNetworkAccessManager(this);
-    connect(networkManager, &QNetworkAccessManager::finished, this, &MarkdownPreviewWidget::onImageLoaded);
-}
-
-void MarkdownPreviewWidget::openUrl(const QUrl &link)
+MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
+    : QWidget(parent)
 {
-    auto path = link.path();
-    path.remove(0, 1);
-    QFileInfo info(path);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    if(info.isDir()) {
-        QDesktopServices::openUrl(link);
+    m_webView = new QWebEngineView(this);
+    m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessRemoteUrls, true);
+    m_webView->page()->setBackgroundColor(Qt::transparent);
+
+    layout->addWidget(m_webView);
+    layout->addWidget(new QLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+    setLayout(layout);
+    initWebView();
+
+    m_updateTimer = new QTimer(this);
+    m_updateTimer->setSingleShot(true);
+    connect(m_updateTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::performUpdate);
+}
+
+void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {
+    if (m_sourceEditor == editor) return;
+
+    if (m_sourceEditor) {
+        disconnect(m_sourceEditor, &QTextEdit::textChanged,
+                   this, &MarkdownPreviewWidget::scheduleUpdate);
     }
-    else if(info.isFile()) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(path));
-    }
-    else {
-        QDesktopServices::openUrl(link);
+
+    m_sourceEditor = editor;
+
+    if (m_sourceEditor) {
+        connect(m_sourceEditor, &QTextEdit::textChanged,
+                this, &MarkdownPreviewWidget::scheduleUpdate);
+        scheduleUpdate();
     }
 }
 
-void MarkdownPreviewWidget::setMarkdown(const QString &markdown) {
-    // 保存当前滚动条位置
-    int scrollBarValue = browser->verticalScrollBar()->value();
-
-    // 设置HTML内容
-    //browser->setHtml(htmlContent);
-    browser->setMarkdown(markdown);
-
-    // 恢复滚动条位置
-    browser->verticalScrollBar()->setValue(scrollBarValue);
-
-    // 手动高亮代码块
-    highlightCodeBlocks();
-
-    // 查找并加载网络图片
-    //loadNetworkImages(browser->toHtml());
+void MarkdownPreviewWidget::scheduleUpdate() {
+    m_lastScrollPosition = m_webView->page()->scrollPosition().y();
+    m_updateTimer->start(200); // 200ms防抖
 }
 
-void MarkdownPreviewWidget::onImageLoaded(QNetworkReply *reply) {
-    if (reply->error() == QNetworkReply::NoError) {
-        QImage image;
-        image.loadFromData(reply->readAll());
-        if (!image.isNull()) {
-            // 缩放 image 防止过大超出预览框
-            if (image.width() > browser->width() || image.height() > browser->height()) {
-                image = image.scaled(QSize(browser->width() * 0.95,
-                                           browser->height() * 0.95), Qt::KeepAspectRatio);
-            }
+void MarkdownPreviewWidget::performUpdate() {
+    if (!m_sourceEditor) return;
 
-            // 插入图片到文档
-            QTextDocument *document = browser->document();
-            QTextCursor cursor(document);
+    const QString content = m_sourceEditor->toPlainText();
+    const QString html = generateHtml(content);
 
-            QTextImageFormat imageFormat;
-            imageFormat.setName(reply->url().toString());
-            cursor.insertImage(image);
-        }
-    }
-    reply->deleteLater();
+    m_webView->setHtml(html, QUrl("qrc:/"));
+
+    // 延迟恢复滚动位置
+    QTimer::singleShot(50, this, [this] {
+        m_webView->page()->runJavaScript(
+            QString("window.scrollTo(0, %1);").arg(m_lastScrollPosition)
+        );
+    });
 }
 
-void MarkdownPreviewWidget::highlightCodeBlocks() {
-    QTextDocument *document = browser->document();
-    QTextCursor cursor(document);
+QString MarkdownPreviewWidget::generateHtml(const QString& markdown) {
+    // 使用 QJsonDocument 正确序列化字符串
+    QJsonArray a;
+    a.append(QJsonValue(markdown));
+    QJsonDocument doc(a); // 转换为 JSON 对象
 
-    // 匹配代码块
-    QRegularExpression regex("<pre><code>(.*?)</code></pre>", QRegularExpression::DotMatchesEverythingOption);
-    QRegularExpressionMatchIterator matches = regex.globalMatch(document->toHtml());
+    QString escapedMarkdown = QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
 
-    while (matches.hasNext()) {
-        QRegularExpressionMatch match = matches.next();
-        QString codeBlock = match.captured(1);
-
-        // 设置代码块样式
-        QTextCharFormat codeFormat;
-        codeFormat.setFontFamily("Courier New");
-        codeFormat.setBackground(Qt::lightGray);
-        codeFormat.setForeground(Qt::darkBlue);
-
-        // 替换代码块为高亮文本
-        cursor.setPosition(match.capturedStart());
-        cursor.setPosition(match.capturedEnd(), QTextCursor::KeepAnchor);
-        cursor.removeSelectedText();
-        cursor.insertText(codeBlock, codeFormat);
+    // 移除 JSON 外层的引号（保留内容转义）
+    if (escapedMarkdown.startsWith('[') && escapedMarkdown.endsWith(']')) {
+        escapedMarkdown = escapedMarkdown.mid(2, escapedMarkdown.length() - 4);
     }
+
+    return QString(R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            %1
+            <script src="qrc:/markdown/marked.min.js"></script>
+        </head>
+        <body>
+            <article class="markdown-body">
+                <div id="content"></div>
+            </article>
+            <script>
+                const md = "%2";  // 使用双引号包裹
+                document.getElementById('content').innerHTML = marked.parse(md);
+
+                // 自动调整图片大小
+                document.querySelectorAll('img').forEach(img => {
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                });
+            </script>
+        </body>
+        </html>
+    )").arg(m_darkMode ? STYLE_DARK : STYLE_LIGHT)
+      .arg(escapedMarkdown); // 直接插入已转义内容
 }
 
-void MarkdownPreviewWidget::loadNetworkImages(const QString &htmlContent) {
-    QRegularExpression regex("<img[^>]+src=\"([^\">]+)\"");
-    QRegularExpressionMatchIterator matches = regex.globalMatch(htmlContent);
-    while (matches.hasNext()) {
-        QRegularExpressionMatch match = matches.next();
-        QString imageUrl = match.captured(1);
-        if (imageUrl.startsWith("http")) {
-            // 下载网络图片
-            networkManager->get(QNetworkRequest(QUrl(imageUrl)));
-        }
-    }
+void MarkdownPreviewWidget::setDarkTheme(bool enabled) {
+    m_darkMode = enabled;
+    scheduleUpdate();
 }
 
-QString MarkdownPreviewWidget::loadTemplate(const QString &path) {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("Failed to open template file.");
-        return "";
-    }
-    QTextStream in(&file);
-    return in.readAll();
+void MarkdownPreviewWidget::initWebView() {
+    // 禁用上下文菜单
+    m_webView->setContextMenuPolicy(Qt::NoContextMenu);
+
+    // 启用开发者工具（可选）
+    // m_webView->page()->setDevToolsPage(m_webView->page());
+    // m_webView->page()->triggerAction(QWebEnginePage::InspectElement);
 }

@@ -55,7 +55,8 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_layout->addWidget(m_textEdit->lineNumberArea);
     m_layout->addWidget(m_textEdit);
     m_layout->addWidget(m_markdownPreview);
-    m_markdownPreview->setVisible(false);
+    //m_markdownPreview->setVisible(false);
+    m_markdownPreview->setSourceEditor(qobject_cast<QTextEdit *>(m_textEdit));
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
     m_textEdit->setWrapper(this);
@@ -72,7 +73,6 @@ EditWrapper::EditWrapper(QWidget *parent)
 
     connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
     connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
-    connect(m_textEdit, &DTextEdit::textChanged, this, &EditWrapper::handleTextChanged);
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
     connect(m_toast, &Toast::closeBtnClicked, this, [=] {
         QFileInfo fi(filePath());
@@ -329,13 +329,6 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
         break;
     default:
         break;
-    }
-}
-
-void EditWrapper::handleTextChanged()
-{
-    if (m_markdownPreview->isVisible()) {
-        m_markdownPreview->setMarkdown(m_textEdit->toPlainText());
     }
 }
 
