@@ -21,7 +21,9 @@
 #include "fileloadthread.h"
 #include "editwrapper.h"
 #include "utils.h"
+#ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
+#endif
 #include <unistd.h>
 
 #include <QCoreApplication>
@@ -46,17 +48,24 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_endOfLineMode(eolUnix),
       m_isLoadFinished(true),
       m_toast(new Toast(this)),
-      m_isRefreshing(false),
-      m_markdownPreview(new MarkdownPreviewWidget)
+      m_isRefreshing(false)
 {
+#ifdef USE_WEBENGINE
+    m_markdownPreview = new MarkdownPreviewWidget();
+#endif
+
     // Init layout and widgets.
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
     m_layout->addWidget(m_textEdit->lineNumberArea);
     m_layout->addWidget(m_textEdit);
+#ifdef USE_WEBENGINE
     m_layout->addWidget(m_markdownPreview);
-    //m_markdownPreview->setVisible(false);
-    m_markdownPreview->setSourceEditor(qobject_cast<QTextEdit *>(m_textEdit));
+    m_markdownPreview->setVisible(false);
+    m_markdownPreview->setSourceEditor(NULL);
+    m_layout->setStretch(1, 1);
+    m_layout->setStretch(2, 1);
+#endif
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
     m_textEdit->setWrapper(this);
@@ -334,7 +343,10 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
 
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
+#ifdef USE_WEBENGINE
     m_markdownPreview->setVisible(name == "Markdown");
+    m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
+#endif
     m_bottomBar->setHightlightName(name);
 }
 

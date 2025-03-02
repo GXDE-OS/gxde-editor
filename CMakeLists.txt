@@ -45,12 +45,9 @@ find_package(DtkCore REQUIRED)
 find_package(KF5SyntaxHighlighting)
 find_package(KF5Codecs)
 
-# 检查目标架构
-if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "loongarch")
-    # 如果不是 loongarch 架构，则引入 QWebEngineView 库
-    find_package(Qt5 COMPONENTS WebEngineWidgets REQUIRED)
-    #target_link_libraries(gxde-editor ${Qt5WebEngine_LIBRARIES})
-endif()
+# 尝试查找WebEngine模块
+find_package(Qt5WebEngine QUIET)
+find_package(Qt5WebEngineWidgets QUIET)
 
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
@@ -70,10 +67,17 @@ target_link_libraries(gxde-editor
     KF5::SyntaxHighlighting
 )
 
-if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "loongarch")
-    target_include_directories(gxde-editor PUBLIC ${Qt5WebEngine_INCLUDE_DIRS})
-    #target_link_libraries(gxde-editor ${Qt5WebEngine_LIBRARIES})
-    target_link_libraries(gxde-editor Qt5::WebEngineWidgets)
+# 判断 Qt5WebEngine 模块是否存在
+if(Qt5WebEngine_FOUND AND Qt5WebEngineWidgets_FOUND)
+    # 添加模块链接和宏定义
+    target_link_libraries(gxde-editor
+        Qt5::WebEngine
+        Qt5::WebEngineWidgets
+    )
+    target_compile_definitions(gxde-editor
+        PRIVATE
+        USE_WEBENGINE
+    )
 endif()
 
 set(CMAKE_INSTALL_PREFIX /usr)

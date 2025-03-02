@@ -1,13 +1,16 @@
 // MarkdownPreviewWidget.cpp
+#ifdef USE_WEBENGINE
 #include "markdownpreviewwidget.h"
 #include <QScrollBar>
 #include <QFile>
 #include <QWebEngineSettings>
 #include <QJsonDocument>
-#include <QLabel>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
+
 
 // 使用GitHub风格的Markdown样式
 const QString STYLE_LIGHT = R"(
@@ -45,11 +48,12 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     m_webView = new QWebEngineView(this);
+    m_webPage = new MarkdownWebPage(this);
+    m_webView->setPage(m_webPage);
     m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessRemoteUrls, true);
     m_webView->page()->setBackgroundColor(Qt::transparent);
 
     layout->addWidget(m_webView);
-    layout->addWidget(new QLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
     setLayout(layout);
     initWebView();
 
@@ -144,9 +148,10 @@ void MarkdownPreviewWidget::setDarkTheme(bool enabled) {
 
 void MarkdownPreviewWidget::initWebView() {
     // 禁用上下文菜单
-    m_webView->setContextMenuPolicy(Qt::NoContextMenu);
+    //m_webView->setContextMenuPolicy(Qt::NoContextMenu);
 
     // 启用开发者工具（可选）
-    // m_webView->page()->setDevToolsPage(m_webView->page());
-    // m_webView->page()->triggerAction(QWebEnginePage::InspectElement);
+    m_webView->page()->setDevToolsPage(m_webView->page());
+    m_webView->page()->triggerAction(QWebEnginePage::InspectElement);
 }
+#endif

@@ -24,7 +24,9 @@
 #include "dtextedit.h"
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
+#ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
+#endif
 
 #include <QVBoxLayout>
 #include <QWidget>
@@ -87,7 +89,9 @@ private:
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
+#ifdef USE_WEBENGINE
     MarkdownPreviewWidget *m_markdownPreview;
+#endif
 
     EndOfLineMode m_endOfLineMode;
     bool m_isLoadFinished;
