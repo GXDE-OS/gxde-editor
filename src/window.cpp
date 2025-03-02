@@ -1235,7 +1235,8 @@ void Window::loadTheme(const QString &path)
     const QString &tabbarStartColor = jsonMap["app-colors"].toMap()["tab-background-start-color"].toString();
     const QString &tabbarEndColor = jsonMap["app-colors"].toMap()["tab-background-end-color"].toString();
 
-    if (QColor(backgroundColor).lightness() < 128) {
+    bool isDark = (QColor(backgroundColor).lightness() < 128);
+    if (isDark) {
         DThemeManager::instance()->setTheme("dark");
     } else {
         DThemeManager::instance()->setTheme("light");
@@ -1245,6 +1246,7 @@ void Window::loadTheme(const QString &path)
 
     for (EditWrapper *wrapper : m_wrappers.values()) {
         wrapper->textEditor()->setThemeWithPath(path);
+        wrapper->setDarkTheme(isDark);
     }
 
     // set background.

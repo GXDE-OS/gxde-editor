@@ -89,6 +89,8 @@ EditWrapper::EditWrapper(QWidget *parent)
     });
 
     connect(m_toast, &Toast::saveAsBtnClicked, this, &EditWrapper::requestSaveAs);
+
+    setDarkTheme(DThemeManager::instance()->theme() == "dark");
 }
 
 EditWrapper::~EditWrapper()
@@ -348,6 +350,13 @@ void EditWrapper::handleHightlightChanged(const QString &name)
     m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
 #endif
     m_bottomBar->setHightlightName(name);
+}
+
+void EditWrapper::setDarkTheme(bool enabled)
+{
+#ifdef USE_WEBENGINE
+    m_markdownPreview->setDarkTheme(enabled);
+#endif
 }
 
 void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString &content)

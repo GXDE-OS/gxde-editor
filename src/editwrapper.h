@@ -70,6 +70,7 @@ public:
 
     void checkForReload();
     void initToastPosition();
+    void setDarkTheme(bool enabled);
 
 signals:
     void requestSaveAs();

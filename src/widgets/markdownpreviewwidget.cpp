@@ -35,7 +35,7 @@ const QString STYLE_DARK = R"(
   <link rel="stylesheet" href="qrc:/markdown/github-markdown-dark.css">
   <style>
     .markdown-body {
-      background-color: #0d1117;
+      background-color: #0d111700;
       color: #c9d1d9;
     }
   </style>
