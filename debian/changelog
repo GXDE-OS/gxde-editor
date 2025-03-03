@@ -1,8 +1,9 @@
-gxde-editor (1.4.0) UNRELEASED; urgency=medium
+gxde-editor (1.4.1) UNRELEASED; urgency=medium
 
   * 新增 Markdown 预览功能
+  * 初步实现预览框同步
 
- -- gfdgd_xi <3025613752@qq.com>  Sun, 02 Mar 2025 22:45:49 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Mon, 03 Mar 2025 22:54:16 +0800
 
 gxde-editor (1.0-1) unstable; urgency=medium
 

@@ -37,15 +37,21 @@ private slots:
     void scheduleUpdate();
     void performUpdate();
 
+    void setupScrollSync();
+    void syncEditorToPreview();
+
 private:
     void initWebView();
     void updateScrollPosition();
     QString generateHtml(const QString& markdown);
+    double calculateSyncRatio();
 
     QWebEngineView* m_webView;
     MarkdownWebPage* m_webPage;
     QTextEdit* m_sourceEditor = nullptr;
+    QTimer* m_scrollSyncTimer;
     QTimer* m_updateTimer;
+    bool m_syncing = false;
     int m_lastScrollPosition = 0;
     bool m_darkMode = false;
 };

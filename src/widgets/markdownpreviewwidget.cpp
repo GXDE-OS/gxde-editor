@@ -41,6 +41,20 @@ const QString STYLE_DARK = R"(
   </style>
 )";
 
+// JavaScript 同步代码
+const QString SCROLL_SYNC_JS = R"(
+let lastSentPosition = 0;
+const SYNC_THRESHOLD = 5; // 像素阈值避免微小抖动
+
+window.addEventListener('scroll', function(e) {
+    const current = window.scrollY || document.documentElement.scrollTop;
+    if (Math.abs(current - lastSentPosition) > SYNC_THRESHOLD) {
+        lastSentPosition = current;
+        window.external.syncPreviewScroll(current);
+    }
+});
+)";
+
 MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     : QWidget(parent)
 {
@@ -60,6 +74,10 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     m_updateTimer = new QTimer(this);
     m_updateTimer->setSingleShot(true);
     connect(m_updateTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::performUpdate);
+
+    m_scrollSyncTimer = new QTimer(this);
+    m_scrollSyncTimer->setSingleShot(true);
+    //connect(m_scrollSyncTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::setupScrollSync);
 }
 
 void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {
@@ -70,6 +88,11 @@ void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {
                    this, &MarkdownPreviewWidget::scheduleUpdate);
     }
 
+    if (m_sourceEditor) {
+        disconnect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &MarkdownPreviewWidget::syncEditorToPreview);
+    }
+
     m_sourceEditor = editor;
 
     if (m_sourceEditor) {
@@ -77,7 +100,63 @@ void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {
                 this, &MarkdownPreviewWidget::scheduleUpdate);
         scheduleUpdate();
     }
+
+    // 初始化滚动同步
+    if (m_sourceEditor) {
+        connect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
+                this, &MarkdownPreviewWidget::syncEditorToPreview);
+        // 初始化内容
+        m_webView->setHtml(generateHtml(m_sourceEditor->toPlainText()));
+    }
 }
+
+void MarkdownPreviewWidget::setupScrollSync() {
+    // 注入JavaScript同步处理器
+    QWebEngineScript script;
+    script.setSourceCode(SCROLL_SYNC_JS);
+    script.setName("ScrollSync");
+    script.setWorldId(QWebEngineScript::MainWorld);
+    script.setInjectionPoint(QWebEngineScript::DocumentReady);
+    m_webView->page()->scripts().insert(script);
+}
+
+double MarkdownPreviewWidget::calculateSyncRatio() {
+    const int editorHeight = m_sourceEditor->height();
+    const int editorContentHeight = m_sourceEditor->document()->size().height();
+    const double editorVisibleRatio = static_cast<double>(editorHeight) / editorContentHeight;
+
+    // 获取预览内容高度
+    int previewContentHeight = 0;
+    m_webView->page()->runJavaScript("document.documentElement.scrollHeight",
+        [&](const QVariant& result) {
+            previewContentHeight = result.toInt();
+        });
+
+    const int previewHeight = m_webView->height();
+    const double previewVisibleRatio = static_cast<double>(previewHeight) / previewContentHeight;
+
+    // 计算比例修正系数（考虑padding等因素）
+    return (1.0 - previewVisibleRatio) / (1.0 - editorVisibleRatio);
+}
+
+void MarkdownPreviewWidget::syncEditorToPreview() {
+    //if (m_syncing) return;
+    m_syncing = true;
+
+    // 计算滚动比例
+    QScrollBar* scrollBar = m_sourceEditor->verticalScrollBar();
+    const double ratio = static_cast<double>(scrollBar->value()) / scrollBar->maximum();
+
+    // 异步执行滚动操作
+    m_webView->page()->runJavaScript(
+        QString("window.scrollTo(0, document.documentElement.scrollHeight * %1);")
+            .arg(ratio)
+    );
+
+    // 200ms后解除同步锁定
+    //QTimer::singleShot(200, this, [this](){ m_syncing = false; });
+}
+
 
 void MarkdownPreviewWidget::scheduleUpdate() {
     m_lastScrollPosition = m_webView->page()->scrollPosition().y();
@@ -151,7 +230,7 @@ void MarkdownPreviewWidget::initWebView() {
     //m_webView->setContextMenuPolicy(Qt::NoContextMenu);
 
     // 启用开发者工具（可选）
-    m_webView->page()->setDevToolsPage(m_webView->page());
-    m_webView->page()->triggerAction(QWebEnginePage::InspectElement);
+    //m_webView->page()->setDevToolsPage(m_webView->page());
+    //m_webView->page()->triggerAction(QWebEnginePage::InspectElement);
 }
 #endif
