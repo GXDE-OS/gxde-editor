@@ -58,6 +58,9 @@ window.addEventListener('scroll', function(e) {
 MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     : QWidget(parent)
 {
+    // 禁用sandbox
+    qputenv("QTWEBENGINE_DISABLE_SANDBOX", "1");
+
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
