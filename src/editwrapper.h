@@ -91,7 +91,7 @@ private:
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
 #ifdef USE_WEBENGINE
-    MarkdownPreviewWidget *m_markdownPreview;
+    MarkdownPreviewWidget *m_markdownPreview = nullptr;
 #endif
 
     EndOfLineMode m_endOfLineMode;

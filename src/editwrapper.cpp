@@ -51,7 +51,10 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_isRefreshing(false)
 {
 #ifdef USE_WEBENGINE
-    m_markdownPreview = new MarkdownPreviewWidget();
+    // 判断是否支持 Markdown 预览，如果支持则显示
+    if (MarkdownPreviewWidget::isSupport()) {
+        m_markdownPreview = new MarkdownPreviewWidget();
+    }
 #endif
 
     // Init layout and widgets.
@@ -60,11 +63,14 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_layout->addWidget(m_textEdit->lineNumberArea);
     m_layout->addWidget(m_textEdit);
 #ifdef USE_WEBENGINE
-    m_layout->addWidget(m_markdownPreview);
-    m_markdownPreview->setVisible(false);
-    m_markdownPreview->setSourceEditor(NULL);
-    m_layout->setStretch(1, 1);
-    m_layout->setStretch(2, 1);
+    // 加载 Markdown 预览框
+    if (m_markdownPreview) {
+        m_layout->addWidget(m_markdownPreview);
+        m_markdownPreview->setVisible(false);
+        m_markdownPreview->setSourceEditor(NULL);
+        m_layout->setStretch(1, 1);
+        m_layout->setStretch(2, 1);
+    }
 #endif
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
@@ -346,8 +352,10 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
 #ifdef USE_WEBENGINE
-    m_markdownPreview->setVisible(name == "Markdown");
-    m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
+    if (m_markdownPreview) {
+        m_markdownPreview->setVisible(name == "Markdown");
+        m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
+    }
 #endif
     m_bottomBar->setHightlightName(name);
 }
@@ -355,7 +363,9 @@ void EditWrapper::handleHightlightChanged(const QString &name)
 void EditWrapper::setDarkTheme(bool enabled)
 {
 #ifdef USE_WEBENGINE
-    m_markdownPreview->setDarkTheme(enabled);
+    if (m_markdownPreview) {
+        m_markdownPreview->setDarkTheme(enabled);
+    }
 #endif
 }
 

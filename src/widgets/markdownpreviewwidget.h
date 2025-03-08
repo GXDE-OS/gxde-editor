@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QDesktopServices>
+#include <QProcessEnvironment>
 
 // 用于实现调用浏览器打开超链接
 class MarkdownWebPage : public QWebEnginePage {
@@ -32,6 +33,14 @@ public:
     explicit MarkdownPreviewWidget(QWidget* parent = nullptr);
     void setSourceEditor(QTextEdit* editor);
     void setDarkTheme(bool enabled);
+
+    static bool isSupport() {
+        // 检测是否有设置 QTWEBENGINE_DISABLE_SANDBOX
+        if (QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
+            return true;
+        }
+        return QProcessEnvironment::systemEnvironment().value("USER") != "root";
+    };
 
 private slots:
     void scheduleUpdate();

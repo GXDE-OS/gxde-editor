@@ -58,14 +58,12 @@ window.addEventListener('scroll', function(e) {
 MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     : QWidget(parent)
 {
-    // 禁用sandbox
-    qputenv("QTWEBENGINE_DISABLE_SANDBOX", "1");
-
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
     m_webView = new QWebEngineView(this);
     m_webPage = new MarkdownWebPage(this);
+
     m_webView->setPage(m_webPage);
     m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessRemoteUrls, true);
     m_webView->page()->setBackgroundColor(Qt::transparent);
