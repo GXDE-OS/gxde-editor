@@ -34,13 +34,13 @@ public:
     void setSourceEditor(QTextEdit* editor);
     void setDarkTheme(bool enabled);
 
-    static bool isSupport() {
+    static bool isSupport()/* {
         // 检测是否有设置 QTWEBENGINE_DISABLE_SANDBOX
         if (QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
             return true;
         }
         return QProcessEnvironment::systemEnvironment().value("USER") != "root";
-    };
+    }*/;
 
 private slots:
     void scheduleUpdate();

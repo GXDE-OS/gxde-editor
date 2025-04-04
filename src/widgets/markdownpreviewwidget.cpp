@@ -11,6 +11,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <QDBusMessage>
+#include <QDBusConnection>
 
 // 使用GitHub风格的Markdown样式
 const QString STYLE_LIGHT = R"(
@@ -79,6 +81,30 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     m_scrollSyncTimer = new QTimer(this);
     m_scrollSyncTimer->setSingleShot(true);
     //connect(m_scrollSyncTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::setupScrollSync);
+}
+
+bool MarkdownPreviewWidget::isSupport()
+{
+    // 检测是否是 root 用户且有设置 QTWEBENGINE_DISABLE_SANDBOX
+    if (QProcessEnvironment::systemEnvironment().value("USER") != "root" ||
+        QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
+        QDBusMessage dbus = QDBusMessage::createMethodCall("com.gxde.daemon.system.info",
+                                                           "/com/gxde/daemon/system/info",
+                                                           "com.gxde.daemon.system.info",
+                                                           "IsInChroot");
+        auto result = QDBusConnection::sessionBus().call(dbus);
+        bool isInChroot = false;
+        if (result.arguments().count() > 0) {
+            isInChroot = result.arguments().at(0).toBool();
+        }
+        if (isInChroot && QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
+            return 1;
+        }
+        if (!isInChroot) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {

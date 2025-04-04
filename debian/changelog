@@ -4,8 +4,9 @@ gxde-editor (1.4.5) UNRELEASED; urgency=medium
   * 初步实现预览框同步
   * 修复 root 无法正常打开文件编辑器的问题，恢复沙箱机制
   * 新增语音朗读功能
+  * 修复小小电脑下打开文本编辑器崩溃的问题
 
- -- gfdgd_xi <3025613752@qq.com>  Fri, 04 Apr 2025 12:23:02 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Fri, 04 Apr 2025 12:54:55 +0800
 
 gxde-editor (1.0-1) unstable; urgency=medium
 
