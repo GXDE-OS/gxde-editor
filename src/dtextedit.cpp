@@ -48,6 +48,9 @@
 #include <QMimeData>
 #include <QTimer>
 
+#include <QDBusReply>
+#include <QtConcurrent>
+
 #include <private/qguiapplication_p.h>
 #include <qpa/qplatformtheme.h>
 
@@ -118,6 +121,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     m_exitFullscreenAction = new QAction(tr("Exit fullscreen"), this);
     m_openInFileManagerAction = new QAction(tr("Display in file manager"), this);
     m_toggleCommentAction = new QAction(tr("Toggle comment"), this);
+    m_speakText = new QAction(tr("Speak text"), this);
 
     connect(m_rightMenu, &QMenu::aboutToHide, this, &DTextEdit::removeHighlightWordUnderCursor);
     connect(m_undoAction, &QAction::triggered, this, &DTextEdit::undo);
@@ -136,6 +140,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     connect(m_disableReadOnlyModeAction, &QAction::triggered, this, &DTextEdit::toggleReadOnlyMode);
     connect(m_openInFileManagerAction, &QAction::triggered, this, &DTextEdit::clickOpenInFileManagerAction);
     connect(m_toggleCommentAction, &QAction::triggered, this, &DTextEdit::toggleComment);
+    connect(m_speakText, &QAction::triggered, this, &DTextEdit::toggleSpeakText);
 
     // Init convert case sub menu.
     m_haveWordUnderCursor = false;
@@ -2223,6 +2228,21 @@ void DTextEdit::toggleComment()
     }
 }
 
+void DTextEdit::toggleSpeakText()
+{
+    // 获取选中文本
+    QString text = textCursor().selectedText();
+    QDBusMessage dbus = QDBusMessage::createMethodCall("com.gxde.daemon.ai.speaker",
+                                                       "/com/gxde/daemon/ai/speaker",
+                                                       "com.gxde.daemon.ai.speaker",
+                                                       "TextToSpeech");
+    dbus << text;
+    QtConcurrent::run([=]() {
+        QDBusConnection::sessionBus().call(dbus);
+    });
+
+}
+
 int DTextEdit::getNextWordPosition(QTextCursor cursor, QTextCursor::MoveMode moveMode)
 {
     // FIXME(rekols): if is empty text, it will crash.
@@ -2683,6 +2703,7 @@ void DTextEdit::contextMenuEvent(QContextMenuEvent *event)
     if (!toPlainText().isEmpty()) {
         m_rightMenu->addAction(m_selectAllAction);
     }
+    m_rightMenu->addAction(m_speakText);
     m_rightMenu->addSeparator();
     if (!toPlainText().isEmpty()) {
         m_rightMenu->addAction(m_findAction);

@@ -168,6 +168,8 @@ public:
     void toggleReadOnlyMode();
     void toggleComment();
 
+    void toggleSpeakText();
+
     int getNextWordPosition(QTextCursor cursor, QTextCursor::MoveMode moveMode);
     int getPrevWordPosition(QTextCursor cursor, QTextCursor::MoveMode moveMode);
     bool atWordSeparator(int position);
@@ -272,6 +274,7 @@ private:
     QAction *m_exitFullscreenAction;
     QAction *m_openInFileManagerAction;
     QAction *m_toggleCommentAction;
+    QAction *m_speakText;
 
     QMenu *m_convertCaseMenu;
     QAction *m_upcaseAction;
