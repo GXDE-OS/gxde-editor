@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="pl" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pl">
 <context>
     <name>BottomBar</name>
     <message>
@@ -20,120 +22,125 @@
 <context>
     <name>DTextEdit</name>
     <message>
-        <location filename="../src/dtextedit.cpp" line="105"/>
+        <location filename="../src/dtextedit.cpp" line="108"/>
         <source>Undo</source>
         <translation>Wstecz</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="106"/>
+        <location filename="../src/dtextedit.cpp" line="109"/>
         <source>Redo</source>
         <translation>Ponów</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="107"/>
+        <location filename="../src/dtextedit.cpp" line="110"/>
         <source>Cut</source>
         <translation>Wytnij</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="108"/>
+        <location filename="../src/dtextedit.cpp" line="111"/>
         <source>Copy</source>
         <translation>Kopiuj</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="109"/>
+        <location filename="../src/dtextedit.cpp" line="112"/>
         <source>Paste</source>
         <translation>Wklej</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="110"/>
+        <location filename="../src/dtextedit.cpp" line="113"/>
         <source>Delete</source>
         <translation>Usuń</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="111"/>
+        <location filename="../src/dtextedit.cpp" line="114"/>
         <source>Select All</source>
         <translation>Zaznacz wszystkie</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="112"/>
-        <location filename="../src/window.cpp" line="183"/>
+        <location filename="../src/dtextedit.cpp" line="115"/>
+        <location filename="../src/window.cpp" line="186"/>
         <source>Find</source>
         <translation>Znajdź</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="113"/>
-        <location filename="../src/window.cpp" line="184"/>
+        <location filename="../src/dtextedit.cpp" line="116"/>
+        <location filename="../src/window.cpp" line="187"/>
         <source>Replace</source>
         <translation>Zamień</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="114"/>
+        <location filename="../src/dtextedit.cpp" line="117"/>
         <source>Go to Line</source>
         <translation>Przejdź do wiersza</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="115"/>
+        <location filename="../src/dtextedit.cpp" line="118"/>
         <source>Turn on Read-Only mode</source>
         <translation>Przejdź do trybu tylko odczytu</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="116"/>
+        <location filename="../src/dtextedit.cpp" line="119"/>
         <source>Turn off Read-Only mode</source>
         <translation>Wyjdź z trybu tylko odczytu</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="117"/>
+        <location filename="../src/dtextedit.cpp" line="120"/>
         <source>Fullscreen</source>
         <translation>Pełny ekran</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="118"/>
+        <location filename="../src/dtextedit.cpp" line="121"/>
         <source>Exit fullscreen</source>
         <translation>Wyłącz pełny ekran</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="119"/>
+        <location filename="../src/dtextedit.cpp" line="122"/>
         <source>Display in file manager</source>
         <translation>Wyświetl w menedżerze plików</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="120"/>
+        <location filename="../src/dtextedit.cpp" line="123"/>
         <source>Toggle comment</source>
         <translation>Przełącz komentarze</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="142"/>
+        <location filename="../src/dtextedit.cpp" line="124"/>
+        <source>Speak text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="147"/>
         <source>Change Case</source>
         <translation>Zmień wielkość znaków</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="143"/>
+        <location filename="../src/dtextedit.cpp" line="148"/>
         <source>Upper Case</source>
         <translation>Wielkie litery</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="144"/>
+        <location filename="../src/dtextedit.cpp" line="149"/>
         <source>Lower Case</source>
         <translation>Małe litery</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="145"/>
+        <location filename="../src/dtextedit.cpp" line="150"/>
         <source>Capitalize</source>
         <translation>Wielka litera</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="196"/>
+        <location filename="../src/dtextedit.cpp" line="201"/>
         <location filename="../src/widgets/bottombar.cpp" line="51"/>
         <source>None</source>
         <translation>Brak</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="2204"/>
+        <location filename="../src/dtextedit.cpp" line="2210"/>
         <source>Read-Only mode is off</source>
         <translation>Tryb tylko odczutu jest wyłączony</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="2208"/>
+        <location filename="../src/dtextedit.cpp" line="2214"/>
         <source>Read-Only mode is on</source>
         <translation>Tryb tylko odczutu jest włączony</translation>
     </message>
@@ -141,28 +148,28 @@
 <context>
     <name>EditWrapper</name>
     <message>
-        <location filename="../src/editwrapper.cpp" line="259"/>
+        <location filename="../src/editwrapper.cpp" line="293"/>
         <source>File has changed on disk. Reload?</source>
         <translation>Plik został zmieniony na dysku. Wczytać go ponownie?</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="262"/>
+        <location filename="../src/editwrapper.cpp" line="296"/>
         <source>File removed on the disk. Save it now?</source>
         <translation>Plik został usunięty z dysku. Zapisać go teraz?</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="305"/>
+        <location filename="../src/editwrapper.cpp" line="339"/>
         <location filename="../src/widgets/bottombar.cpp" line="45"/>
         <source>INSERT</source>
         <translation>WSTAWIANIE</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="308"/>
+        <location filename="../src/editwrapper.cpp" line="342"/>
         <source>OVERWRITE</source>
         <translation>NADPISYWANIE</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="311"/>
+        <location filename="../src/editwrapper.cpp" line="345"/>
         <source>R/O</source>
         <translation>TYLKO DO ODCZYTU</translation>
     </message>
@@ -170,17 +177,17 @@
 <context>
     <name>FindBar</name>
     <message>
-        <location filename="../src/findbar.cpp" line="37"/>
+        <location filename="../src/findbar.cpp" line="38"/>
         <source>Find: </source>
         <translation>Znajdź:</translation>
     </message>
     <message>
-        <location filename="../src/findbar.cpp" line="39"/>
+        <location filename="../src/findbar.cpp" line="40"/>
         <source>Next</source>
         <translation>Następne</translation>
     </message>
     <message>
-        <location filename="../src/findbar.cpp" line="40"/>
+        <location filename="../src/findbar.cpp" line="41"/>
         <source>Previous</source>
         <translation>Poprzednie</translation>
     </message>
@@ -188,7 +195,7 @@
 <context>
     <name>JumpLineBar</name>
     <message>
-        <location filename="../src/jumplinebar.cpp" line="39"/>
+        <location filename="../src/jumplinebar.cpp" line="40"/>
         <source>Go to Line: </source>
         <translation>Przejdź do wiersza:</translation>
     </message>
@@ -196,22 +203,29 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/main.cpp" line="50"/>
         <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation>Edytor Deepin to pulpitowy edytor tekstu, który obsługuje najpopularniejsze funkcje edycji tekstu.</translation>
+        <translation type="vanished">Edytor Deepin to pulpitowy edytor tekstu, który obsługuje najpopularniejsze funkcje edycji tekstu.</translation>
+    </message>
+    <message>
+        <source>Deepin Editor</source>
+        <translation type="vanished">Edytor Deepin</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="50"/>
+        <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="62"/>
-        <source>Deepin Editor</source>
-        <translation>Edytor Deepin</translation>
+        <source>GXDE Editor</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/main.cpp" line="59"/>
         <source>Deepin Editor</source>
-        <translation>Edytor Deepin</translation>
+        <translation type="vanished">Edytor Deepin</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
@@ -282,7 +296,7 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="891"/>
+        <location filename="../src/window.cpp" line="900"/>
         <source>Window</source>
         <translation>Okno</translation>
     </message>
@@ -616,36 +630,41 @@
         <source>Window size</source>
         <translation>Rozmiar okna</translation>
     </message>
+    <message>
+        <location filename="../src/main.cpp" line="59"/>
+        <source>GXDE Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ReplaceBar</name>
     <message>
-        <location filename="../src/replacebar.cpp" line="37"/>
+        <location filename="../src/replacebar.cpp" line="38"/>
         <source>Replace: </source>
         <translation>Zastąp:</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="39"/>
+        <location filename="../src/replacebar.cpp" line="40"/>
         <source>With: </source>
         <translation>Poprzez:</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="41"/>
+        <location filename="../src/replacebar.cpp" line="42"/>
         <source>Replace</source>
         <translation>Zastąp</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="42"/>
+        <location filename="../src/replacebar.cpp" line="43"/>
         <source>Skip</source>
         <translation>Pomiń</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="43"/>
+        <location filename="../src/replacebar.cpp" line="44"/>
         <source>Replace Rest</source>
         <translation>Zastąp pozostałe</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="44"/>
+        <location filename="../src/replacebar.cpp" line="45"/>
         <source>Replace All</source>
         <translation>Zastąp wszystkie</translation>
     </message>
@@ -702,131 +721,130 @@
 <context>
     <name>Window</name>
     <message>
-        <location filename="../src/window.cpp" line="175"/>
+        <location filename="../src/window.cpp" line="178"/>
         <source>New window</source>
         <translation>Nowe okno</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="176"/>
+        <location filename="../src/window.cpp" line="179"/>
         <source>New tab</source>
         <translation>Nowa karta</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="177"/>
+        <location filename="../src/window.cpp" line="180"/>
         <source>Open file</source>
         <translation>Otwórz plik</translation>
     </message>
     <message>
         <location filename="../src/widgets/toast.cpp" line="39"/>
-        <location filename="../src/window.cpp" line="179"/>
+        <location filename="../src/window.cpp" line="182"/>
         <source>Save as</source>
         <translation>Zapisz jako</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="180"/>
+        <location filename="../src/window.cpp" line="183"/>
         <source>Print</source>
         <translation>Drukuj</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="181"/>
+        <location filename="../src/window.cpp" line="184"/>
         <source>Switch theme</source>
         <translation>Przełącz motyw</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="261"/>
-        <location filename="../src/window.cpp" line="1339"/>
+        <location filename="../src/window.cpp" line="264"/>
+        <location filename="../src/window.cpp" line="1353"/>
         <source>Read-Only</source>
         <translation>Tylko do odczytu</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="581"/>
+        <location filename="../src/window.cpp" line="590"/>
         <source>Saved successfully</source>
         <translation>Zapisano pomyślnie</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1311"/>
+        <location filename="../src/window.cpp" line="1325"/>
         <source>Discard</source>
         <translation>Odrzuć</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="182"/>
+        <location filename="../src/window.cpp" line="185"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="289"/>
+        <location filename="../src/window.cpp" line="292"/>
         <source>You do not have permission to open %1</source>
         <translation>Nie posiadasz uprawnień do otwarcia %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="318"/>
         <source>Invalid file: %1</source>
-        <translation>Nieprawidłowy plik: %1</translation>
+        <translation type="vanished">Nieprawidłowy plik: %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="365"/>
-        <location filename="../src/window.cpp" line="598"/>
-        <location filename="../src/window.cpp" line="1020"/>
-        <location filename="../src/window.cpp" line="1383"/>
+        <location filename="../src/window.cpp" line="368"/>
+        <location filename="../src/window.cpp" line="607"/>
+        <location filename="../src/window.cpp" line="1029"/>
+        <location filename="../src/window.cpp" line="1397"/>
         <source>Save File</source>
         <translation>Zapisz plik</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="365"/>
+        <location filename="../src/window.cpp" line="368"/>
         <source>Do you want to save this file?</source>
         <translation>Czy chcesz zapisać plik?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="600"/>
-        <location filename="../src/window.cpp" line="615"/>
+        <location filename="../src/window.cpp" line="609"/>
+        <location filename="../src/window.cpp" line="624"/>
         <source>Encoding</source>
         <translation>Kodowanie</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="601"/>
-        <location filename="../src/window.cpp" line="616"/>
+        <location filename="../src/window.cpp" line="610"/>
+        <location filename="../src/window.cpp" line="625"/>
         <source>Line Endings</source>
         <translation>Zakończenia wiersza</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="922"/>
+        <location filename="../src/window.cpp" line="931"/>
         <source>Editor</source>
         <translation>Edytor</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="535"/>
+        <location filename="../src/window.cpp" line="544"/>
         <source>You do not have permission to save %1</source>
         <translation>Nie posiadasz uprawnień do zapisania %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="568"/>
+        <location filename="../src/window.cpp" line="577"/>
         <source>Unable to save the file</source>
         <translation>Nie można zapisać pliku</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="568"/>
+        <location filename="../src/window.cpp" line="577"/>
         <source>Do you want to save as another?</source>
         <translation>Czy chcesz zapisać plik pod inną nazwą?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1020"/>
-        <location filename="../src/window.cpp" line="1383"/>
+        <location filename="../src/window.cpp" line="1029"/>
+        <location filename="../src/window.cpp" line="1397"/>
         <source>Do you want to save all the files?</source>
         <translation>Czy chcesz zapisać wszystkie pliki?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="979"/>
+        <location filename="../src/window.cpp" line="988"/>
         <source>Blank document %1</source>
         <translation>Pusty dokument %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1310"/>
+        <location filename="../src/window.cpp" line="1324"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="178"/>
-        <location filename="../src/window.cpp" line="1312"/>
+        <location filename="../src/window.cpp" line="181"/>
+        <location filename="../src/window.cpp" line="1326"/>
         <source>Save</source>
         <translation>Zapisz</translation>
     </message>
