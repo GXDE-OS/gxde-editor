@@ -1,4 +1,4 @@
-gxde-editor (1.4.5) UNRELEASED; urgency=medium
+gxde-editor (1.4.5.1) UNRELEASED; urgency=medium
 
   * 新增 Markdown 预览功能
   * 初步实现预览框同步
@@ -6,7 +6,7 @@ gxde-editor (1.4.5) UNRELEASED; urgency=medium
   * 新增语音朗读功能
   * 修复小小电脑下打开文本编辑器崩溃的问题
 
- -- gfdgd_xi <3025613752@qq.com>  Fri, 04 Apr 2025 12:54:55 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Fri, 04 Apr 2025 13:35:55 +0800
 
 gxde-editor (1.0-1) unstable; urgency=medium
 

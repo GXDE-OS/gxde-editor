@@ -97,9 +97,6 @@ bool MarkdownPreviewWidget::isSupport()
         if (result.arguments().count() > 0) {
             isInChroot = result.arguments().at(0).toBool();
         }
-        if (isInChroot && QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
-            return 1;
-        }
         if (!isInChroot) {
             return 1;
         }
