@@ -23,6 +23,7 @@ Package: gxde-editor
 Architecture: any
 Replaces: deepin-editor
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: gxde-qt5integration
 Recommends: gxde-daemon (>= 1.2.6)
 Description: dtk based text editor
  Advanced text editor based on dtk.
