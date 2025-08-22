@@ -15,7 +15,7 @@ Build-Depends:
  libkf5codecs-dev, 
  qttools5-dev-tools, 
  qtbase5-private-dev,
- qtwebengine5-dev [i386 amd64 armhf arm64 mips64el]
+# qtwebengine5-dev [i386 amd64 armhf arm64 mips64el]
 Standards-Version: 3.9.8
 Homepage: https://www.gxde.top
 
