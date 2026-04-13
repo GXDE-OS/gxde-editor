@@ -29,6 +29,7 @@ configure_file(src/environments.h.in environments.h @ONLY)
 
 # Sources files
 file(GLOB SRCS "src/*.h" "src/*.cpp"
+               "src/editor/*.h" "src/editor/*.cpp"
                "src/thememodule/*.h" "src/thememodule/*.cpp"
                "src/widgets/*.h" "src/widgets/*.cpp")
 
@@ -91,7 +92,10 @@ if (BUILD_TESTING)
     find_package(Qt5Test REQUIRED)
 
     add_executable(gxde-editor-tests
+        tests/test_main.cpp
+        tests/editorlanguage_test.cpp
         tests/syntaxutils_test.cpp
+        src/editor/editorlanguage.cpp
         src/syntaxutils.cpp
     )
     target_link_libraries(gxde-editor-tests
