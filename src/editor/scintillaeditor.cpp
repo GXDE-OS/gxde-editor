@@ -1,17 +1,9 @@
 #include "scintillaeditor.h"
 
-#ifdef HAVE_QSCINTILLA
 #include <Qsci/qsciscintilla.h>
-#else
-#include <QPlainTextEdit>
-#endif
 
 ScintillaEditor::ScintillaEditor()
-#ifdef HAVE_QSCINTILLA
     : m_editor(new QsciScintilla())
-#else
-    : m_editor(new QPlainTextEdit())
-#endif
 {
 }
 
@@ -27,20 +19,12 @@ QWidget *ScintillaEditor::widget()
 
 QString ScintillaEditor::text() const
 {
-#ifdef HAVE_QSCINTILLA
     return m_editor->text();
-#else
-    return m_editor->toPlainText();
-#endif
 }
 
 void ScintillaEditor::setText(const QString &text)
 {
-#ifdef HAVE_QSCINTILLA
     m_editor->setText(text);
-#else
-    m_editor->setPlainText(text);
-#endif
 }
 
 bool ScintillaEditor::isReadOnly() const

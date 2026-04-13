@@ -7,6 +7,7 @@
 #include <QString>
 #include <QObject>
 #include <QTest>
+#include <Qsci/qsciscintilla.h>
 
 #include <memory>
 #include <type_traits>
@@ -29,6 +30,8 @@ void EditorFactoryTest::createsScintillaEditorBackend()
 
     QVERIFY2(dynamic_cast<ScintillaEditor *>(editor.get()) != nullptr,
              "EditorFactory should create a ScintillaEditor when the Scintilla backend is requested.");
+    QVERIFY2(dynamic_cast<QsciScintilla *>(editor->widget()) != nullptr,
+             "ScintillaEditor must be backed by a QsciScintilla widget.");
 
     editor->setText(QStringLiteral("hello"));
     QCOMPARE(editor->text(), QStringLiteral("hello"));

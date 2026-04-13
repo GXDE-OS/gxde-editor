@@ -55,14 +55,12 @@ include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 find_path(QSCINTILLA_INCLUDE_DIR
     NAMES Qsci/qsciscintilla.h
     PATH_SUFFIXES qt5 x86_64-linux-gnu/qt5
+    REQUIRED
 )
 find_library(QSCINTILLA_LIBRARY
     NAMES qscintilla2_qt5 qscintilla2-qt5
+    REQUIRED
 )
-
-if (QSCINTILLA_INCLUDE_DIR AND QSCINTILLA_LIBRARY)
-    set(HAVE_QSCINTILLA TRUE)
-endif ()
 
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
@@ -80,11 +78,8 @@ target_link_libraries(gxde-editor
     KF5::SyntaxHighlighting
 )
 
-if (HAVE_QSCINTILLA)
-    target_include_directories(gxde-editor PUBLIC ${QSCINTILLA_INCLUDE_DIR})
-    target_compile_definitions(gxde-editor PRIVATE HAVE_QSCINTILLA)
-    target_link_libraries(gxde-editor ${QSCINTILLA_LIBRARY})
-endif ()
+target_include_directories(gxde-editor PUBLIC ${QSCINTILLA_INCLUDE_DIR})
+target_link_libraries(gxde-editor ${QSCINTILLA_LIBRARY})
 
 # 判断 Qt5WebEngine 模块是否存在
 if(Qt5WebEngine_FOUND AND Qt5WebEngineWidgets_FOUND)
@@ -149,11 +144,8 @@ if (BUILD_TESTING)
         KF5::Codecs
         KF5::SyntaxHighlighting
     )
-    if (HAVE_QSCINTILLA)
-        target_include_directories(editorfactory-test PRIVATE ${QSCINTILLA_INCLUDE_DIR})
-        target_compile_definitions(editorfactory-test PRIVATE HAVE_QSCINTILLA)
-        target_link_libraries(editorfactory-test ${QSCINTILLA_LIBRARY})
-    endif ()
+    target_include_directories(editorfactory-test PRIVATE ${QSCINTILLA_INCLUDE_DIR})
+    target_link_libraries(editorfactory-test ${QSCINTILLA_LIBRARY})
     add_test(NAME editorfactory-test COMMAND editorfactory-test)
 endif ()
 

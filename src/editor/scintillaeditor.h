@@ -3,12 +3,8 @@
 
 #include "abstracteditor.h"
 
-class QPlainTextEdit;
 class QWidget;
-
-#ifdef HAVE_QSCINTILLA
 class QsciScintilla;
-#endif
 
 class ScintillaEditor : public AbstractEditor
 {
@@ -26,11 +22,7 @@ private:
     ScintillaEditor(const ScintillaEditor &) = delete;
     ScintillaEditor &operator=(const ScintillaEditor &) = delete;
 
-#ifdef HAVE_QSCINTILLA
     QsciScintilla *m_editor;
-#else
-    QPlainTextEdit *m_editor;
-#endif
 };
 
 #endif
