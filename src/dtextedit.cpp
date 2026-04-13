@@ -21,6 +21,7 @@
  */
 
 #include "dtextedit.h"
+#include "syntaxutils.h"
 #include "utils.h"
 #include "window.h"
 #include "editwrapper.h"
@@ -54,6 +55,22 @@
 #include <private/qguiapplication_p.h>
 #include <qpa/qplatformtheme.h>
 
+class EditorSyntaxHighlighter : public KSyntaxHighlighting::SyntaxHighlighter
+{
+public:
+    using KSyntaxHighlighting::SyntaxHighlighter::SyntaxHighlighter;
+
+    void setDefinitionWithoutRehighlight(const KSyntaxHighlighting::Definition &definition)
+    {
+        KSyntaxHighlighting::AbstractHighlighter::setDefinition(definition);
+    }
+
+    void rehighlightBlockNow(const QTextBlock &block)
+    {
+        rehighlightBlock(block);
+    }
+};
+
 static inline bool isModifier(QKeyEvent *e)
 {
     if (!e) {
@@ -74,9 +91,11 @@ static inline bool isModifier(QKeyEvent *e)
 DTextEdit::DTextEdit(QWidget *parent)
     : QTextEdit(parent),
       m_wrapper(nullptr),
-      m_highlighter(new KSyntaxHighlighting::SyntaxHighlighter(document()))
+      m_highlighter(new EditorSyntaxHighlighter(document()))
 {
     lineNumberArea = new LineNumberArea(this);
+    m_deferredSyntaxHighlightTimer = new QTimer(this);
+    m_deferredSyntaxHighlightTimer->setInterval(0);
 
 #if QT_VERSION < QT_VERSION_CHECK(5,9,0)
     m_touchTapDistance = 15;
@@ -101,6 +120,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     });
     connect(this, &QTextEdit::cursorPositionChanged, this, &DTextEdit::cursorPositionChanged);
     connect(document(), &QTextDocument::modificationChanged, this, &DTextEdit::setModified);
+    connect(m_deferredSyntaxHighlightTimer, &QTimer::timeout, this, &DTextEdit::processPendingSyntaxHighlight);
 
     // Init menu.
     m_rightMenu = new QMenu();
@@ -237,8 +257,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     connect(m_hlActionGroup, &QActionGroup::triggered, this, [this] (QAction *action) {
         const auto defName = action->data().toString();
         const auto def = m_repository.definitionForName(defName);
-        m_highlighter->setDefinition(def);
-        emit hightlightChanged(action->text());
+        applySyntaxDefinition(def, action->text());
     });
 }
 
@@ -1832,7 +1851,11 @@ void DTextEdit::setTheme(const KSyntaxHighlighting::Theme &theme, const QString 
     // does not support highlight do not reload
     // when switching theme will be jammed or large files.
     if (m_highlighted) {
-        m_highlighter->rehighlight();
+        if (m_useDeferredSyntaxHighlight) {
+            startDeferredSyntaxHighlight(m_highlighter->definition());
+        } else {
+            m_highlighter->rehighlight();
+        }
     }
 
     lineNumberArea->update();
@@ -1841,60 +1864,127 @@ void DTextEdit::setTheme(const KSyntaxHighlighting::Theme &theme, const QString 
 
 void DTextEdit::loadHighlighter()
 {
-    const auto def = m_repository.definitionForFileName(QFileInfo(filepath).fileName());
+    QTextCursor contentSampleCursor(document());
+    contentSampleCursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, 4096);
 
-    if (!def.filePath().isEmpty()) {
-        const QString &syntaxFile = QFileInfo(QString(":/syntax/%1")
-                                              .arg(QFileInfo(def.filePath()).fileName())).absoluteFilePath();
+    const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(m_repository,
+                                                                           filepath,
+                                                                           contentSampleCursor.selection().toPlainText());
+    applySyntaxDefinition(m_repository.definitionForName(definitionName));
+}
 
-        QFile file(syntaxFile);
-        if (!file.open(QFile::ReadOnly)) {
-            qDebug() << "Can't open file" << syntaxFile;
-        }
+void DTextEdit::applySyntaxDefinition(const KSyntaxHighlighting::Definition &definition, const QString &displayName)
+{
+    stopDeferredSyntaxHighlight();
+    updateCommentDefinition(definition);
 
-        QXmlStreamReader reader(&file);
-        QString singleLineComment;
-        QString multiLineCommentStart;
-        QString multiLineCommentEnd;
-
-        while (!reader.atEnd()) {
-            const auto token = reader.readNext();
-            if (token != QXmlStreamReader::StartElement) {
-                continue;
-            }
-
-            if (reader.name() == "comment") {
-                if (reader.attributes().hasAttribute(QStringLiteral("name"))) {
-                    QString attrName = reader.attributes().value(QStringLiteral("name")).toString();
-
-                    if (attrName == "singleLine") {
-                        singleLineComment = reader.attributes().value(QStringLiteral("start")).toString();
-                    } else if (attrName == "multiLine") {
-                        multiLineCommentStart = reader.attributes().value(QStringLiteral("start")).toString();
-                        multiLineCommentEnd = reader.attributes().value(QStringLiteral("end")).toString();
-                    }
-                }
-            }
-        }
-
-        m_commentDefinition.setComments(QString("%1 ").arg(singleLineComment), multiLineCommentStart, multiLineCommentEnd);
-
-        m_highlighter->setDefinition(def);
-
-        file.close();
-
-        m_highlighted = true;
-
-        // init action.
-        for (QAction *action : m_hlActionGroup->actions()) {
-            if (action->text() == def.name()) {
-                action->setChecked(true);
-                emit hightlightChanged(action->text());
-            }
-        }
-
-    } else {
+    if (!definition.isValid()) {
+        m_highlighter->setDefinition(definition);
         m_highlighted = false;
+        m_useDeferredSyntaxHighlight = false;
+
+        for (QAction *action : m_hlActionGroup->actions()) {
+            action->setChecked(action->data().toString().isEmpty());
+        }
+
+        emit hightlightChanged(displayName.isEmpty() ? tr("None") : displayName);
+        return;
+    }
+
+    m_useDeferredSyntaxHighlight = SyntaxUtils::shouldDeferSyntaxHighlight(document()->characterCount());
+    if (m_useDeferredSyntaxHighlight) {
+        startDeferredSyntaxHighlight(definition);
+    } else {
+        m_highlighter->setDefinition(definition);
+    }
+
+    m_highlighted = true;
+
+    const QString actionName = displayName.isEmpty() ? definition.name() : displayName;
+    for (QAction *action : m_hlActionGroup->actions()) {
+        if (action->data().toString() == definition.name()) {
+            action->setChecked(true);
+            emit hightlightChanged(actionName);
+            return;
+        }
+    }
+
+    emit hightlightChanged(actionName);
+}
+
+void DTextEdit::updateCommentDefinition(const KSyntaxHighlighting::Definition &definition)
+{
+    m_commentDefinition.setComments(QString(), QString(), QString());
+
+    if (!definition.isValid()) {
+        return;
+    }
+
+    const QString syntaxFile = QFileInfo(QString(":/syntax/%1").arg(QFileInfo(definition.filePath()).fileName())).absoluteFilePath();
+    QFile file(syntaxFile);
+    if (!file.open(QFile::ReadOnly)) {
+        qDebug() << "Can't open file" << syntaxFile;
+        return;
+    }
+
+    QXmlStreamReader reader(&file);
+    QString singleLineComment;
+    QString multiLineCommentStart;
+    QString multiLineCommentEnd;
+
+    while (!reader.atEnd()) {
+        const auto token = reader.readNext();
+        if (token != QXmlStreamReader::StartElement) {
+            continue;
+        }
+
+        if (reader.name() != QStringLiteral("comment") || !reader.attributes().hasAttribute(QStringLiteral("name"))) {
+            continue;
+        }
+
+        const QString attrName = reader.attributes().value(QStringLiteral("name")).toString();
+        if (attrName == QStringLiteral("singleLine")) {
+            singleLineComment = reader.attributes().value(QStringLiteral("start")).toString();
+        } else if (attrName == QStringLiteral("multiLine")) {
+            multiLineCommentStart = reader.attributes().value(QStringLiteral("start")).toString();
+            multiLineCommentEnd = reader.attributes().value(QStringLiteral("end")).toString();
+        }
+    }
+
+    m_commentDefinition.setComments(singleLineComment.isEmpty() ? QString() : QString("%1 ").arg(singleLineComment),
+                                    multiLineCommentStart,
+                                    multiLineCommentEnd);
+}
+
+void DTextEdit::startDeferredSyntaxHighlight(const KSyntaxHighlighting::Definition &definition)
+{
+    m_highlighter->setDefinitionWithoutRehighlight(definition);
+    m_pendingSyntaxHighlightBlockNumber = 0;
+    m_deferredSyntaxHighlightTimer->start();
+}
+
+void DTextEdit::stopDeferredSyntaxHighlight()
+{
+    if (m_deferredSyntaxHighlightTimer->isActive()) {
+        m_deferredSyntaxHighlightTimer->stop();
+    }
+
+    m_pendingSyntaxHighlightBlockNumber = -1;
+}
+
+void DTextEdit::processPendingSyntaxHighlight()
+{
+    QTextBlock block = document()->findBlockByNumber(m_pendingSyntaxHighlightBlockNumber);
+
+    for (int processedBlocks = 0; processedBlocks < 128 && block.isValid(); ++processedBlocks) {
+        m_highlighter->rehighlightBlockNow(block);
+        block = block.next();
+        ++m_pendingSyntaxHighlightBlockNumber;
+    }
+
+    if (!block.isValid()) {
+        m_deferredSyntaxHighlightTimer->stop();
+        m_pendingSyntaxHighlightBlockNumber = -1;
     }
 }
 
@@ -2218,9 +2308,9 @@ void DTextEdit::toggleReadOnlyMode()
 
 void DTextEdit::toggleComment()
 {
-    const auto def = m_repository.definitionForFileName(QFileInfo(filepath).fileName());
+    const auto def = m_highlighter->definition();
 
-    if (!def.filePath().isEmpty()) {
+    if (def.isValid()) {
         Comment::unCommentSelection(this, m_commentDefinition);
     } else {
         // do not need to prompt the user.
@@ -2716,10 +2806,10 @@ void DTextEdit::contextMenuEvent(QContextMenuEvent *event)
     }
 
     // intelligent judge whether to support comments.
-    const auto def = m_repository.definitionForFileName(QFileInfo(filepath).fileName());
+    const auto def = m_highlighter->definition();
     if (!toPlainText().isEmpty() &&
         (textCursor().hasSelection() || !isBlankLine) &&
-        !def.filePath().isEmpty()) {
+        def.isValid()) {
         m_rightMenu->addAction(m_toggleCommentAction);
     }
 

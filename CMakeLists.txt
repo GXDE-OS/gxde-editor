@@ -85,6 +85,23 @@ set(CMAKE_INSTALL_PREFIX /usr)
 add_subdirectory("gxedit")
 add_subdirectory("dedit")
 
+include(CTest)
+
+if (BUILD_TESTING)
+    find_package(Qt5Test REQUIRED)
+
+    add_executable(gxde-editor-tests
+        tests/syntaxutils_test.cpp
+        src/syntaxutils.cpp
+    )
+    target_link_libraries(gxde-editor-tests
+        Qt5::Core
+        Qt5::Test
+        KF5::SyntaxHighlighting
+    )
+    add_test(NAME gxde-editor-tests COMMAND gxde-editor-tests)
+endif ()
+
 # Install qm files
 file(GLOB QM_FILES "translations/*.qm")
 install(FILES ${QM_FILES}

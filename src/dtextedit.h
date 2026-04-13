@@ -41,6 +41,8 @@ namespace KSyntaxHighlighting {
 enum ConvertCase { UPPER, LOWER, CAPITALIZE };
 
 class EditWrapper;
+class QTimer;
+class EditorSyntaxHighlighter;
 class DTextEdit : public QTextEdit
 {
     Q_OBJECT
@@ -213,6 +215,7 @@ public slots:
     void handleCursorMarkChanged(bool mark, QTextCursor cursor);
 
     void adjustScrollbarMargins();
+    void processPendingSyntaxHighlight();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -232,6 +235,10 @@ private:
     void cursorPositionChanged();
     void updateHighlightBrackets(const QChar &openChar, const QChar &closeChar);
     int getFirstVisibleBlockId() const;
+    void applySyntaxDefinition(const KSyntaxHighlighting::Definition &definition, const QString &displayName = QString());
+    void updateCommentDefinition(const KSyntaxHighlighting::Definition &definition);
+    void startDeferredSyntaxHighlight(const KSyntaxHighlighting::Definition &definition);
+    void stopDeferredSyntaxHighlight();
 
 private:
     EditWrapper *m_wrapper;
@@ -255,7 +262,7 @@ private:
     int m_tabSpaceNumber = 4;
 
     KSyntaxHighlighting::Repository m_repository;
-    KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
+    EditorSyntaxHighlighter *m_highlighter;
 
     QMenu *m_rightMenu;
     QAction *m_undoAction;
@@ -329,8 +336,11 @@ private:
     QActionGroup *m_hlActionGroup;
 
     QPoint m_lastTouchBeginPos;
+    QTimer *m_deferredSyntaxHighlightTimer = nullptr;
     QPointer<QTimer> m_updateEnableSelectionByMouseTimer;
     int m_touchTapDistance = -1;
+    int m_pendingSyntaxHighlightBlockNumber = -1;
+    bool m_useDeferredSyntaxHighlight = false;
 };
 
 #endif
