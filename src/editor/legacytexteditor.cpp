@@ -3,9 +3,9 @@
 #include "../dtextedit.h"
 
 LegacyTextEditor::LegacyTextEditor(QWidget *parent)
-    : m_editor(new DTextEdit(parent)),
-      m_language(EditorLanguage::PlainText)
+    : m_editor(new DTextEdit())
 {
+    Q_UNUSED(parent)
 }
 
 LegacyTextEditor::~LegacyTextEditor()
@@ -36,14 +36,4 @@ bool LegacyTextEditor::isReadOnly() const
 void LegacyTextEditor::setReadOnly(bool readOnly)
 {
     m_editor->setReadOnly(readOnly);
-}
-
-EditorLanguage::Type LegacyTextEditor::language() const
-{
-    return m_language;
-}
-
-void LegacyTextEditor::setLanguage(EditorLanguage::Type language)
-{
-    m_language = language;
 }

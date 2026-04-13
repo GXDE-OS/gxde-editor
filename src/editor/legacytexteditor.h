@@ -17,12 +17,9 @@ public:
     void setText(const QString &text) override;
     bool isReadOnly() const override;
     void setReadOnly(bool readOnly) override;
-    EditorLanguage::Type language() const override;
-    void setLanguage(EditorLanguage::Type language) override;
 
 private:
     DTextEdit *m_editor;
-    EditorLanguage::Type m_language;
 };
 
 #endif
