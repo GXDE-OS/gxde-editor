@@ -2,10 +2,9 @@
 
 #include "../dtextedit.h"
 
-LegacyTextEditor::LegacyTextEditor(QWidget *parent)
+LegacyTextEditor::LegacyTextEditor()
     : m_editor(new DTextEdit())
 {
-    Q_UNUSED(parent)
 }
 
 LegacyTextEditor::~LegacyTextEditor()

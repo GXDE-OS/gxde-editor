@@ -9,7 +9,7 @@ class QWidget;
 class LegacyTextEditor : public AbstractEditor
 {
 public:
-    explicit LegacyTextEditor(QWidget *parent = nullptr);
+    LegacyTextEditor();
     ~LegacyTextEditor() override;
 
     QWidget *widget() override;
@@ -19,6 +19,9 @@ public:
     void setReadOnly(bool readOnly) override;
 
 private:
+    LegacyTextEditor(const LegacyTextEditor &) = delete;
+    LegacyTextEditor &operator=(const LegacyTextEditor &) = delete;
+
     DTextEdit *m_editor;
 };
 
