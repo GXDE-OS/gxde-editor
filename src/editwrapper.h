@@ -77,6 +77,8 @@ signals:
 
 private:
     void detectEndOfLine();
+    void appendPendingTextLoadChunk();
+    void finishPendingTextLoad();
     void handleCursorModeChanged(DTextEdit::CursorMode mode);
     void handleHightlightChanged(const QString &name);
     void handleFileLoadFinished(const QByteArray &encode, const QString &content);
@@ -100,6 +102,9 @@ private:
     Toast *m_toast;
 
     bool m_isRefreshing;
+    QString m_pendingLoadContent;
+    int m_pendingLoadOffset = 0;
+    QTimer *m_pendingLoadTimer = nullptr;
 };
 
 #endif

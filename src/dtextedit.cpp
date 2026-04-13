@@ -115,6 +115,10 @@ DTextEdit::DTextEdit(QWidget *parent)
     // Init widgets.
     connect(this->verticalScrollBar(), &QScrollBar::valueChanged, this, &DTextEdit::updateLineNumber);
     connect(this, &QTextEdit::textChanged, this, [this]() {
+        if (m_bulkLoading) {
+            return;
+        }
+
         updateLineNumber();
         updateWordCount();
     });
@@ -1871,6 +1875,20 @@ void DTextEdit::loadHighlighter()
                                                                            filepath,
                                                                            contentSampleCursor.selection().toPlainText());
     applySyntaxDefinition(m_repository.definitionForName(definitionName));
+}
+
+void DTextEdit::beginBulkLoad()
+{
+    m_bulkLoading = true;
+    document()->setUndoRedoEnabled(false);
+}
+
+void DTextEdit::endBulkLoad()
+{
+    document()->setUndoRedoEnabled(true);
+    m_bulkLoading = false;
+    updateLineNumber();
+    updateWordCount();
 }
 
 void DTextEdit::applySyntaxDefinition(const KSyntaxHighlighting::Definition &definition, const QString &displayName)

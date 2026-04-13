@@ -20,6 +20,7 @@
 #include "widgets/toast.h"
 #include "fileloadthread.h"
 #include "editwrapper.h"
+#include "syntaxutils.h"
 #include "utils.h"
 #ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
@@ -50,6 +51,9 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_toast(new Toast(this)),
       m_isRefreshing(false)
 {
+    m_pendingLoadTimer = new QTimer(this);
+    m_pendingLoadTimer->setInterval(0);
+
 #ifdef USE_WEBENGINE
     // 判断是否支持 Markdown 预览，如果支持则显示
     if (MarkdownPreviewWidget::isSupport()) {
@@ -95,6 +99,7 @@ EditWrapper::EditWrapper(QWidget *parent)
     });
 
     connect(m_toast, &Toast::saveAsBtnClicked, this, &EditWrapper::requestSaveAs);
+    connect(m_pendingLoadTimer, &QTimer::timeout, this, &EditWrapper::appendPendingTextLoadChunk);
 
     setDarkTheme(DThemeManager::instance()->theme() == "dark");
 }
@@ -383,19 +388,52 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
         DRecentManager::addItem(m_textEdit->filepath, data);
     }
 
-    m_isLoadFinished = true;
     setTextCodec(encode);
-
-    // set text.
-    m_textEdit->setPlainText(content);
-
-    // update status.
-    m_textEdit->setModified(false);
-    m_textEdit->moveToStart();
-
     m_bottomBar->setEncodeName(m_textCodec->name());
 
-    // load highlight.
+    if (SyntaxUtils::shouldLoadTextIncrementally(content.size())) {
+        m_pendingLoadContent = content;
+        m_pendingLoadOffset = 0;
+        m_textEdit->clear();
+        m_textEdit->beginBulkLoad();
+        m_pendingLoadTimer->start();
+        return;
+    }
+
+    m_isLoadFinished = true;
+    m_textEdit->setPlainText(content);
+    m_textEdit->setModified(false);
+    m_textEdit->moveToStart();
+    QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
+}
+
+void EditWrapper::appendPendingTextLoadChunk()
+{
+    const int chunkSize = SyntaxUtils::incrementalTextLoadChunkSize();
+    const QString chunk = m_pendingLoadContent.mid(m_pendingLoadOffset, chunkSize);
+
+    QTextCursor cursor(m_textEdit->document());
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertText(chunk);
+
+    m_pendingLoadOffset += chunk.size();
+
+    if (m_pendingLoadOffset >= m_pendingLoadContent.size()) {
+        finishPendingTextLoad();
+    }
+}
+
+void EditWrapper::finishPendingTextLoad()
+{
+    m_pendingLoadTimer->stop();
+    m_textEdit->endBulkLoad();
+    m_textEdit->setModified(false);
+    m_textEdit->moveToStart();
+    m_isLoadFinished = true;
+
+    m_pendingLoadContent.clear();
+    m_pendingLoadOffset = 0;
+
     QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
 }
 

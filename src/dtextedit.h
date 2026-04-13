@@ -144,6 +144,8 @@ public:
     void setThemeWithPath(const QString &path);
     void setTheme(const KSyntaxHighlighting::Theme &theme, const QString &path);
     void loadHighlighter();
+    void beginBulkLoad();
+    void endBulkLoad();
 
     bool highlightWordUnderMouse(QPoint pos);
     void removeHighlightWordUnderCursor();
@@ -340,6 +342,7 @@ private:
     QPointer<QTimer> m_updateEnableSelectionByMouseTimer;
     int m_touchTapDistance = -1;
     int m_pendingSyntaxHighlightBlockNumber = -1;
+    bool m_bulkLoading = false;
     bool m_useDeferredSyntaxHighlight = false;
 };
 

@@ -12,6 +12,8 @@ public:
                                               const QString &filePath,
                                               const QString &content = QString());
     static bool shouldDeferSyntaxHighlight(int characterCount);
+    static bool shouldLoadTextIncrementally(int characterCount);
+    static int incrementalTextLoadChunkSize();
 };
 
 #endif
