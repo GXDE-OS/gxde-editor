@@ -42,9 +42,14 @@
 DCORE_USE_NAMESPACE
 
 EditWrapper::EditWrapper(QWidget *parent)
+    : EditWrapper(EditorFactory::create(QStringLiteral("legacy")), parent)
+{
+}
+
+EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget *parent)
     : QWidget(parent),
       m_layout(new QHBoxLayout),
-      m_editorBackend(EditorFactory::create(QStringLiteral("legacy"))),
+      m_editorBackend(std::move(editorBackend)),
       m_textEdit(qobject_cast<DTextEdit *>(m_editorBackend ? m_editorBackend->widget() : nullptr)),
       m_bottomBar(new BottomBar(this)),
       m_textCodec(QTextCodec::codecForName("UTF-8")),
@@ -53,8 +58,6 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_toast(new Toast(this)),
       m_isRefreshing(false)
 {
-    Q_ASSERT(m_textEdit);
-
     m_pendingLoadTimer = new QTimer(this);
     m_pendingLoadTimer->setInterval(0);
 
@@ -68,8 +71,12 @@ EditWrapper::EditWrapper(QWidget *parent)
     // Init layout and widgets.
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
-    m_layout->addWidget(m_textEdit->lineNumberArea);
-    m_layout->addWidget(editorWidget());
+    if (m_textEdit) {
+        m_layout->addWidget(m_textEdit->lineNumberArea);
+    }
+    if (QWidget *widget = editorWidget()) {
+        m_layout->addWidget(widget);
+    }
 #ifdef USE_WEBENGINE
     // 加载 Markdown 预览框
     if (m_markdownPreview) {
@@ -81,8 +88,10 @@ EditWrapper::EditWrapper(QWidget *parent)
     }
 #endif
 
-    m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
-    m_textEdit->setWrapper(this);
+    if (m_textEdit) {
+        m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
+        m_textEdit->setWrapper(this);
+    }
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(m_layout);
@@ -94,8 +103,10 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_toast->setOnlyShow(true);
     m_toast->setIcon(":/images/warning.svg");
 
-    connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
-    connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
+    if (m_textEdit) {
+        connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
+        connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
+    }
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
     connect(m_toast, &Toast::closeBtnClicked, this, [=] {
         QFileInfo fi(filePath());
@@ -132,15 +143,19 @@ void EditWrapper::openFile(const QString &filepath)
 
 bool EditWrapper::saveFile()
 {
+    if (!m_textEdit) {
+        return false;
+    }
+
     // use QSaveFile for safely save files.
-    QSaveFile saveFile(m_textEdit->filepath);
+    QSaveFile saveFile(filePath());
     saveFile.setDirectWriteFallback(true);
 
     if (!saveFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         return false;
     }
 
-    QFile file(m_textEdit->filepath);
+    QFile file(filePath());
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
@@ -184,7 +199,7 @@ bool EditWrapper::saveFile()
         m_isLoadFinished = true;
     }
 
-    qDebug() << "Saved file:" << m_textEdit->filepath
+    qDebug() << "Saved file:" << filePath()
              << "with codec:" << m_textCodec->name()
              << "Line Endings:" << m_endOfLineMode
              << "State:" << ok;
@@ -196,14 +211,17 @@ void EditWrapper::updatePath(const QString &file)
 {
     QFileInfo fi(file);
     m_modified = fi.lastModified();
+    m_filePath = file;
 
-    m_textEdit->filepath = file;
+    if (m_textEdit) {
+        m_textEdit->filepath = file;
+    }
     detectEndOfLine();
 }
 
 void EditWrapper::refresh()
 {
-    if (filePath().isEmpty() || Utils::isDraftFile(filePath()) || m_isRefreshing) {
+    if (!m_textEdit || filePath().isEmpty() || Utils::isDraftFile(filePath()) || m_isRefreshing) {
         return;
     }
 
@@ -289,7 +307,7 @@ void EditWrapper::hideToast()
 
 void EditWrapper::checkForReload()
 {
-    if (Utils::isDraftFile(m_textEdit->filepath))
+    if (filePath().isEmpty() || Utils::isDraftFile(filePath()))
         return;
 
     QFileInfo fi(filePath());
@@ -322,7 +340,11 @@ void EditWrapper::initToastPosition()
 
 void EditWrapper::detectEndOfLine()
 {
-    QFile file(m_textEdit->filepath);
+    if (filePath().isEmpty()) {
+        return;
+    }
+
+    QFile file(filePath());
 
     if (!file.open(QIODevice::ReadOnly)) {
         return;
@@ -379,16 +401,21 @@ void EditWrapper::setDarkTheme(bool enabled)
 
 void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString &content)
 {
+    if (!m_textEdit) {
+        m_isLoadFinished = true;
+        return;
+    }
+
     // restore mouse style.
     // QApplication::restoreOverrideCursor();
 
-    qDebug() << "load finished: " << m_textEdit->filepath << ", " << encode << "endOfLine: " << m_endOfLineMode;
+    qDebug() << "load finished: " << filePath() << ", " << encode << "endOfLine: " << m_endOfLineMode;
 
-    if (!Utils::isDraftFile(m_textEdit->filepath)) {
+    if (!Utils::isDraftFile(filePath())) {
         DRecentData data;
         data.appName = "Deepin Editor";
         data.appExec = "deepin-editor";
-        DRecentManager::addItem(m_textEdit->filepath, data);
+        DRecentManager::addItem(filePath(), data);
     }
 
     setTextCodec(encode);
@@ -412,6 +439,10 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
 
 void EditWrapper::appendPendingTextLoadChunk()
 {
+    if (!m_textEdit) {
+        return;
+    }
+
     const int chunkSize = SyntaxUtils::incrementalTextLoadChunkSize();
     const QString chunk = m_pendingLoadContent.mid(m_pendingLoadOffset, chunkSize);
 
@@ -428,6 +459,14 @@ void EditWrapper::appendPendingTextLoadChunk()
 
 void EditWrapper::finishPendingTextLoad()
 {
+    if (!m_textEdit) {
+        m_pendingLoadTimer->stop();
+        m_pendingLoadContent.clear();
+        m_pendingLoadOffset = 0;
+        m_isLoadFinished = true;
+        return;
+    }
+
     m_pendingLoadTimer->stop();
     m_textEdit->endBulkLoad();
     m_textEdit->setModified(false);

@@ -52,6 +52,7 @@ public:
     };
 
     EditWrapper(QWidget *parent = 0);
+    EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget *parent = 0);
     ~EditWrapper();
 
     void openFile(const QString &filepath);
@@ -65,7 +66,7 @@ public:
     void setTextCodec(QByteArray encodeName, bool reload = false);
 
     BottomBar *bottomBar() { return m_bottomBar; }
-    QString filePath() { return m_textEdit->filepath; }
+    QString filePath() const { return m_filePath; }
     AbstractEditor *editorBackend() const { return m_editorBackend.get(); }
     QWidget *editorWidget() const { return m_editorBackend ? m_editorBackend->widget() : nullptr; }
     DTextEdit *textEditor() { return m_textEdit; }
@@ -93,6 +94,7 @@ protected:
 
 private:
     QHBoxLayout *m_layout;
+    QString m_filePath;
     std::unique_ptr<AbstractEditor> m_editorBackend;
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;

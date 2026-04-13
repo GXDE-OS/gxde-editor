@@ -24,6 +24,7 @@ private slots:
     void createsScintillaEditorBackend();
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
+    void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
 };
 
 void EditorFactoryTest::createsScintillaEditorBackend()
@@ -57,6 +58,24 @@ void EditorFactoryTest::editWrapperUsesLegacyFactoryBackendByDefault()
     QVERIFY2(dynamic_cast<LegacyTextEditor *>(wrapper.editorBackend()) != nullptr,
              "EditWrapper should expose the default LegacyTextEditor backend created through EditorFactory.");
     QCOMPARE(wrapper.editorBackend()->widget(), static_cast<QWidget *>(wrapper.textEditor()));
+}
+
+void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    const QString path = QStringLiteral("/tmp/nonlegacy-editor.cpp");
+
+    QVERIFY2(dynamic_cast<QsciScintilla *>(wrapper.editorWidget()) != nullptr,
+             "EditWrapper should host the non-legacy backend widget directly.");
+    QVERIFY(wrapper.textEditor() == nullptr);
+
+    wrapper.updatePath(path);
+
+    QCOMPARE(wrapper.filePath(), path);
+    QVERIFY(!wrapper.saveFile());
+
+    wrapper.refresh();
+    wrapper.checkForReload();
 }
 
 int main(int argc, char **argv)
