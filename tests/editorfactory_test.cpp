@@ -3,6 +3,7 @@
 #include "../src/editor/legacytexteditor.h"
 #include "../src/editor/scintillaeditor.h"
 #include "../src/editwrapper.h"
+#include "../src/window.h"
 
 #include <QApplication>
 #include <QString>
@@ -25,6 +26,7 @@ private slots:
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
+    void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
 };
 
 void EditorFactoryTest::createsScintillaEditorBackend()
@@ -76,6 +78,15 @@ void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEdi
 
     wrapper.refresh();
     wrapper.checkForReload();
+}
+
+void EditorFactoryTest::windowLegacyTextEditorHelperHandlesNonLegacyWrappers()
+{
+    EditWrapper legacyWrapper;
+    EditWrapper scintillaWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+
+    QVERIFY(Window::legacyTextEditor(&legacyWrapper) != nullptr);
+    QVERIFY(Window::legacyTextEditor(&scintillaWrapper) == nullptr);
 }
 
 int main(int argc, char **argv)

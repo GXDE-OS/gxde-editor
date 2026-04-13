@@ -174,6 +174,11 @@ Window::~Window()
     // We don't need clean pointers because application has exit here.
 }
 
+DTextEdit *Window::legacyTextEditor(EditWrapper *wrapper)
+{
+    return wrapper ? wrapper->textEditor() : nullptr;
+}
+
 void Window::initTitlebar()
 {
     QAction *newWindowAction(new QAction(tr("New window"), this));
@@ -266,9 +271,10 @@ void Window::addTab(const QString &filepath, bool activeTab)
     }
 
     if (curWrapper) {
+        DTextEdit *currentTextEditor = legacyTextEditor(curWrapper);
         // if the current page is a draft file and is empty
         // no need to create a new tab.
-        if (curWrapper->textEditor()->toPlainText().isEmpty() &&
+        if (currentTextEditor && currentTextEditor->toPlainText().isEmpty() &&
                 !m_wrappers.keys().contains(filepath) &&
                 Utils::isDraftFile(curPath))
         {
@@ -363,11 +369,12 @@ void Window::closeTab()
     }
 
     // this property holds whether the document has been modified by the user
-    bool isModified = wrapper->textEditor()->document()->isModified();
+    DTextEdit *textEditor = legacyTextEditor(wrapper);
+    bool isModified = textEditor && textEditor->document()->isModified();
 
     // document has been modified or unsaved draft document.
     // need to prompt whether to save.
-    if (isModified || (isBlankFile && !wrapper->textEditor()->toPlainText().isEmpty())) {
+    if (isModified || (isBlankFile && textEditor && !textEditor->toPlainText().isEmpty())) {
         DDialog *dialog = createDialog(tr("Save File"), tr("Do you want to save this file?"));
 
         connect(dialog, &DDialog::buttonClicked, this, [=] (int index) {
@@ -668,7 +675,9 @@ bool Window::saveAsFile()
         m_wrappers.remove(filePath);
         m_wrappers.insert(newFilePath, wrapper);
 
-        wrapper->textEditor()->loadHighlighter();
+        if (DTextEdit *textEditor = legacyTextEditor(wrapper)) {
+            textEditor->loadHighlighter();
+        }
     } else {
         return false;
     }
@@ -1073,8 +1082,9 @@ void Window::handleTabsClosed(const QStringList &tabList)
         if (m_wrappers.contains(path)) {
             EditWrapper *wrapper = m_wrappers.value(path);
             bool isBlankFile = QFileInfo(path).dir().absolutePath() == m_blankFileDir;
-            bool isContentEmpty = wrapper->textEditor()->toPlainText().isEmpty();
-            bool isModified = wrapper->textEditor()->document()->isModified();
+            DTextEdit *textEditor = legacyTextEditor(wrapper);
+            bool isContentEmpty = !textEditor || textEditor->toPlainText().isEmpty();
+            bool isModified = textEditor && textEditor->document()->isModified();
 
             if ( (isBlankFile && !isContentEmpty) ||
                  (!isBlankFile && isModified)) {
@@ -1095,14 +1105,14 @@ void Window::handleTabsClosed(const QStringList &tabList)
             if (index == 1) {
                 // need delete all draft documents.
                 for (EditWrapper *wrapper : needSaveList) {
-                    if (QFileInfo(wrapper->textEditor()->filepath).dir().absolutePath() == m_blankFileDir) {
-                        QFile::remove(wrapper->textEditor()->filepath);
+                    if (QFileInfo(wrapper->filePath()).dir().absolutePath() == m_blankFileDir) {
+                        QFile::remove(wrapper->filePath());
                     }
                 }
 
             } else if (index == 2) {
                 for (EditWrapper *wrapper : needSaveList) {
-                    const QString &path = wrapper->textEditor()->filepath;
+                    const QString &path = wrapper->filePath();
                     if (Utils::isDraftFile(path)) {
                         saveAsFile();
                     } else {
@@ -1138,7 +1148,9 @@ void Window::handleCurrentChanged(const int &index)
     }
 
     for (auto wrapper : m_wrappers.values()) {
-        wrapper->textEditor()->removeKeywords();
+        if (DTextEdit *textEditor = legacyTextEditor(wrapper)) {
+            textEditor->removeKeywords();
+        }
     }
 
     const QString &filepath = m_tabbar->fileAt(index);
@@ -1486,13 +1498,15 @@ void Window::closeEvent(QCloseEvent *e)
 
     QList<EditWrapper *> needSaveList;
     for (EditWrapper *wrapper : m_wrappers) {
+        DTextEdit *textEditor = legacyTextEditor(wrapper);
+
         // save all the draft documents.
-        if (QFileInfo(wrapper->textEditor()->filepath).dir().absolutePath() == m_blankFileDir) {
+        if (QFileInfo(wrapper->filePath()).dir().absolutePath() == m_blankFileDir) {
             wrapper->saveFile();
             continue;
         }
 
-        if (wrapper->textEditor()->document()->isModified()) {
+        if (textEditor && textEditor->document()->isModified()) {
             needSaveList << wrapper;
         }
     }

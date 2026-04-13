@@ -48,6 +48,8 @@ public:
     Window(DMainWindow *parent = 0);
     ~Window();
 
+    static DTextEdit *legacyTextEditor(EditWrapper *wrapper);
+
     void initTitlebar();
 
     int getTabIndex(const QString &file);
