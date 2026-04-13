@@ -92,10 +92,7 @@ if (BUILD_TESTING)
     find_package(Qt5Test REQUIRED)
 
     add_executable(gxde-editor-tests
-        tests/test_main.cpp
-        tests/editorlanguage_test.cpp
         tests/syntaxutils_test.cpp
-        src/editor/editorlanguage.cpp
         src/syntaxutils.cpp
     )
     target_link_libraries(gxde-editor-tests
@@ -104,6 +101,16 @@ if (BUILD_TESTING)
         KF5::SyntaxHighlighting
     )
     add_test(NAME gxde-editor-tests COMMAND gxde-editor-tests)
+
+    add_executable(editorlanguage-test
+        tests/editorlanguage_test.cpp
+        src/editor/editorlanguage.cpp
+    )
+    target_link_libraries(editorlanguage-test
+        Qt5::Core
+        Qt5::Test
+    )
+    add_test(NAME editorlanguage-test COMMAND editorlanguage-test)
 endif ()
 
 # Install qm files

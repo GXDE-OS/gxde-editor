@@ -20,8 +20,6 @@ public:
     EditorLanguage::Type language() const override;
     void setLanguage(EditorLanguage::Type language) override;
 
-    DTextEdit *textEdit() const;
-
 private:
     DTextEdit *m_editor;
     EditorLanguage::Type m_language;

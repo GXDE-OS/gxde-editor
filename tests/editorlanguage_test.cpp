@@ -23,10 +23,6 @@ void EditorLanguageTest::fallsBackToPlainTextForUnknownDefinitions()
     QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QString()), EditorLanguage::PlainText);
 }
 
-int runEditorLanguageTest(int argc, char *argv[])
-{
-    EditorLanguageTest test;
-    return QTest::qExec(&test, argc, argv);
-}
+QTEST_APPLESS_MAIN(EditorLanguageTest)
 
 #include "editorlanguage_test.moc"

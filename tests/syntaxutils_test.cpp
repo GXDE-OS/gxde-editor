@@ -50,10 +50,6 @@ void SyntaxUtilsTest::usesSmallHighlightBatchesForHugeDocuments()
     QVERIFY(SyntaxUtils::syntaxHighlightIntervalMs(16 * 1024 * 1024) >= 1);
 }
 
-int runSyntaxUtilsTest(int argc, char *argv[])
-{
-    SyntaxUtilsTest test;
-    return QTest::qExec(&test, argc, argv);
-}
+QTEST_APPLESS_MAIN(SyntaxUtilsTest)
 
 #include "syntaxutils_test.moc"

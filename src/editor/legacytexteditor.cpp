@@ -47,8 +47,3 @@ void LegacyTextEditor::setLanguage(EditorLanguage::Type language)
 {
     m_language = language;
 }
-
-DTextEdit *LegacyTextEditor::textEdit() const
-{
-    return m_editor;
-}
