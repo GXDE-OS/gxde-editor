@@ -14,6 +14,8 @@ public:
     static bool shouldDeferSyntaxHighlight(int characterCount);
     static bool shouldLoadTextIncrementally(int characterCount);
     static int incrementalTextLoadChunkSize();
+    static int syntaxHighlightBatchSize(int characterCount);
+    static int syntaxHighlightIntervalMs(int characterCount);
 };
 
 #endif

@@ -7,6 +7,7 @@ namespace {
 static const int kDeferredSyntaxHighlightThreshold = 1024 * 1024;
 static const int kIncrementalTextLoadThreshold = 2 * 1024 * 1024;
 static const int kIncrementalTextLoadChunkSize = 256 * 1024;
+static const int kHugeSyntaxHighlightThreshold = 8 * 1024 * 1024;
 }
 
 QString SyntaxUtils::detectSyntaxDefinitionName(const KSyntaxHighlighting::Repository &repository,
@@ -48,4 +49,14 @@ bool SyntaxUtils::shouldLoadTextIncrementally(int characterCount)
 int SyntaxUtils::incrementalTextLoadChunkSize()
 {
     return kIncrementalTextLoadChunkSize;
+}
+
+int SyntaxUtils::syntaxHighlightBatchSize(int characterCount)
+{
+    return characterCount >= kHugeSyntaxHighlightThreshold ? 1 : 32;
+}
+
+int SyntaxUtils::syntaxHighlightIntervalMs(int characterCount)
+{
+    return characterCount >= kHugeSyntaxHighlightThreshold ? 8 : 0;
 }

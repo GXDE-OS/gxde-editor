@@ -13,6 +13,7 @@ private slots:
     void detectsSyntaxDefinitionFromShebang();
     void defersHighlightingForLargeDocuments();
     void defersLoadingForHugeDocuments();
+    void usesSmallHighlightBatchesForHugeDocuments();
 };
 
 void SyntaxUtilsTest::detectsSyntaxDefinitionFromShebang()
@@ -40,6 +41,13 @@ void SyntaxUtilsTest::defersLoadingForHugeDocuments()
     QVERIFY(!SyntaxUtils::shouldLoadTextIncrementally(64 * 1024));
     QVERIFY(SyntaxUtils::shouldLoadTextIncrementally(8 * 1024 * 1024));
     QCOMPARE(SyntaxUtils::incrementalTextLoadChunkSize(), 256 * 1024);
+}
+
+void SyntaxUtilsTest::usesSmallHighlightBatchesForHugeDocuments()
+{
+    QVERIFY(SyntaxUtils::syntaxHighlightBatchSize(64 * 1024) > SyntaxUtils::syntaxHighlightBatchSize(16 * 1024 * 1024));
+    QCOMPARE(SyntaxUtils::syntaxHighlightBatchSize(16 * 1024 * 1024), 1);
+    QVERIFY(SyntaxUtils::syntaxHighlightIntervalMs(16 * 1024 * 1024) >= 1);
 }
 
 QTEST_APPLESS_MAIN(SyntaxUtilsTest)

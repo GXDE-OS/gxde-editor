@@ -344,6 +344,7 @@ private:
     int m_pendingSyntaxHighlightBlockNumber = -1;
     bool m_bulkLoading = false;
     bool m_useDeferredSyntaxHighlight = false;
+    int m_syntaxHighlightCharacterCount = 0;
 };
 
 #endif

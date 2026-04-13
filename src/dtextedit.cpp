@@ -1976,6 +1976,8 @@ void DTextEdit::updateCommentDefinition(const KSyntaxHighlighting::Definition &d
 
 void DTextEdit::startDeferredSyntaxHighlight(const KSyntaxHighlighting::Definition &definition)
 {
+    m_syntaxHighlightCharacterCount = document()->characterCount();
+    m_deferredSyntaxHighlightTimer->setInterval(SyntaxUtils::syntaxHighlightIntervalMs(m_syntaxHighlightCharacterCount));
     m_highlighter->setDefinitionWithoutRehighlight(definition);
     m_pendingSyntaxHighlightBlockNumber = 0;
     m_deferredSyntaxHighlightTimer->start();
@@ -1988,13 +1990,15 @@ void DTextEdit::stopDeferredSyntaxHighlight()
     }
 
     m_pendingSyntaxHighlightBlockNumber = -1;
+    m_syntaxHighlightCharacterCount = 0;
 }
 
 void DTextEdit::processPendingSyntaxHighlight()
 {
     QTextBlock block = document()->findBlockByNumber(m_pendingSyntaxHighlightBlockNumber);
 
-    for (int processedBlocks = 0; processedBlocks < 128 && block.isValid(); ++processedBlocks) {
+    const int batchSize = SyntaxUtils::syntaxHighlightBatchSize(m_syntaxHighlightCharacterCount);
+    for (int processedBlocks = 0; processedBlocks < batchSize && block.isValid(); ++processedBlocks) {
         m_highlighter->rehighlightBlockNow(block);
         block = block.next();
         ++m_pendingSyntaxHighlightBlockNumber;
