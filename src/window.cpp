@@ -81,8 +81,9 @@ Window::Window(DMainWindow *parent)
     connect(m_settings, &Settings::themeChanged, this, &Window::loadTheme);
     connect(m_settings, &Settings::adjustWordWrap, this, [=] (bool enable) {
         for (EditWrapper *wrapper : m_wrappers.values()) {
-            DTextEdit *textedit = wrapper->textEditor();
-            textedit->setLineWrapMode(enable);
+            if (DTextEdit *textedit = wrapper->textEditor()) {
+                textedit->setLineWrapMode(enable);
+            }
         }
     });
 
@@ -330,12 +331,15 @@ void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, co
 
     // wrapper may be from anther window pointer.
     // reconnect signal.
-    connect(wrapper->textEditor(), &DTextEdit::clickFindAction, this, &Window::popupFindBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickReplaceAction, this, &Window::popupReplaceBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickJumpLineAction, this, &Window::popupJumpLineBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickFullscreenAction, this, &Window::toggleFullscreen, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::popupNotify, this, &Window::showNotify, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::pressEsc, this, &Window::removeBottomWidget, Qt::QueuedConnection);
+    if (DTextEdit *textEditor = wrapper->textEditor()) {
+        connect(textEditor, &DTextEdit::clickFindAction, this, &Window::popupFindBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickReplaceAction, this, &Window::popupReplaceBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickJumpLineAction, this, &Window::popupJumpLineBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickFullscreenAction, this, &Window::toggleFullscreen, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::popupNotify, this, &Window::showNotify, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::pressEsc, this, &Window::removeBottomWidget, Qt::QueuedConnection);
+        textEditor->setThemeWithPath(m_themePath);
+    }
 
     wrapper->disconnect();
     connect(wrapper, &EditWrapper::requestSaveAs, this, &Window::saveAsFile);
@@ -346,7 +350,6 @@ void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, co
     wrapper->updatePath(filepath);
 
     showNewEditor(wrapper);
-    wrapper->textEditor()->setThemeWithPath(m_themePath);
 }
 
 void Window::closeTab()
@@ -422,36 +425,43 @@ EditWrapper* Window::createEditor()
     EditWrapper *wrapper = new EditWrapper();
     bool wordWrap = m_settings->settings->option("base.font.wordwrap")->value().toBool();
 
-    wrapper->textEditor()->setThemeWithPath(m_themePath);
-    wrapper->textEditor()->setSettings(m_settings);
-    wrapper->textEditor()->setTabSpaceNumber(m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
-    wrapper->textEditor()->setFontFamily(m_settings->settings->option("base.font.family")->value().toString());
-    wrapper->textEditor()->setModified(false);
-    wrapper->textEditor()->setLineWrapMode(wordWrap);
+    DTextEdit *textEditor = wrapper->textEditor();
+    if (textEditor) {
+        textEditor->setThemeWithPath(m_themePath);
+        textEditor->setSettings(m_settings);
+        textEditor->setTabSpaceNumber(m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
+        textEditor->setFontFamily(m_settings->settings->option("base.font.family")->value().toString());
+        textEditor->setModified(false);
+        textEditor->setLineWrapMode(wordWrap);
+    }
     setFontSizeWithConfig(wrapper);
 
-    connect(wrapper->textEditor(), &DTextEdit::clickFindAction, this, &Window::popupFindBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickReplaceAction, this, &Window::popupReplaceBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickJumpLineAction, this, &Window::popupJumpLineBar, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::clickFullscreenAction, this, &Window::toggleFullscreen, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::popupNotify, this, &Window::showNotify, Qt::QueuedConnection);
-    connect(wrapper->textEditor(), &DTextEdit::pressEsc, this, &Window::removeBottomWidget, Qt::QueuedConnection);
+    if (textEditor) {
+        connect(textEditor, &DTextEdit::clickFindAction, this, &Window::popupFindBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickReplaceAction, this, &Window::popupReplaceBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickJumpLineAction, this, &Window::popupJumpLineBar, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::clickFullscreenAction, this, &Window::toggleFullscreen, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::popupNotify, this, &Window::showNotify, Qt::QueuedConnection);
+        connect(textEditor, &DTextEdit::pressEsc, this, &Window::removeBottomWidget, Qt::QueuedConnection);
+    }
     connect(wrapper, &EditWrapper::requestSaveAs, this, &Window::saveAsFile);
 
-    connect(wrapper->textEditor(), &DTextEdit::modificationChanged, this, [=] (const QString &path, bool isModified) {
-        int tabIndex = m_tabbar->indexOf(path);
-        QString tabName = m_tabbar->textAt(tabIndex);
-        QRegularExpression reg("[^*](.+)");
-        QRegularExpressionMatch match = reg.match(tabName);
+    if (textEditor) {
+        connect(textEditor, &DTextEdit::modificationChanged, this, [=] (const QString &path, bool isModified) {
+            int tabIndex = m_tabbar->indexOf(path);
+            QString tabName = m_tabbar->textAt(tabIndex);
+            QRegularExpression reg("[^*](.+)");
+            QRegularExpressionMatch match = reg.match(tabName);
 
-        tabName = match.captured(0);
+            tabName = match.captured(0);
 
-        if (isModified) {
-            tabName.prepend('*');
-        }
+            if (isModified) {
+                tabName.prepend('*');
+            }
 
-        m_tabbar->setTabText(tabIndex, tabName);
-    });
+            m_tabbar->setTabText(tabIndex, tabName);
+        });
+    }
 
     return wrapper;
 }
@@ -466,15 +476,24 @@ EditWrapper* Window::wrapper(const QString &filePath)
     return m_wrappers.value(filePath);
 }
 
+QWidget *Window::getEditorWidget(const QString &filepath)
+{
+    EditWrapper *editorWrapper = m_wrappers.value(filepath);
+    return editorWrapper ? editorWrapper->editorWidget() : nullptr;
+}
+
 DTextEdit* Window::getTextEditor(const QString &filepath)
 {
-    return m_wrappers.value(filepath)->textEditor();
+    EditWrapper *editorWrapper = m_wrappers.value(filepath);
+    return editorWrapper ? editorWrapper->textEditor() : nullptr;
 }
 
 void Window::focusActiveEditor()
 {
     if (m_tabbar->count() > 0) {
-        currentWrapper()->textEditor()->setFocus();
+        if (QWidget *editorWidget = getEditorWidget(m_tabbar->currentPath())) {
+            editorWidget->setFocus();
+        }
     }
 }
 
@@ -491,7 +510,9 @@ void Window::removeWrapper(const QString &filePath, bool isDelete)
         }
 
         // remove all signals on this connection.
-        disconnect(wrapper->textEditor(), 0, this, 0);
+        if (DTextEdit *textEditor = wrapper->textEditor()) {
+            disconnect(textEditor, 0, this, 0);
+        }
     }
 
     // Exit window after close all tabs.
@@ -1086,14 +1107,18 @@ void Window::handleCurrentChanged(const int &index)
 
     if (m_wrappers.contains(filepath)) {
         EditWrapper *wrapper = m_wrappers.value(filepath);
-        wrapper->textEditor()->setFocus();
+        if (QWidget *editorWidget = wrapper->editorWidget()) {
+            editorWidget->setFocus();
+        }
         m_editorWidget->setCurrentWidget(wrapper);
     }
 }
 
 void Window::handleJumpLineBarExit()
 {
-    QTimer::singleShot(0, currentWrapper()->textEditor(), SLOT(setFocus()));
+    if (QWidget *editorWidget = getEditorWidget(m_tabbar->currentPath())) {
+        QTimer::singleShot(0, editorWidget, SLOT(setFocus()));
+    }
 }
 
 void Window::handleJumpLineBarJumpToLine(const QString &filepath, int line, bool focusEditor)
@@ -1102,7 +1127,9 @@ void Window::handleJumpLineBarJumpToLine(const QString &filepath, int line, bool
         getTextEditor(filepath)->jumpToLine(line, true);
 
         if (focusEditor) {
-            QTimer::singleShot(0, getTextEditor(filepath), SLOT(setFocus()));
+            if (QWidget *editorWidget = getEditorWidget(filepath)) {
+                QTimer::singleShot(0, editorWidget, SLOT(setFocus()));
+            }
         }
     }
 }

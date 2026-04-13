@@ -62,6 +62,7 @@ public:
     EditWrapper* createEditor();
     EditWrapper* currentWrapper();
     EditWrapper* wrapper(const QString &filePath);
+    QWidget *getEditorWidget(const QString &filepath);
     DTextEdit* getTextEditor(const QString &filepath);
     void focusActiveEditor();
     void removeWrapper(const QString &filePath, bool isDelete = false);

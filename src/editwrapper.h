@@ -22,12 +22,14 @@
 
 #include "dbusinterface.h"
 #include "dtextedit.h"
+#include "editor/abstracteditor.h"
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
 #ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
 #endif
 
+#include <memory>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -64,6 +66,8 @@ public:
 
     BottomBar *bottomBar() { return m_bottomBar; }
     QString filePath() { return m_textEdit->filepath; }
+    AbstractEditor *editorBackend() const { return m_editorBackend.get(); }
+    QWidget *editorWidget() const { return m_editorBackend ? m_editorBackend->widget() : nullptr; }
     DTextEdit *textEditor() { return m_textEdit; }
     bool toastVisible() { return m_toast->isVisible(); }
     void hideToast();
@@ -89,6 +93,7 @@ protected:
 
 private:
     QHBoxLayout *m_layout;
+    std::unique_ptr<AbstractEditor> m_editorBackend;
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;

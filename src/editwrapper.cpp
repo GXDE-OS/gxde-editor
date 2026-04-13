@@ -20,6 +20,7 @@
 #include "widgets/toast.h"
 #include "fileloadthread.h"
 #include "editwrapper.h"
+#include "editor/editorfactory.h"
 #include "syntaxutils.h"
 #include "utils.h"
 #ifdef USE_WEBENGINE
@@ -43,7 +44,8 @@ DCORE_USE_NAMESPACE
 EditWrapper::EditWrapper(QWidget *parent)
     : QWidget(parent),
       m_layout(new QHBoxLayout),
-      m_textEdit(new DTextEdit),
+      m_editorBackend(EditorFactory::create(QStringLiteral("legacy"))),
+      m_textEdit(qobject_cast<DTextEdit *>(m_editorBackend ? m_editorBackend->widget() : nullptr)),
       m_bottomBar(new BottomBar(this)),
       m_textCodec(QTextCodec::codecForName("UTF-8")),
       m_endOfLineMode(eolUnix),
@@ -51,6 +53,8 @@ EditWrapper::EditWrapper(QWidget *parent)
       m_toast(new Toast(this)),
       m_isRefreshing(false)
 {
+    Q_ASSERT(m_textEdit);
+
     m_pendingLoadTimer = new QTimer(this);
     m_pendingLoadTimer->setInterval(0);
 
@@ -65,7 +69,7 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
     m_layout->addWidget(m_textEdit->lineNumberArea);
-    m_layout->addWidget(m_textEdit);
+    m_layout->addWidget(editorWidget());
 #ifdef USE_WEBENGINE
     // 加载 Markdown 预览框
     if (m_markdownPreview) {
@@ -106,7 +110,6 @@ EditWrapper::EditWrapper(QWidget *parent)
 
 EditWrapper::~EditWrapper()
 {
-    delete m_textEdit;
     delete m_toast;
 }
 

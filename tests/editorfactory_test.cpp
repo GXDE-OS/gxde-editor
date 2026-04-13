@@ -2,6 +2,7 @@
 #include "../src/editor/editorfactory.h"
 #include "../src/editor/legacytexteditor.h"
 #include "../src/editor/scintillaeditor.h"
+#include "../src/editwrapper.h"
 
 #include <QApplication>
 #include <QString>
@@ -22,6 +23,7 @@ class EditorFactoryTest : public QObject
 private slots:
     void createsScintillaEditorBackend();
     void fallsBackToLegacyEditorForUnknownEngine();
+    void editWrapperUsesLegacyFactoryBackendByDefault();
 };
 
 void EditorFactoryTest::createsScintillaEditorBackend()
@@ -46,6 +48,15 @@ void EditorFactoryTest::fallsBackToLegacyEditorForUnknownEngine()
 
     QVERIFY2(dynamic_cast<LegacyTextEditor *>(editor.get()) != nullptr,
              "EditorFactory should fall back to LegacyTextEditor for unknown engine names.");
+}
+
+void EditorFactoryTest::editWrapperUsesLegacyFactoryBackendByDefault()
+{
+    EditWrapper wrapper;
+
+    QVERIFY2(dynamic_cast<LegacyTextEditor *>(wrapper.editorBackend()) != nullptr,
+             "EditWrapper should expose the default LegacyTextEditor backend created through EditorFactory.");
+    QCOMPARE(wrapper.editorBackend()->widget(), static_cast<QWidget *>(wrapper.textEditor()));
 }
 
 int main(int argc, char **argv)
