@@ -52,6 +52,18 @@ find_package(Qt5WebEngineWidgets QUIET)
 
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
+find_path(QSCINTILLA_INCLUDE_DIR
+    NAMES Qsci/qsciscintilla.h
+    PATH_SUFFIXES qt5 x86_64-linux-gnu/qt5
+)
+find_library(QSCINTILLA_LIBRARY
+    NAMES qscintilla2_qt5 qscintilla2-qt5
+)
+
+if (QSCINTILLA_INCLUDE_DIR AND QSCINTILLA_LIBRARY)
+    set(HAVE_QSCINTILLA TRUE)
+endif ()
+
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
 target_include_directories(gxde-editor PUBLIC ${DtkWidget_INCLUDE_DIRS} ${OBJECT_BINARY_DIR} ${CMARK_INCLUDE_DIRS})
@@ -67,6 +79,12 @@ target_link_libraries(gxde-editor
     KF5::Codecs
     KF5::SyntaxHighlighting
 )
+
+if (HAVE_QSCINTILLA)
+    target_include_directories(gxde-editor PUBLIC ${QSCINTILLA_INCLUDE_DIR})
+    target_compile_definitions(gxde-editor PRIVATE HAVE_QSCINTILLA)
+    target_link_libraries(gxde-editor ${QSCINTILLA_LIBRARY})
+endif ()
 
 # 判断 Qt5WebEngine 模块是否存在
 if(Qt5WebEngine_FOUND AND Qt5WebEngineWidgets_FOUND)
@@ -111,6 +129,32 @@ if (BUILD_TESTING)
         Qt5::Test
     )
     add_test(NAME editorlanguage-test COMMAND editorlanguage-test)
+
+    set(EDITOR_FACTORY_TEST_SRCS ${SRCS})
+    list(REMOVE_ITEM EDITOR_FACTORY_TEST_SRCS ${CMAKE_SOURCE_DIR}/src/main.cpp)
+
+    add_executable(editorfactory-test
+        tests/editorfactory_test.cpp
+        ${EDITOR_FACTORY_TEST_SRCS}
+    )
+    target_link_libraries(editorfactory-test
+        ${DtkWidget_LIBRARIES}
+        ${DtkCore_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES}
+        ${Qt5DBus_LIBRARIES}
+        ${Qt5PrintSupport_LIBRARIES}
+        ${Qt5Concurrent_LIBRARIES}
+        ${Qt5Network_LIBRARIES}
+        Qt5::Test
+        KF5::Codecs
+        KF5::SyntaxHighlighting
+    )
+    if (HAVE_QSCINTILLA)
+        target_include_directories(editorfactory-test PRIVATE ${QSCINTILLA_INCLUDE_DIR})
+        target_compile_definitions(editorfactory-test PRIVATE HAVE_QSCINTILLA)
+        target_link_libraries(editorfactory-test ${QSCINTILLA_LIBRARY})
+    endif ()
+    add_test(NAME editorfactory-test COMMAND editorfactory-test)
 endif ()
 
 # Install qm files
