@@ -89,6 +89,9 @@ public:
 
     void toggleFullscreen();
 
+    void refreshScintillaShortcuts(EditWrapper *wrapper);
+    bool triggerScintillaSettingAction(EditWrapper *wrapper, const QString &settingKey);
+
     void remberPositionSave();
     void remberPositionRestore();
 

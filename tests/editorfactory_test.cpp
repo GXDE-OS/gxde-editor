@@ -69,6 +69,8 @@ private slots:
     void windowAppliesConfiguredTabWidthToScintillaEditors();
     void windowHonorsConfiguredScintillaEditorShortcut();
     void openScintillaWrappersRefreshConfiguredShortcuts();
+    void scintillaOpenNewlineActionsMatchLegacyBehavior();
+    void scintillaRepresentativeShortcutActionsWork();
     void openingFileReusesEmptyScintillaBlankTab();
 #ifdef USE_WEBENGINE
     void markdownPreviewReconnectsForScintillaMarkdownTabs();
@@ -444,6 +446,73 @@ void EditorFactoryTest::openScintillaWrappersRefreshConfiguredShortcuts()
     QVERIFY(shortcut != nullptr);
     QCOMPARE(shortcut->key(), QKeySequence(QStringLiteral("Ctrl+Shift+U")));
     window.removeWrapper(QStringLiteral("/tmp/refresh-shortcut.txt"), true);
+}
+
+void EditorFactoryTest::scintillaOpenNewlineActionsMatchLegacyBehavior()
+{
+    Window window(nullptr);
+    EditWrapper *aboveWrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    EditWrapper *belowWrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QsciScintilla *aboveEditor = qobject_cast<QsciScintilla *>(aboveWrapper->editorWidget());
+    QsciScintilla *belowEditor = qobject_cast<QsciScintilla *>(belowWrapper->editorWidget());
+    int line = -1;
+    int index = -1;
+
+    QVERIFY(aboveEditor != nullptr);
+    QVERIFY(belowEditor != nullptr);
+
+    aboveWrapper->editorBackend()->setText(QStringLiteral("alpha\nbeta"));
+    aboveEditor->setCursorPosition(0, 2);
+    QVERIFY(window.triggerScintillaSettingAction(aboveWrapper, QStringLiteral("shortcuts.editor.opennewlineabove")));
+    QCOMPARE(aboveEditor->text(), QStringLiteral("\nalpha\nbeta"));
+    aboveEditor->getCursorPosition(&line, &index);
+    QCOMPARE(line, 0);
+    QCOMPARE(index, 0);
+
+    belowWrapper->editorBackend()->setText(QStringLiteral("alpha\nbeta"));
+    belowEditor->setCursorPosition(0, 2);
+    QVERIFY(window.triggerScintillaSettingAction(belowWrapper, QStringLiteral("shortcuts.editor.opennewlinebelow")));
+    QCOMPARE(belowEditor->text(), QStringLiteral("alpha\n\nbeta"));
+    belowEditor->getCursorPosition(&line, &index);
+    QCOMPARE(line, 1);
+    QCOMPARE(index, 0);
+
+    delete aboveWrapper;
+    delete belowWrapper;
+}
+
+void EditorFactoryTest::scintillaRepresentativeShortcutActionsWork()
+{
+    Window window(nullptr);
+    EditWrapper *wrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QsciScintilla *editor = qobject_cast<QsciScintilla *>(wrapper->editorWidget());
+
+    QVERIFY(editor != nullptr);
+
+    wrapper->updatePath(QStringLiteral("/tmp/shortcut-actions.cpp"));
+    wrapper->editorBackend()->setText(QStringLiteral("hello\nworld"));
+    editor->setCursorPosition(0, 0);
+    QVERIFY(window.triggerScintillaSettingAction(wrapper, QStringLiteral("shortcuts.editor.capitalizeword")));
+    QCOMPARE(editor->text(), QStringLiteral("Hello\nworld"));
+
+    QVERIFY(window.triggerScintillaSettingAction(wrapper, QStringLiteral("shortcuts.editor.setmark")));
+    QVERIFY(editor->property("cursorMark").toBool());
+
+    editor->setSelection(0, 0, 0, 5);
+    const long currentBefore = editor->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
+    const long anchorBefore = editor->SendScintilla(QsciScintillaBase::SCI_GETANCHOR);
+    QVERIFY(window.triggerScintillaSettingAction(wrapper, QStringLiteral("shortcuts.editor.exchangemark")));
+    QCOMPARE(editor->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS), anchorBefore);
+    QCOMPARE(editor->SendScintilla(QsciScintillaBase::SCI_GETANCHOR), currentBefore);
+
+    editor->setSelection(0, 0, 1, 5);
+    QVERIFY(window.triggerScintillaSettingAction(wrapper, QStringLiteral("shortcuts.editor.joinlines")));
+    QCOMPARE(editor->text(), QStringLiteral("Hello world"));
+
+    QVERIFY(window.triggerScintillaSettingAction(wrapper, QStringLiteral("shortcuts.editor.togglecomment")));
+    QCOMPARE(editor->text(), QStringLiteral("// Hello world"));
+
+    delete wrapper;
 }
 
 void EditorFactoryTest::openingFileReusesEmptyScintillaBlankTab()
