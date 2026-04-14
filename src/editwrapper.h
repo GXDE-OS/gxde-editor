@@ -76,6 +76,7 @@ public:
     void checkForReload();
     void initToastPosition();
     void setDarkTheme(bool enabled);
+    void refreshBottomBarHighlight();
 
 signals:
     void requestSaveAs();

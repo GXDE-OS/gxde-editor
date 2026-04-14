@@ -29,6 +29,18 @@
 static_assert(std::is_base_of<AbstractEditor, ScintillaEditor>::value,
               "ScintillaEditor must implement the AbstractEditor interface.");
 
+class CountingScintillaEditor : public ScintillaEditor
+{
+public:
+    QString text() const override
+    {
+        ++textCallCount;
+        return ScintillaEditor::text();
+    }
+
+    mutable int textCallCount = 0;
+};
+
 class EditorFactoryTest : public QObject
 {
     Q_OBJECT
@@ -47,7 +59,9 @@ private slots:
     void scintillaRefreshUsesIncrementalReloadPath();
     void scintillaRefreshReloadsHighlighter();
     void scintillaBottomBarTracksScintillaState();
+    void scintillaBottomBarUsesCheapCharacterCount();
     void windowCanPrintScintillaEditorToPdf();
+    void saveAsRefreshesScintillaBottomBarHighlight();
     void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
 };
@@ -344,6 +358,22 @@ void EditorFactoryTest::scintillaBottomBarTracksScintillaState()
     QCOMPARE(wrapper.bottomBar()->m_cursorStatus->text(), QStringLiteral("INSERT"));
 }
 
+void EditorFactoryTest::scintillaBottomBarUsesCheapCharacterCount()
+{
+    CountingScintillaEditor *editor = new CountingScintillaEditor();
+    EditWrapper wrapper{std::unique_ptr<AbstractEditor>(editor)};
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper.editorWidget());
+
+    QVERIFY(widget != nullptr);
+
+    editor->setText(QStringLiteral("alpha\nbeta"));
+    editor->textCallCount = 0;
+    wrapper.updateBottomBarForBackend();
+
+    QCOMPARE(widget->length(), 10);
+    QCOMPARE(editor->textCallCount, 0);
+}
+
 void EditorFactoryTest::windowCanPrintScintillaEditorToPdf()
 {
     Window window(nullptr);
@@ -364,6 +394,29 @@ void EditorFactoryTest::windowCanPrintScintillaEditorToPdf()
     QVERIFY(QFileInfo(outputPath).size() > 0);
 
     window.removeWrapper(path, true);
+}
+
+void EditorFactoryTest::saveAsRefreshesScintillaBottomBarHighlight()
+{
+    EditWrapper *wrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QTemporaryDir dir;
+    const QString originalPath = dir.filePath(QStringLiteral("plain.txt"));
+    const QString renamedPath = dir.filePath(QStringLiteral("renamed.cpp"));
+
+    QVERIFY(dir.isValid());
+
+    wrapper->updatePath(originalPath);
+    wrapper->editorBackend()->setText(QStringLiteral("int main() { return 0; }\n"));
+    wrapper->bottomBar()->setHightlightName(QStringLiteral("None"));
+
+    wrapper->updatePath(renamedPath);
+    if (AbstractEditor *editor = wrapper->editorBackend()) {
+        editor->loadHighlighter();
+    }
+
+    QCOMPARE(wrapper->bottomBar()->m_highlightMenu->m_text->text(), QStringLiteral("C++"));
+
+    delete wrapper;
 }
 
 void EditorFactoryTest::windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends()

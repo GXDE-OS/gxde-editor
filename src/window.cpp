@@ -730,6 +730,7 @@ bool Window::saveAsFile()
         if (AbstractEditor *editor = editorBackend(wrapper)) {
             editor->loadHighlighter();
         }
+        wrapper->refreshBottomBarHighlight();
     } else {
         return false;
     }

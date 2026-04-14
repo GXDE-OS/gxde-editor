@@ -230,6 +230,8 @@ void EditWrapper::updatePath(const QString &file)
     if (QWidget *widget = editorWidget()) {
         widget->setProperty("filepath", file);
     }
+
+    refreshBottomBarHighlight();
     detectEndOfLine();
 }
 
@@ -415,9 +417,23 @@ void EditWrapper::updateBottomBarForBackend()
         return;
     }
 
+    int characterCount = 0;
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(editorWidget())) {
+        characterCount = scintillaEditor->length();
+    } else if (m_textEdit) {
+        characterCount = m_textEdit->characterCount();
+    } else {
+        characterCount = m_editorBackend->text().size();
+    }
+
     m_bottomBar->updatePosition(m_editorBackend->currentLine(), m_editorBackend->currentColumn() + 1);
-    m_bottomBar->updateWordCount(m_editorBackend->text().size());
+    m_bottomBar->updateWordCount(characterCount);
     m_bottomBar->setCursorStatus(m_editorBackend->isReadOnly() ? tr("R/O") : tr("INSERT"));
+}
+
+void EditWrapper::refreshBottomBarHighlight()
+{
+    updateBottomBarHighlight();
 }
 
 void EditWrapper::updateBottomBarHighlight()
