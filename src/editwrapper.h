@@ -81,6 +81,8 @@ signals:
     void requestSaveAs();
 
 private:
+    void updateBottomBarForBackend();
+    void updateBottomBarHighlight();
     void detectEndOfLine();
     void appendPendingTextLoadChunk();
     void finishPendingTextLoad();
@@ -112,6 +114,10 @@ private:
     QString m_pendingLoadContent;
     int m_pendingLoadOffset = 0;
     QTimer *m_pendingLoadTimer = nullptr;
+    bool m_restorePendingLoadPosition = false;
+    int m_pendingRestoreRow = 1;
+    int m_pendingRestoreColumn = 0;
+    int m_pendingRestoreScrollOffset = 0;
 };
 
 #endif

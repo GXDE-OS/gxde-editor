@@ -38,6 +38,7 @@
 #include <QTimer>
 #include <QDir>
 #include <Qsci/qsciscintilla.h>
+#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/repository.h>
 
 #include "drecentmanager.h"
 
@@ -108,6 +109,13 @@ EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget 
     if (m_textEdit) {
         connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
         connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
+    } else if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(editorWidget())) {
+        connect(scintillaEditor, &QsciScintillaBase::SCN_UPDATEUI, this, [=] (int) {
+            updateBottomBarForBackend();
+        });
+        connect(scintillaEditor, &QsciScintilla::textChanged, this, [=] {
+            updateBottomBarForBackend();
+        });
     }
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
     connect(m_toast, &Toast::closeBtnClicked, this, [=] {
@@ -118,6 +126,7 @@ EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget 
     connect(m_toast, &Toast::saveAsBtnClicked, this, &EditWrapper::requestSaveAs);
     connect(m_pendingLoadTimer, &QTimer::timeout, this, &EditWrapper::appendPendingTextLoadChunk);
 
+    updateBottomBarForBackend();
     setDarkTheme(DThemeManager::instance()->theme() == "dark");
 }
 
@@ -237,20 +246,35 @@ void EditWrapper::refresh()
 
     if (file.open(QIODevice::ReadOnly)) {
         m_isRefreshing = true;
+        m_isLoadFinished = false;
 
         QTextStream out(&file);
         out.setCodec(m_textCodec);
         QString content = out.readAll();
-
-        m_editorBackend->setText(content);
-        m_editorBackend->setModified(false);
-        m_editorBackend->scrollToLine(yoffset, row, column);
 
         QFileInfo fi(filePath());
         m_modified = fi.lastModified();
 
         file.close();
         m_toast->hideAnimation();
+
+        if (SyntaxUtils::shouldLoadTextIncrementally(content.size())) {
+            m_pendingLoadContent = content;
+            m_pendingLoadOffset = 0;
+            m_restorePendingLoadPosition = true;
+            m_pendingRestoreRow = row;
+            m_pendingRestoreColumn = column;
+            m_pendingRestoreScrollOffset = yoffset;
+            m_editorBackend->setText(QString());
+            m_editorBackend->beginBulkLoad();
+            m_pendingLoadTimer->start();
+            return;
+        }
+
+        m_editorBackend->setText(content);
+        m_editorBackend->setModified(false);
+        m_editorBackend->scrollToLine(yoffset, row, column);
+        updateBottomBarForBackend();
 
         if (QWidget *widget = editorWidget()) {
             widget->setUpdatesEnabled(false);
@@ -260,6 +284,9 @@ void EditWrapper::refresh()
             if (QWidget *widget = editorWidget()) {
                 widget->setUpdatesEnabled(true);
             }
+            m_editorBackend->loadHighlighter();
+            updateBottomBarHighlight();
+            m_isLoadFinished = true;
             m_isRefreshing = false;
         });
     } else {
@@ -382,6 +409,29 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
     }
 }
 
+void EditWrapper::updateBottomBarForBackend()
+{
+    if (!m_editorBackend) {
+        return;
+    }
+
+    m_bottomBar->updatePosition(m_editorBackend->currentLine(), m_editorBackend->currentColumn() + 1);
+    m_bottomBar->updateWordCount(m_editorBackend->text().size());
+    m_bottomBar->setCursorStatus(m_editorBackend->isReadOnly() ? tr("R/O") : tr("INSERT"));
+}
+
+void EditWrapper::updateBottomBarHighlight()
+{
+    if (m_textEdit || !m_editorBackend) {
+        return;
+    }
+
+    const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(KSyntaxHighlighting::Repository(),
+                                                                           filePath(),
+                                                                           m_editorBackend->text().left(4096));
+    m_bottomBar->setHightlightName(definitionName.isEmpty() ? tr("None") : definitionName);
+}
+
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
 #ifdef USE_WEBENGINE
@@ -427,6 +477,7 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
     if (SyntaxUtils::shouldLoadTextIncrementally(content.size())) {
         m_pendingLoadContent = content;
         m_pendingLoadOffset = 0;
+        m_restorePendingLoadPosition = false;
         if (m_editorBackend) {
             m_editorBackend->setText(QString());
             m_editorBackend->beginBulkLoad();
@@ -439,7 +490,11 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
     m_editorBackend->setText(content);
     m_editorBackend->setModified(false);
     m_editorBackend->moveToStart();
-    QTimer::singleShot(100, this, [=] { m_editorBackend->loadHighlighter(); });
+    updateBottomBarForBackend();
+    QTimer::singleShot(100, this, [=] {
+        m_editorBackend->loadHighlighter();
+        updateBottomBarHighlight();
+    });
 }
 
 void EditWrapper::appendPendingTextLoadChunk()
@@ -481,13 +536,25 @@ void EditWrapper::finishPendingTextLoad()
     m_pendingLoadTimer->stop();
     m_editorBackend->endBulkLoad();
     m_editorBackend->setModified(false);
-    m_editorBackend->moveToStart();
+
+    if (m_restorePendingLoadPosition) {
+        m_editorBackend->scrollToLine(m_pendingRestoreScrollOffset, m_pendingRestoreRow, m_pendingRestoreColumn);
+    } else {
+        m_editorBackend->moveToStart();
+    }
+
     m_isLoadFinished = true;
+    updateBottomBarForBackend();
 
     m_pendingLoadContent.clear();
     m_pendingLoadOffset = 0;
+    m_restorePendingLoadPosition = false;
 
-    QTimer::singleShot(100, this, [=] { m_editorBackend->loadHighlighter(); });
+    QTimer::singleShot(100, this, [=] {
+        m_editorBackend->loadHighlighter();
+        updateBottomBarHighlight();
+        m_isRefreshing = false;
+    });
 }
 
 void EditWrapper::resizeEvent(QResizeEvent *e)

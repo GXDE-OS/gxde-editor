@@ -13,6 +13,8 @@
 
 #include <QApplication>
 #include <QMimeData>
+#include <QTemporaryDir>
+#include <QTemporaryFile>
 #include <QString>
 #include <QObject>
 #include <QTest>
@@ -42,6 +44,10 @@ private slots:
     void tabbarMimeTransferCapturesWrapperFilePathForScintillaEditors();
     void scintillaWrapperIncrementallyLoadsLargeFiles();
     void scintillaEditorSkipsLexerForLargeDocuments();
+    void scintillaRefreshUsesIncrementalReloadPath();
+    void scintillaRefreshReloadsHighlighter();
+    void scintillaBottomBarTracksScintillaState();
+    void windowCanPrintScintillaEditorToPdf();
     void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
 };
@@ -267,6 +273,97 @@ void EditorFactoryTest::scintillaEditorSkipsLexerForLargeDocuments()
 
     QVERIFY2(widget->lexer() == nullptr,
              "Scintilla should skip attaching a lexer when the document is large enough to require the safe path.");
+}
+
+void EditorFactoryTest::scintillaRefreshUsesIncrementalReloadPath()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QTemporaryFile file;
+    QString content;
+
+    QVERIFY(file.open());
+    while (content.size() <= (2 * 1024 * 1024)) {
+        content.append(QStringLiteral("0123456789abcdef\n"));
+    }
+
+    file.write(content.toUtf8());
+    file.flush();
+
+    wrapper.updatePath(file.fileName());
+    wrapper.refresh();
+
+    QVERIFY2(!wrapper.isLoadFinished(),
+             "Refreshing a large Scintilla document should reuse the incremental safe-load path.");
+    QVERIFY(wrapper.m_pendingLoadTimer->isActive());
+
+    QTRY_VERIFY(wrapper.isLoadFinished());
+    QCOMPARE(wrapper.editorBackend()->text(), content);
+}
+
+void EditorFactoryTest::scintillaRefreshReloadsHighlighter()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QTemporaryFile file(QDir::tempPath() + QStringLiteral("/refresh-highlighter-XXXXXX.cpp"));
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper.editorWidget());
+
+    QVERIFY(widget != nullptr);
+    QVERIFY(file.open());
+    file.write("int main() { return 0; }\n");
+    file.flush();
+
+    wrapper.updatePath(file.fileName());
+    wrapper.refresh();
+
+    QTRY_VERIFY(widget->lexer() != nullptr);
+    QVERIFY2(qobject_cast<QsciLexerCPP *>(widget->lexer()) != nullptr,
+             "Refreshing a Scintilla-backed C++ file should re-apply the matching lexer.");
+}
+
+void EditorFactoryTest::scintillaBottomBarTracksScintillaState()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper.editorWidget());
+
+    QVERIFY(widget != nullptr);
+
+    wrapper.show();
+    wrapper.updatePath(QStringLiteral("/tmp/bottombar.cpp"));
+    wrapper.m_isLoadFinished = false;
+    wrapper.handleFileLoadFinished(QByteArrayLiteral("UTF-8"), QStringLiteral("alpha\nbeta"));
+    QTRY_VERIFY(wrapper.isLoadFinished());
+    widget->setFocus();
+    QTest::qWait(0);
+    QTest::keyClick(widget, Qt::Key_Down);
+    QTest::keyClick(widget, Qt::Key_Right);
+    QTest::keyClick(widget, Qt::Key_Right);
+    qApp->processEvents();
+    QTRY_COMPARE(wrapper.bottomBar()->m_highlightMenu->m_text->text(), QStringLiteral("C++"));
+
+    QCOMPARE(wrapper.bottomBar()->m_charCountLabel->text(), QStringLiteral("Characters 10"));
+    QCOMPARE(wrapper.bottomBar()->m_positionLabel->text(), QStringLiteral("Row 2 , Column 3"));
+    QCOMPARE(wrapper.bottomBar()->m_cursorStatus->text(), QStringLiteral("INSERT"));
+}
+
+void EditorFactoryTest::windowCanPrintScintillaEditorToPdf()
+{
+    Window window(nullptr);
+    EditWrapper *wrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QTemporaryDir dir;
+    const QString path = dir.filePath(QStringLiteral("printable.cpp"));
+    const QString outputPath = dir.filePath(QStringLiteral("printable.pdf"));
+
+    QVERIFY(dir.isValid());
+
+    wrapper->updatePath(path);
+    wrapper->editorBackend()->setText(QStringLiteral("int main() { return 0; }\n"));
+    window.addTabWithWrapper(wrapper, path, QStringLiteral("printable.cpp"), 0);
+
+    QVERIFY2(window.printEditorToPdf(wrapper, outputPath),
+             "Window should print Scintilla-backed tabs to PDF instead of bailing out.");
+    QVERIFY(QFileInfo(outputPath).exists());
+    QVERIFY(QFileInfo(outputPath).size() > 0);
+
+    window.removeWrapper(path, true);
 }
 
 void EditorFactoryTest::windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends()

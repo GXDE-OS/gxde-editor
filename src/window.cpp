@@ -34,6 +34,7 @@
 #include <DSettingsOption>
 #include <DTitlebar>
 #include <QApplication>
+#include <Qsci/qsciprinter.h>
 #include <Qsci/qsciscintilla.h>
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
@@ -872,15 +873,21 @@ void Window::popupSettingsDialog()
 
 void Window::popupPrintDialog()
 {
-    DTextEdit *textEditor = currentWrapper() ? currentWrapper()->textEditor() : nullptr;
-    if (!textEditor) {
+    EditWrapper *wrapper = currentWrapper();
+    if (!wrapper) {
         return;
     }
 
-    QPrinter printer(QPrinter::HighResolution);
+    DTextEdit *textEditor = wrapper->textEditor();
+    QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget());
+    if (!textEditor && !scintillaEditor) {
+        return;
+    }
+
+    QsciPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
 
-    const QString &filePath = textEditor->filepath;
+    const QString &filePath = wrapper->filePath();
     const QString &fileDir = QFileInfo(filePath).dir().absolutePath();
 
     if (fileDir == m_blankFileDir) {
@@ -892,10 +899,36 @@ void Window::popupPrintDialog()
     printer.setOutputFormat(QPrinter::PdfFormat);
 
     connect(&preview, &QPrintPreviewDialog::paintRequested, this, [=] (QPrinter *printer) {
-        textEditor->print(printer);
+        if (textEditor) {
+            textEditor->print(printer);
+        } else if (QsciPrinter *scintillaPrinter = dynamic_cast<QsciPrinter *>(printer)) {
+            scintillaPrinter->printRange(scintillaEditor);
+        }
     });
 
     preview.exec();
+}
+
+bool Window::printEditorToPdf(EditWrapper *wrapper, const QString &outputPath)
+{
+    if (!wrapper || outputPath.isEmpty()) {
+        return false;
+    }
+
+    QsciPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(outputPath);
+
+    if (DTextEdit *textEditor = wrapper->textEditor()) {
+        textEditor->print(&printer);
+        return QFileInfo(outputPath).exists();
+    }
+
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        return printer.printRange(scintillaEditor) != 0 && QFileInfo(outputPath).exists();
+    }
+
+    return false;
 }
 
 void Window::popupThemePanel()

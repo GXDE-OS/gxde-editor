@@ -73,6 +73,7 @@ public:
     void openFile();
     bool saveFile();
     bool saveAsFile();
+    bool printEditorToPdf(EditWrapper *wrapper, const QString &outputPath);
 
     void decrementFontSize();
     void incrementFontSize();
