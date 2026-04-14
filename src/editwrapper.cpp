@@ -143,7 +143,7 @@ void EditWrapper::openFile(const QString &filepath)
 
 bool EditWrapper::saveFile()
 {
-    if (!m_textEdit) {
+    if (!m_editorBackend) {
         return false;
     }
 
@@ -170,7 +170,7 @@ bool EditWrapper::saveFile()
 
     QTextStream stream(&file);
     stream.setCodec(m_textCodec);
-    stream << m_textEdit->toPlainText().replace(eolRegex, eol);
+    stream << m_editorBackend->text().replace(eolRegex, eol);
 
     // flush stream.
     stream.flush();
@@ -195,7 +195,7 @@ bool EditWrapper::saveFile()
 
     // update status.
     if (ok) {
-        m_textEdit->setModified(false);
+        m_editorBackend->setModified(false);
         m_isLoadFinished = true;
     }
 
@@ -221,14 +221,14 @@ void EditWrapper::updatePath(const QString &file)
 
 void EditWrapper::refresh()
 {
-    if (!m_textEdit || filePath().isEmpty() || Utils::isDraftFile(filePath()) || m_isRefreshing) {
+    if (!m_editorBackend || filePath().isEmpty() || Utils::isDraftFile(filePath()) || m_isRefreshing) {
         return;
     }
 
     QFile file(filePath());
-    int curPos = m_textEdit->textCursor().position();
-    int yoffset = m_textEdit->verticalScrollBar()->value();
-    int xoffset = m_textEdit->horizontalScrollBar()->value();
+    int row = m_editorBackend->currentLine();
+    int column = m_editorBackend->currentColumn();
+    int yoffset = m_editorBackend->scrollOffset();
 
     if (file.open(QIODevice::ReadOnly)) {
         m_isRefreshing = true;
@@ -237,15 +237,9 @@ void EditWrapper::refresh()
         out.setCodec(m_textCodec);
         QString content = out.readAll();
 
-        m_textEdit->setPlainText(QString());
-        m_textEdit->setPlainText(content);
-        m_textEdit->setModified(false);
-
-        QTextCursor textcur = m_textEdit->textCursor();
-        textcur.setPosition(curPos);
-        m_textEdit->setTextCursor(textcur);
-        m_textEdit->verticalScrollBar()->setValue(yoffset);
-        m_textEdit->horizontalScrollBar()->setValue(xoffset);
+        m_editorBackend->setText(content);
+        m_editorBackend->setModified(false);
+        m_editorBackend->scrollToLine(yoffset, row, column);
 
         QFileInfo fi(filePath());
         m_modified = fi.lastModified();
@@ -253,10 +247,14 @@ void EditWrapper::refresh()
         file.close();
         m_toast->hideAnimation();
 
-        m_textEdit->setUpdatesEnabled(false);
+        if (QWidget *widget = editorWidget()) {
+            widget->setUpdatesEnabled(false);
+        }
 
         QTimer::singleShot(10, this, [=] {
-            m_textEdit->setUpdatesEnabled(true);
+            if (QWidget *widget = editorWidget()) {
+                widget->setUpdatesEnabled(true);
+            }
             m_isRefreshing = false;
         });
     } else {
@@ -401,7 +399,7 @@ void EditWrapper::setDarkTheme(bool enabled)
 
 void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString &content)
 {
-    if (!m_textEdit) {
+    if (!m_editorBackend) {
         m_isLoadFinished = true;
         return;
     }
@@ -424,17 +422,19 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
     if (SyntaxUtils::shouldLoadTextIncrementally(content.size())) {
         m_pendingLoadContent = content;
         m_pendingLoadOffset = 0;
-        m_textEdit->clear();
-        m_textEdit->beginBulkLoad();
-        m_pendingLoadTimer->start();
-        return;
+        if (m_textEdit) {
+            m_textEdit->clear();
+            m_editorBackend->beginBulkLoad();
+            m_pendingLoadTimer->start();
+            return;
+        }
     }
 
     m_isLoadFinished = true;
-    m_textEdit->setPlainText(content);
-    m_textEdit->setModified(false);
-    m_textEdit->moveToStart();
-    QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
+    m_editorBackend->setText(content);
+    m_editorBackend->setModified(false);
+    m_editorBackend->moveToStart();
+    QTimer::singleShot(100, this, [=] { m_editorBackend->loadHighlighter(); });
 }
 
 void EditWrapper::appendPendingTextLoadChunk()
@@ -468,15 +468,15 @@ void EditWrapper::finishPendingTextLoad()
     }
 
     m_pendingLoadTimer->stop();
-    m_textEdit->endBulkLoad();
-    m_textEdit->setModified(false);
-    m_textEdit->moveToStart();
+    m_editorBackend->endBulkLoad();
+    m_editorBackend->setModified(false);
+    m_editorBackend->moveToStart();
     m_isLoadFinished = true;
 
     m_pendingLoadContent.clear();
     m_pendingLoadOffset = 0;
 
-    QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
+    QTimer::singleShot(100, this, [=] { m_editorBackend->loadHighlighter(); });
 }
 
 void EditWrapper::resizeEvent(QResizeEvent *e)

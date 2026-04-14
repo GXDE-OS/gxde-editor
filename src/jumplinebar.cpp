@@ -55,6 +55,7 @@ JumpLineBar::JumpLineBar(QWidget *parent)
 void JumpLineBar::focus()
 {
     m_editLine->setFocus();
+    m_editLine->selectAll();
 }
 
 bool JumpLineBar::isFocus()

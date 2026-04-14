@@ -43,6 +43,13 @@
 #include <QGuiApplication>
 #include <QWindow>
 
+namespace {
+AbstractEditor *editorBackend(EditWrapper *wrapper)
+{
+    return wrapper ? wrapper->editorBackend() : nullptr;
+}
+}
+
 #ifdef DTKWIDGET_CLASS_DFileDialog
 #include <DFileDialog>
 #else
@@ -81,8 +88,8 @@ Window::Window(DMainWindow *parent)
     connect(m_settings, &Settings::themeChanged, this, &Window::loadTheme);
     connect(m_settings, &Settings::adjustWordWrap, this, [=] (bool enable) {
         for (EditWrapper *wrapper : m_wrappers.values()) {
-            if (DTextEdit *textedit = wrapper->textEditor()) {
-                textedit->setLineWrapMode(enable);
+            if (AbstractEditor *editor = editorBackend(wrapper)) {
+                editor->setLineWrapMode(enable);
             }
         }
     });
@@ -369,12 +376,12 @@ void Window::closeTab()
     }
 
     // this property holds whether the document has been modified by the user
-    DTextEdit *textEditor = legacyTextEditor(wrapper);
-    bool isModified = textEditor && textEditor->document()->isModified();
+    AbstractEditor *editor = editorBackend(wrapper);
+    bool isModified = editor && editor->isModified();
 
     // document has been modified or unsaved draft document.
     // need to prompt whether to save.
-    if (isModified || (isBlankFile && textEditor && !textEditor->toPlainText().isEmpty())) {
+    if (isModified || (isBlankFile && editor && !editor->text().isEmpty())) {
         DDialog *dialog = createDialog(tr("Save File"), tr("Do you want to save this file?"));
 
         connect(dialog, &DDialog::buttonClicked, this, [=] (int index) {
@@ -431,16 +438,22 @@ EditWrapper* Window::createEditor()
 {
     EditWrapper *wrapper = new EditWrapper();
     bool wordWrap = m_settings->settings->option("base.font.wordwrap")->value().toBool();
+    AbstractEditor *editor = editorBackend(wrapper);
 
     DTextEdit *textEditor = wrapper->textEditor();
     if (textEditor) {
         textEditor->setThemeWithPath(m_themePath);
         textEditor->setSettings(m_settings);
         textEditor->setTabSpaceNumber(m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
-        textEditor->setFontFamily(m_settings->settings->option("base.font.family")->value().toString());
-        textEditor->setModified(false);
-        textEditor->setLineWrapMode(wordWrap);
     }
+
+    if (editor) {
+        editor->setThemeWithPath(m_themePath);
+        editor->setFontFamily(m_settings->settings->option("base.font.family")->value().toString());
+        editor->setModified(false);
+        editor->setLineWrapMode(wordWrap);
+    }
+
     setFontSizeWithConfig(wrapper);
 
     if (textEditor) {
@@ -675,8 +688,8 @@ bool Window::saveAsFile()
         m_wrappers.remove(filePath);
         m_wrappers.insert(newFilePath, wrapper);
 
-        if (DTextEdit *textEditor = legacyTextEditor(wrapper)) {
-            textEditor->loadHighlighter();
+        if (AbstractEditor *editor = editorBackend(wrapper)) {
+            editor->loadHighlighter();
         }
     } else {
         return false;
@@ -705,8 +718,8 @@ void Window::resetFontSize()
 void Window::setFontSizeWithConfig(EditWrapper *wrapper)
 {
     int size = m_settings->settings->option("base.font.size")->value().toInt();
-    if (DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr) {
-        textEditor->setFontSize(size);
+    if (AbstractEditor *editor = editorBackend(wrapper)) {
+        editor->setFontSize(size);
     }
 
     m_fontSize = size;
@@ -728,15 +741,15 @@ void Window::popupFindBar()
 
         QString tabPath = m_tabbar->currentPath();
         EditWrapper *wrapper = currentWrapper();
-        DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-        if (!textEditor) {
+        AbstractEditor *editor = editorBackend(wrapper);
+        if (!editor) {
             removeBottomWidget();
             return;
         }
-        QString text = textEditor->textCursor().selectedText();
-        int row = textEditor->getCurrentLine();
-        int column = textEditor->getCurrentColumn();
-        int scrollOffset = textEditor->getScrollOffset();
+        QString text = editor->selectedText();
+        int row = editor->currentLine();
+        int column = editor->currentColumn();
+        int scrollOffset = editor->scrollOffset();
 
         m_findBar->activeInput(text, tabPath, row, column, scrollOffset);
 
@@ -759,15 +772,15 @@ void Window::popupReplaceBar()
 
         QString tabPath = m_tabbar->currentPath();
         EditWrapper *wrapper = currentWrapper();
-        DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-        if (!textEditor) {
+        AbstractEditor *editor = editorBackend(wrapper);
+        if (!editor) {
             removeBottomWidget();
             return;
         }
-        QString text = textEditor->textCursor().selectedText();
-        int row = textEditor->getCurrentLine();
-        int column = textEditor->getCurrentColumn();
-        int scrollOffset = textEditor->getScrollOffset();
+        QString text = editor->selectedText();
+        int row = editor->currentLine();
+        int column = editor->currentColumn();
+        int scrollOffset = editor->scrollOffset();
 
         m_replaceBar->activeInput(text, tabPath, row, column, scrollOffset);
 
@@ -788,15 +801,15 @@ void Window::popupJumpLineBar()
     } else {
         QString tabPath = m_tabbar->currentPath();
         EditWrapper *wrapper = currentWrapper();
-        DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-        if (!textEditor) {
+        AbstractEditor *editor = editorBackend(wrapper);
+        if (!editor) {
             return;
         }
-        QString text = textEditor->textCursor().selectedText();
-        int row = textEditor->getCurrentLine();
-        int column = textEditor->getCurrentColumn();
-        int count = textEditor->blockCount();
-        int scrollOffset = textEditor->getScrollOffset();
+        QString text = editor->selectedText();
+        int row = editor->currentLine();
+        int column = editor->currentColumn();
+        int count = editor->lineCount();
+        int scrollOffset = editor->scrollOffset();
 
         m_jumpLineBar->activeInput(tabPath, row, column, count, scrollOffset);
     }
@@ -866,15 +879,15 @@ void Window::toggleFullscreen()
 void Window::remberPositionSave()
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
     m_remberPositionFilePath = m_tabbar->currentPath();
-    m_remberPositionRow = textEditor->getCurrentLine();
-    m_remberPositionColumn = textEditor->getCurrentColumn();
-    m_remberPositionScrollOffset = textEditor->getScrollOffset();
+    m_remberPositionRow = editor->currentLine();
+    m_remberPositionColumn = editor->currentColumn();
+    m_remberPositionScrollOffset = editor->scrollOffset();
 }
 
 void Window::remberPositionRestore()
@@ -890,8 +903,8 @@ void Window::remberPositionRestore()
         const int &column = m_remberPositionColumn;
 
         activeTab(m_tabbar->indexOf(m_remberPositionFilePath));
-        if (DTextEdit *textEditor = getTextEditor(filePath)) {
-            textEditor->scrollToLine(scrollOffset, row, column);
+        if (AbstractEditor *editor = editorBackend(m_wrappers.value(filePath))) {
+            editor->scrollToLine(scrollOffset, row, column);
         }
     }
 }
@@ -899,8 +912,8 @@ void Window::remberPositionRestore()
 void Window::updateFont(const QString &fontName)
 {
     for (EditWrapper *wrapper : m_wrappers.values()) {
-        if (DTextEdit *textEditor = wrapper->textEditor()) {
-            textEditor->setFontFamily(fontName);
+        if (AbstractEditor *editor = editorBackend(wrapper)) {
+            editor->setFontFamily(fontName);
         }
     }
 }
@@ -908,8 +921,8 @@ void Window::updateFont(const QString &fontName)
 void Window::updateFontSize(int size)
 {
     for (EditWrapper *wrapper : m_wrappers.values()) {
-        if (DTextEdit *textEditor = wrapper->textEditor()) {
-            textEditor->setFontSize(size);
+        if (AbstractEditor *editor = editorBackend(wrapper)) {
+            editor->setFontSize(size);
         }
     }
 
@@ -1082,9 +1095,9 @@ void Window::handleTabsClosed(const QStringList &tabList)
         if (m_wrappers.contains(path)) {
             EditWrapper *wrapper = m_wrappers.value(path);
             bool isBlankFile = QFileInfo(path).dir().absolutePath() == m_blankFileDir;
-            DTextEdit *textEditor = legacyTextEditor(wrapper);
-            bool isContentEmpty = !textEditor || textEditor->toPlainText().isEmpty();
-            bool isModified = textEditor && textEditor->document()->isModified();
+            AbstractEditor *editor = editorBackend(wrapper);
+            bool isContentEmpty = !editor || editor->text().isEmpty();
+            bool isModified = editor && editor->isModified();
 
             if ( (isBlankFile && !isContentEmpty) ||
                  (!isBlankFile && isModified)) {
@@ -1148,8 +1161,8 @@ void Window::handleCurrentChanged(const int &index)
     }
 
     for (auto wrapper : m_wrappers.values()) {
-        if (DTextEdit *textEditor = legacyTextEditor(wrapper)) {
-            textEditor->removeKeywords();
+        if (AbstractEditor *editor = editorBackend(wrapper)) {
+            editor->removeKeywords();
         }
     }
 
@@ -1174,8 +1187,8 @@ void Window::handleJumpLineBarExit()
 void Window::handleJumpLineBarJumpToLine(const QString &filepath, int line, bool focusEditor)
 {
     if (m_wrappers.contains(filepath)) {
-        if (DTextEdit *textEditor = getTextEditor(filepath)) {
-            textEditor->jumpToLine(line, true);
+        if (AbstractEditor *editor = editorBackend(m_wrappers.value(filepath))) {
+            editor->jumpToLine(line, true);
         }
 
         if (focusEditor) {
@@ -1189,8 +1202,8 @@ void Window::handleJumpLineBarJumpToLine(const QString &filepath, int line, bool
 void Window::handleBackToPosition(const QString &file, int row, int column, int scrollOffset)
 {
     if (m_wrappers.contains(file)) {
-        if (DTextEdit *textEditor = getTextEditor(file)) {
-            textEditor->scrollToLine(scrollOffset, row, column);
+        if (AbstractEditor *editor = editorBackend(m_wrappers.value(file))) {
+            editor->scrollToLine(scrollOffset, row, column);
         }
 
         if (QWidget *editorWidget = getEditorWidget(file)) {
@@ -1202,97 +1215,97 @@ void Window::handleBackToPosition(const QString &file, int row, int column, int 
 void Window::handleFindNext()
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->saveMarkStatus();
-    textEditor->updateCursorKeywordSelection(textEditor->getPosition(), true);
-    textEditor->renderAllSelections();
-    textEditor->restoreMarkStatus();
+    editor->saveMarkStatus();
+    editor->updateCursorKeywordSelection(editor->cursorPosition(), true);
+    editor->renderAllSelections();
+    editor->restoreMarkStatus();
 }
 
 void Window::handleFindPrev()
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->saveMarkStatus();
-    textEditor->updateCursorKeywordSelection(textEditor->getPosition(), false);
-    textEditor->renderAllSelections();
-    textEditor->restoreMarkStatus();
+    editor->saveMarkStatus();
+    editor->updateCursorKeywordSelection(editor->cursorPosition(), false);
+    editor->renderAllSelections();
+    editor->restoreMarkStatus();
 }
 
 
 void Window::handleReplaceAll(const QString &replaceText, const QString &withText)
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->replaceAll(replaceText, withText);
+    editor->replaceAll(replaceText, withText);
 }
 
 void Window::handleReplaceNext(const QString &replaceText, const QString &withText)
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->replaceNext(replaceText, withText);
+    editor->replaceNext(replaceText, withText);
 }
 
 void Window::handleReplaceRest(const QString &replaceText, const QString &withText)
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->replaceRest(replaceText, withText);
+    editor->replaceRest(replaceText, withText);
 }
 
 void Window::handleReplaceSkip()
 {
     EditWrapper *wrapper = currentWrapper();
-    DTextEdit *textEditor = wrapper ? wrapper->textEditor() : nullptr;
-    if (!textEditor) {
+    AbstractEditor *editor = editorBackend(wrapper);
+    if (!editor) {
         return;
     }
 
-    textEditor->updateCursorKeywordSelection(textEditor->getPosition(), true);
-    textEditor->renderAllSelections();
+    editor->updateCursorKeywordSelection(editor->cursorPosition(), true);
+    editor->renderAllSelections();
 }
 
 void Window::handleRemoveSearchKeyword()
 {
-    if (DTextEdit *textEditor = currentWrapper() ? currentWrapper()->textEditor() : nullptr) {
-        textEditor->removeKeywords();
+    if (AbstractEditor *editor = editorBackend(currentWrapper())) {
+        editor->removeKeywords();
     }
 }
 
 void Window::handleUpdateSearchKeyword(QWidget *widget, const QString &file, const QString &keyword)
 {
     if (file == m_tabbar->currentPath() && m_wrappers.contains(file)) {
-        DTextEdit *textEditor = getTextEditor(file);
-        if (!textEditor) {
+        AbstractEditor *editor = editorBackend(m_wrappers.value(file));
+        if (!editor) {
             return;
         }
 
         // Highlight keyword in text editor.
-        textEditor->highlightKeyword(keyword, textEditor->getPosition());
+        editor->highlightKeyword(keyword, editor->cursorPosition());
 
         // Update input widget warning status along with keyword match situation.
-        bool findKeyword = textEditor->findKeywordForward(keyword);
+        bool findKeyword = editor->findKeywordForward(keyword);
         bool emptyKeyword = keyword.trimmed().isEmpty();
 
         auto *findBarWidget = qobject_cast<FindBar*>(widget);
@@ -1359,8 +1372,8 @@ void Window::loadTheme(const QString &path)
     changeTitlebarBackground(tabbarStartColor, tabbarEndColor);
 
     for (EditWrapper *wrapper : m_wrappers.values()) {
-        if (DTextEdit *textEditor = wrapper->textEditor()) {
-            textEditor->setThemeWithPath(path);
+        if (AbstractEditor *editor = editorBackend(wrapper)) {
+            editor->setThemeWithPath(path);
         }
         wrapper->setDarkTheme(isDark);
     }
@@ -1498,7 +1511,7 @@ void Window::closeEvent(QCloseEvent *e)
 
     QList<EditWrapper *> needSaveList;
     for (EditWrapper *wrapper : m_wrappers) {
-        DTextEdit *textEditor = legacyTextEditor(wrapper);
+        AbstractEditor *editor = editorBackend(wrapper);
 
         // save all the draft documents.
         if (QFileInfo(wrapper->filePath()).dir().absolutePath() == m_blankFileDir) {
@@ -1506,7 +1519,7 @@ void Window::closeEvent(QCloseEvent *e)
             continue;
         }
 
-        if (textEditor && textEditor->document()->isModified()) {
+        if (editor && editor->isModified()) {
             needSaveList << wrapper;
         }
     }

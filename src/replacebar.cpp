@@ -101,6 +101,7 @@ void ReplaceBar::focus()
 void ReplaceBar::activeInput(QString text, QString file, int row, int column, int scrollOffset)
 {
     // Try fill keyword with select text.
+    m_replaceLine->setAlert(false);
     m_replaceLine->clear();
     m_replaceLine->insert(text);
     m_replaceLine->selectAll();
@@ -120,6 +121,7 @@ void ReplaceBar::activeInput(QString text, QString file, int row, int column, in
 
 void ReplaceBar::replaceCancel()
 {
+    m_replaceLine->setAlert(false);
     hide();
 }
 

@@ -78,6 +78,7 @@ void FindBar::focus()
 void FindBar::activeInput(QString text, QString file, int row, int column, int scrollOffset)
 {
     // Try fill keyword with select text.
+    m_editLine->setAlert(false);
     m_editLine->clear();
     m_editLine->insert(text);
     m_editLine->selectAll();

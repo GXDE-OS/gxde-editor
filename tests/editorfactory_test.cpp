@@ -23,6 +23,7 @@ class EditorFactoryTest : public QObject
 
 private slots:
     void createsScintillaEditorBackend();
+    void scintillaEditorImplementsCoreEditingPrimitives();
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
@@ -43,6 +44,35 @@ void EditorFactoryTest::createsScintillaEditorBackend()
 
     editor->setReadOnly(true);
     QVERIFY(editor->isReadOnly());
+}
+
+void EditorFactoryTest::scintillaEditorImplementsCoreEditingPrimitives()
+{
+    ScintillaEditor editor;
+
+    editor.setText(QStringLiteral("alpha beta\nalpha beta"));
+    editor.setSelection(0, 0, 0, 5);
+    QCOMPARE(editor.selectedText(), QStringLiteral("alpha"));
+
+    QCOMPARE(editor.currentLine(), 1);
+    QCOMPARE(editor.currentColumn(), 5);
+    QCOMPARE(editor.lineCount(), 2);
+
+    editor.highlightKeyword(QStringLiteral("beta"), editor.cursorPosition());
+    QCOMPARE(editor.selectedText(), QStringLiteral("beta"));
+
+    editor.replaceNext(QStringLiteral("beta"), QStringLiteral("gamma"));
+    QCOMPARE(editor.text(), QStringLiteral("alpha gamma\nalpha beta"));
+
+    editor.replaceAll(QStringLiteral("alpha"), QStringLiteral("omega"));
+    QCOMPARE(editor.text(), QStringLiteral("omega gamma\nomega beta"));
+
+    editor.jumpToLine(2, true);
+    QCOMPARE(editor.currentLine(), 2);
+
+    editor.scrollToLine(0, 1, 2);
+    QCOMPARE(editor.currentLine(), 1);
+    QCOMPARE(editor.currentColumn(), 2);
 }
 
 void EditorFactoryTest::fallsBackToLegacyEditorForUnknownEngine()
@@ -71,13 +101,16 @@ void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEdi
              "EditWrapper should host the non-legacy backend widget directly.");
     QVERIFY(wrapper.textEditor() == nullptr);
 
+    wrapper.editorBackend()->setText(QStringLiteral("int main() {}\n"));
     wrapper.updatePath(path);
 
     QCOMPARE(wrapper.filePath(), path);
-    QVERIFY(!wrapper.saveFile());
+    QVERIFY(wrapper.saveFile());
 
     wrapper.refresh();
     wrapper.checkForReload();
+
+    QFile::remove(path);
 }
 
 void EditorFactoryTest::windowLegacyTextEditorHelperHandlesNonLegacyWrappers()
