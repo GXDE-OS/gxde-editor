@@ -1,14 +1,22 @@
+#define private public
+#define protected public
 #include "../src/editor/abstracteditor.h"
 #include "../src/editor/editorfactory.h"
 #include "../src/editor/legacytexteditor.h"
 #include "../src/editor/scintillaeditor.h"
 #include "../src/editwrapper.h"
+#include "../src/tabbar.h"
 #include "../src/window.h"
 
+#undef protected
+#undef private
+
 #include <QApplication>
+#include <QMimeData>
 #include <QString>
 #include <QObject>
 #include <QTest>
+#include <QStyleOptionTab>
 #include <Qsci/qsciscintillabase.h>
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
@@ -29,8 +37,11 @@ private slots:
     void scintillaEditorSupportsRenderedSelectionsBulkLoadAndLexerLoading();
     void scintillaEditorFindNavigationPreservesAdvancedMatchAndHighlightsAllMatches();
     void fallsBackToLegacyEditorForUnknownEngine();
-    void editWrapperUsesLegacyFactoryBackendByDefault();
+    void editWrapperUsesScintillaFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
+    void tabbarMimeTransferCapturesWrapperFilePathForScintillaEditors();
+    void scintillaWrapperIncrementallyLoadsLargeFiles();
+    void scintillaEditorSkipsLexerForLargeDocuments();
     void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
 };
@@ -151,13 +162,14 @@ void EditorFactoryTest::fallsBackToLegacyEditorForUnknownEngine()
              "EditorFactory should fall back to LegacyTextEditor for unknown engine names.");
 }
 
-void EditorFactoryTest::editWrapperUsesLegacyFactoryBackendByDefault()
+void EditorFactoryTest::editWrapperUsesScintillaFactoryBackendByDefault()
 {
     EditWrapper wrapper;
 
-    QVERIFY2(dynamic_cast<LegacyTextEditor *>(wrapper.editorBackend()) != nullptr,
-             "EditWrapper should expose the default LegacyTextEditor backend created through EditorFactory.");
-    QCOMPARE(wrapper.editorBackend()->widget(), static_cast<QWidget *>(wrapper.textEditor()));
+    QVERIFY2(dynamic_cast<ScintillaEditor *>(wrapper.editorBackend()) != nullptr,
+             "EditWrapper should expose the default ScintillaEditor backend created through EditorFactory.");
+    QVERIFY(wrapper.textEditor() == nullptr);
+    QCOMPARE(wrapper.editorBackend()->widget(), wrapper.editorWidget());
 }
 
 void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor()
@@ -181,9 +193,85 @@ void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEdi
     QFile::remove(path);
 }
 
+void EditorFactoryTest::tabbarMimeTransferCapturesWrapperFilePathForScintillaEditors()
+{
+    Window sourceWindow(nullptr);
+    Window targetWindow(nullptr);
+
+    std::unique_ptr<AbstractEditor> backend(new ScintillaEditor());
+    EditWrapper *wrapper = new EditWrapper(std::move(backend));
+    const QString path = QStringLiteral("/tmp/scintilla-transfer.cpp");
+    const QString tabName = QStringLiteral("scintilla-transfer.cpp");
+
+    wrapper->updatePath(path);
+    sourceWindow.addTabWithWrapper(wrapper, path, tabName, 0);
+
+    Tabbar *sourceTabbar = sourceWindow.findChild<Tabbar *>();
+    Tabbar *targetTabbar = targetWindow.findChild<Tabbar *>();
+    QVERIFY(sourceTabbar != nullptr);
+    QVERIFY(targetTabbar != nullptr);
+
+    QStyleOptionTab option;
+    std::unique_ptr<QMimeData> mimeData(sourceTabbar->createMimeDataFromTab(0, option));
+    QVERIFY(mimeData != nullptr);
+    QCOMPARE(static_cast<EditWrapper *>(mimeData->property("wrapper").value<void *>()), wrapper);
+    QCOMPARE(mimeData->property("filepath").toString(), path);
+
+    QPoint hotspot;
+    QVERIFY(!sourceTabbar->createDragPixmapFromTab(0, option, &hotspot).isNull());
+
+    targetTabbar->insertFromMimeData(0, mimeData.get());
+    QCOMPARE(targetWindow.wrapper(path), wrapper);
+    QCOMPARE(targetWindow.getEditorWidget(path), wrapper->editorWidget());
+
+    sourceWindow.removeWrapper(path, false);
+    targetWindow.removeWrapper(path, true);
+}
+
+void EditorFactoryTest::scintillaWrapperIncrementallyLoadsLargeFiles()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QString content;
+
+    while (content.size() <= (2 * 1024 * 1024)) {
+        content.append(QStringLiteral("0123456789abcdef\n"));
+    }
+
+    wrapper.updatePath(QStringLiteral("/tmp/large-scintilla.cpp"));
+    wrapper.m_isLoadFinished = false;
+    wrapper.handleFileLoadFinished(QByteArrayLiteral("UTF-8"), content);
+
+    QVERIFY2(!wrapper.isLoadFinished(),
+             "Scintilla-backed wrappers should enter the incremental large-file load path.");
+    QVERIFY(wrapper.m_pendingLoadTimer->isActive());
+
+    QTRY_VERIFY(wrapper.isLoadFinished());
+    QCOMPARE(wrapper.editorBackend()->text(), content);
+}
+
+void EditorFactoryTest::scintillaEditorSkipsLexerForLargeDocuments()
+{
+    ScintillaEditor editor;
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(editor.widget());
+    QString content;
+
+    QVERIFY(widget != nullptr);
+
+    while (content.size() <= (1024 * 1024)) {
+        content.append(QStringLiteral("int value = 42;\n"));
+    }
+
+    widget->setProperty("filepath", QStringLiteral("/tmp/large-file.cpp"));
+    editor.setText(content);
+    editor.loadHighlighter();
+
+    QVERIFY2(widget->lexer() == nullptr,
+             "Scintilla should skip attaching a lexer when the document is large enough to require the safe path.");
+}
+
 void EditorFactoryTest::windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends()
 {
-    EditWrapper legacyWrapper;
+    EditWrapper legacyWrapper(std::unique_ptr<AbstractEditor>(new LegacyTextEditor()));
     EditWrapper scintillaWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
     QObject receiver;
     int legacyCount = 0;
@@ -223,7 +311,7 @@ void EditorFactoryTest::windowDisconnectEditorSignalsHandlesLegacyAndScintillaBa
 
 void EditorFactoryTest::windowLegacyTextEditorHelperHandlesNonLegacyWrappers()
 {
-    EditWrapper legacyWrapper;
+    EditWrapper legacyWrapper(std::unique_ptr<AbstractEditor>(new LegacyTextEditor()));
     EditWrapper scintillaWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
 
     QVERIFY(Window::legacyTextEditor(&legacyWrapper) != nullptr);

@@ -1850,6 +1850,12 @@
                             "max": 24
                         },
                         {
+                            "key": "engine",
+                            "hide": true,
+                            "reset": true,
+                            "default": "scintilla"
+                        },
+                        {
                             "key": "file_dialog_dir",
                             "hide": true,
                             "reset": false,

@@ -28,6 +28,18 @@
 #include <QGuiApplication>
 #include <DPlatformWindowHandle>
 
+namespace {
+QString wrapperFilePath(EditWrapper *wrapper, const QMimeData *mimeData = nullptr)
+{
+    const QString path = wrapper ? wrapper->filePath() : QString();
+    if (!path.isEmpty()) {
+        return path;
+    }
+
+    return mimeData ? mimeData->property("filepath").toString() : QString();
+}
+}
+
 Tabbar::Tabbar(QWidget *parent)
     : DTabBar(parent)
 {
@@ -182,14 +194,17 @@ void Tabbar::setDNDColor(const QString &startColor, const QString &endColor)
 
 QPixmap Tabbar::createDragPixmapFromTab(int index, const QStyleOptionTab &option, QPoint *hotspot) const
 {
-    const qreal ratio = qApp->devicePixelRatio();
+    QWidget *editorWidget = static_cast<Window *>(this->window())->getEditorWidget(fileAt(index));
+    if (!editorWidget || editorWidget->size().isEmpty()) {
+        return DTabBar::createDragPixmapFromTab(index, option, hotspot);
+    }
 
-    DTextEdit *textEdit = static_cast<Window *>(this->window())->getTextEditor(fileAt(index));
-    int width = textEdit->width() * ratio;
-    int height = textEdit->height() * ratio;
+    const qreal ratio = qApp->devicePixelRatio();
+    int width = editorWidget->width() * ratio;
+    int height = editorWidget->height() * ratio;
     QImage screenshotImage(width, height, QImage::Format_ARGB32_Premultiplied);
     screenshotImage.setDevicePixelRatio(ratio);
-    textEdit->render(&screenshotImage, QPoint(), QRegion(0, 0, width, height));
+    editorWidget->render(&screenshotImage, QPoint(), QRegion(0, 0, width, height));
 
     // scaled image to smaller.
     int scaledWidth = width * ratio / 5;
@@ -235,6 +250,7 @@ QMimeData* Tabbar::createMimeDataFromTab(int index, const QStyleOptionTab &optio
     QMimeData *mimeData = new QMimeData;
 
     mimeData->setProperty("wrapper", QVariant::fromValue(static_cast<void *>(wrapper)));
+    mimeData->setProperty("filepath", wrapperFilePath(wrapper));
     mimeData->setData("dedit/tabbar", tabName.toUtf8());
     mimeData->removeFormat("text/plain");
 
@@ -253,7 +269,12 @@ void Tabbar::insertFromMimeDataOnDragEnter(int index, const QMimeData *source)
         return;
     }
 
-    window->addTabWithWrapper(wrapper, wrapper->textEditor()->filepath, tabName, index);
+    const QString filePath = wrapperFilePath(wrapper, source);
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    window->addTabWithWrapper(wrapper, filePath, tabName, index);
     window->focusActiveEditor();
 }
 
@@ -269,7 +290,12 @@ void Tabbar::insertFromMimeData(int index, const QMimeData *source)
         return;
     }
 
-    window->addTabWithWrapper(wrapper, wrapper->textEditor()->filepath, tabName, index);
+    const QString filePath = wrapperFilePath(wrapper, source);
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    window->addTabWithWrapper(wrapper, filePath, tabName, index);
     window->focusActiveEditor();
 }
 

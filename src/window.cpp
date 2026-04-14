@@ -21,6 +21,7 @@
  */
 
 #include "window.h"
+#include "editor/editorfactory.h"
 #include "toolbar.h"
 #include "danchors.h"
 #include "dthememanager.h"
@@ -481,7 +482,7 @@ void Window::restoreTab()
 
 EditWrapper* Window::createEditor()
 {
-    EditWrapper *wrapper = new EditWrapper();
+    EditWrapper *wrapper = new EditWrapper(EditorFactory::create(m_settings->editorEngine()));
     bool wordWrap = m_settings->settings->option("base.font.wordwrap")->value().toBool();
     AbstractEditor *editor = editorBackend(wrapper);
 

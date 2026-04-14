@@ -6,7 +6,7 @@
 
 std::unique_ptr<AbstractEditor> EditorFactory::create(const QString &engine)
 {
-    if (engine == QStringLiteral("scintilla")) {
+    if (engine.isEmpty() || engine == QStringLiteral("scintilla")) {
         return std::unique_ptr<AbstractEditor>(new ScintillaEditor());
     }
 

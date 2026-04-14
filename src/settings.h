@@ -40,6 +40,10 @@ public:
     Settings(QWidget *parent = 0);
     ~Settings();
 
+    static QString defaultEditorEngine();
+    static QString normalizedEditorEngine(const QString &engine);
+    QString editorEngine() const;
+
     void dtkThemeWorkaround(QWidget *parent, const QString &theme);
     static QWidget *createFontComBoBoxHandle(QObject *obj);
 

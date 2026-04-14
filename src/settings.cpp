@@ -49,6 +49,10 @@ Settings::Settings(QWidget *parent)
     settings = DSettings::fromJsonFile(":/resources/settings.json");
     settings->setBackend(m_backend);
 
+    if (auto editorEngine = settings->option("advance.editor.engine")) {
+        editorEngine->setValue(normalizedEditorEngine(editorEngine->value().toString()));
+    }
+
     auto wordWrap = settings->option("base.font.wordwrap");
     connect(wordWrap, &Dtk::Core::DSettingsOption::valueChanged, this, [=] (QVariant value) {
         emit adjustWordWrap(value.toBool());
@@ -122,6 +126,29 @@ Settings::Settings(QWidget *parent)
 
 Settings::~Settings()
 {
+}
+
+QString Settings::defaultEditorEngine()
+{
+    return QStringLiteral("scintilla");
+}
+
+QString Settings::normalizedEditorEngine(const QString &engine)
+{
+    return engine == QStringLiteral("legacy") ? engine : defaultEditorEngine();
+}
+
+QString Settings::editorEngine() const
+{
+    if (!settings) {
+        return defaultEditorEngine();
+    }
+
+    if (auto option = settings->option("advance.editor.engine")) {
+        return normalizedEditorEngine(option->value().toString());
+    }
+
+    return defaultEditorEngine();
 }
 
 // This function is workaround, it will remove after DTK fixed SettingDialog theme bug.

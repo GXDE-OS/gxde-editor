@@ -130,6 +130,7 @@ if (BUILD_TESTING)
 
     add_executable(editorfactory-test
         tests/editorfactory_test.cpp
+        src/gxde-editor.qrc
         ${EDITOR_FACTORY_TEST_SRCS}
     )
     target_link_libraries(editorfactory-test

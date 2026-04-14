@@ -346,13 +346,19 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
 void ScintillaEditor::loadHighlighter()
 {
     const QString filePath = m_editor->property("filepath").toString();
+
+    delete m_lexer;
+    m_lexer = nullptr;
+
+    if (SyntaxUtils::shouldSkipSyntaxHighlightForLargeDocuments(text().size())) {
+        m_editor->setLexer(nullptr);
+        return;
+    }
+
     const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(
                 KSyntaxHighlighting::Repository(),
                 filePath,
                 text().left(4096));
-
-    delete m_lexer;
-    m_lexer = nullptr;
 
     switch (EditorLanguage::fromSyntaxDefinitionName(definitionName)) {
     case EditorLanguage::Cpp:

@@ -11,6 +11,7 @@ public:
     static QString detectSyntaxDefinitionName(const KSyntaxHighlighting::Repository &repository,
                                               const QString &filePath,
                                               const QString &content = QString());
+    static bool shouldSkipSyntaxHighlightForLargeDocuments(int characterCount);
     static bool shouldDeferSyntaxHighlight(int characterCount);
     static bool shouldLoadTextIncrementally(int characterCount);
     static int incrementalTextLoadChunkSize();

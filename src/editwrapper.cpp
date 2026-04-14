@@ -21,6 +21,7 @@
 #include "fileloadthread.h"
 #include "editwrapper.h"
 #include "editor/editorfactory.h"
+#include "settings.h"
 #include "syntaxutils.h"
 #include "utils.h"
 #ifdef USE_WEBENGINE
@@ -36,13 +37,14 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDir>
+#include <Qsci/qsciscintilla.h>
 
 #include "drecentmanager.h"
 
 DCORE_USE_NAMESPACE
 
 EditWrapper::EditWrapper(QWidget *parent)
-    : EditWrapper(EditorFactory::create(QStringLiteral("legacy")), parent)
+    : EditWrapper(EditorFactory::create(Settings::defaultEditorEngine()), parent)
 {
 }
 
@@ -425,8 +427,8 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
     if (SyntaxUtils::shouldLoadTextIncrementally(content.size())) {
         m_pendingLoadContent = content;
         m_pendingLoadOffset = 0;
-        if (m_textEdit) {
-            m_textEdit->clear();
+        if (m_editorBackend) {
+            m_editorBackend->setText(QString());
             m_editorBackend->beginBulkLoad();
             m_pendingLoadTimer->start();
             return;
@@ -442,16 +444,22 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
 
 void EditWrapper::appendPendingTextLoadChunk()
 {
-    if (!m_textEdit) {
+    if (!m_editorBackend) {
         return;
     }
 
     const int chunkSize = SyntaxUtils::incrementalTextLoadChunkSize();
     const QString chunk = m_pendingLoadContent.mid(m_pendingLoadOffset, chunkSize);
 
-    QTextCursor cursor(m_textEdit->document());
-    cursor.movePosition(QTextCursor::End);
-    cursor.insertText(chunk);
+    if (m_textEdit) {
+        QTextCursor cursor(m_textEdit->document());
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(chunk);
+    } else if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(editorWidget())) {
+        scintillaEditor->append(chunk);
+    } else {
+        m_editorBackend->setText(m_editorBackend->text() + chunk);
+    }
 
     m_pendingLoadOffset += chunk.size();
 
@@ -462,7 +470,7 @@ void EditWrapper::appendPendingTextLoadChunk()
 
 void EditWrapper::finishPendingTextLoad()
 {
-    if (!m_textEdit) {
+    if (!m_editorBackend) {
         m_pendingLoadTimer->stop();
         m_pendingLoadContent.clear();
         m_pendingLoadOffset = 0;

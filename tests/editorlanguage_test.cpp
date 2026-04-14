@@ -59,6 +59,8 @@ private slots:
 
 void EditorLanguageTest::mapsKnownSyntaxDefinitionNames()
 {
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("C++")), EditorLanguage::Cpp);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("Markdown")), EditorLanguage::Markdown);
     QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("Python")), EditorLanguage::Python);
 }
 

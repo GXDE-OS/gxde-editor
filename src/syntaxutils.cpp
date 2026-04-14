@@ -36,6 +36,11 @@ QString SyntaxUtils::detectSyntaxDefinitionName(const KSyntaxHighlighting::Repos
     return QString();
 }
 
+bool SyntaxUtils::shouldSkipSyntaxHighlightForLargeDocuments(int characterCount)
+{
+    return shouldDeferSyntaxHighlight(characterCount);
+}
+
 bool SyntaxUtils::shouldDeferSyntaxHighlight(int characterCount)
 {
     return characterCount >= kDeferredSyntaxHighlightThreshold;
