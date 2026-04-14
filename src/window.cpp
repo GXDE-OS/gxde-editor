@@ -74,6 +74,21 @@ void updateTabModifiedState(Tabbar *tabbar, const QString &path, bool isModified
 }
 }
 
+void Window::disconnectEditorSignals(EditWrapper *wrapper, QObject *receiver)
+{
+    if (!wrapper || !receiver) {
+        return;
+    }
+
+    if (DTextEdit *textEditor = wrapper->textEditor()) {
+        QObject::disconnect(textEditor, nullptr, receiver, nullptr);
+    }
+
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        QObject::disconnect(scintillaEditor, nullptr, receiver, nullptr);
+    }
+}
+
 #ifdef DTKWIDGET_CLASS_DFileDialog
 #include <DFileDialog>
 #else
@@ -554,10 +569,7 @@ void Window::removeWrapper(const QString &filePath, bool isDelete)
             wrapper->deleteLater();
         }
 
-        // remove all signals on this connection.
-        if (DTextEdit *textEditor = wrapper->textEditor()) {
-            disconnect(textEditor, 0, this, 0);
-        }
+        disconnectEditorSignals(wrapper, this);
     }
 
     // Exit window after close all tabs.

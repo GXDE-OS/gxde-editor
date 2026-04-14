@@ -31,6 +31,7 @@ private slots:
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
+    void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
 };
 
@@ -178,6 +179,46 @@ void EditorFactoryTest::editWrapperToleratesNonLegacyBackendWithoutLegacyTextEdi
     wrapper.checkForReload();
 
     QFile::remove(path);
+}
+
+void EditorFactoryTest::windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends()
+{
+    EditWrapper legacyWrapper;
+    EditWrapper scintillaWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QObject receiver;
+    int legacyCount = 0;
+    int scintillaCount = 0;
+
+    QVERIFY(QObject::connect(legacyWrapper.textEditor(), &DTextEdit::modificationChanged, &receiver,
+                             [&legacyCount] (const QString &, bool) { ++legacyCount; }));
+
+    QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(scintillaWrapper.editorWidget());
+    QVERIFY(scintillaEditor != nullptr);
+    QVERIFY(QObject::connect(scintillaEditor, &QsciScintilla::modificationChanged, &receiver,
+                             [&scintillaCount] (bool) { ++scintillaCount; }));
+
+    QVERIFY(QMetaObject::invokeMethod(legacyWrapper.textEditor(), "modificationChanged",
+                                      Qt::DirectConnection,
+                                      Q_ARG(QString, QStringLiteral("/tmp/file.txt")),
+                                      Q_ARG(bool, true)));
+    QVERIFY(QMetaObject::invokeMethod(scintillaEditor, "modificationChanged",
+                                      Qt::DirectConnection,
+                                      Q_ARG(bool, true)));
+    QCOMPARE(legacyCount, 1);
+    QCOMPARE(scintillaCount, 1);
+
+    Window::disconnectEditorSignals(&legacyWrapper, &receiver);
+    Window::disconnectEditorSignals(&scintillaWrapper, &receiver);
+
+    QVERIFY(QMetaObject::invokeMethod(legacyWrapper.textEditor(), "modificationChanged",
+                                      Qt::DirectConnection,
+                                      Q_ARG(QString, QStringLiteral("/tmp/file.txt")),
+                                      Q_ARG(bool, false)));
+    QVERIFY(QMetaObject::invokeMethod(scintillaEditor, "modificationChanged",
+                                      Qt::DirectConnection,
+                                      Q_ARG(bool, false)));
+    QCOMPARE(legacyCount, 1);
+    QCOMPARE(scintillaCount, 1);
 }
 
 void EditorFactoryTest::windowLegacyTextEditorHelperHandlesNonLegacyWrappers()

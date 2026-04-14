@@ -49,6 +49,7 @@ public:
     ~Window();
 
     static DTextEdit *legacyTextEditor(EditWrapper *wrapper);
+    static void disconnectEditorSignals(EditWrapper *wrapper, QObject *receiver);
 
     void initTitlebar();
 
