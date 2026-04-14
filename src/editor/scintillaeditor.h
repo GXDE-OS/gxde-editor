@@ -51,6 +51,8 @@ public:
     void endBulkLoad() override;
 
 private:
+    void clearSearchIndicators();
+    void updateSearchIndicators();
     void clearSelection();
     void positionToLineIndex(int position, int *line, int *index) const;
     void setSelectionByPosition(int start, int end);
@@ -67,6 +69,7 @@ private:
     int m_savedSelectionToIndex = 0;
     QFont m_font;
     QsciLexer *m_lexer = nullptr;
+    int m_searchIndicator = -1;
 };
 
 #endif

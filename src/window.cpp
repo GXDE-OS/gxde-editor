@@ -33,6 +33,7 @@
 #include <DSettingsOption>
 #include <DTitlebar>
 #include <QApplication>
+#include <Qsci/qsciscintilla.h>
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -47,6 +48,29 @@ namespace {
 AbstractEditor *editorBackend(EditWrapper *wrapper)
 {
     return wrapper ? wrapper->editorBackend() : nullptr;
+}
+
+void updateTabModifiedState(Tabbar *tabbar, const QString &path, bool isModified)
+{
+    if (!tabbar) {
+        return;
+    }
+
+    const int tabIndex = tabbar->indexOf(path);
+    if (tabIndex < 0) {
+        return;
+    }
+
+    QString tabName = tabbar->textAt(tabIndex);
+    if (tabName.startsWith('*')) {
+        tabName.remove(0, 1);
+    }
+
+    if (isModified) {
+        tabName.prepend('*');
+    }
+
+    tabbar->setTabText(tabIndex, tabName);
 }
 }
 
@@ -357,6 +381,12 @@ void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, co
     wrapper->disconnect();
     connect(wrapper, &EditWrapper::requestSaveAs, this, &Window::saveAsFile);
 
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        connect(scintillaEditor, &QsciScintilla::modificationChanged, this, [=] (bool isModified) {
+            updateTabModifiedState(m_tabbar, wrapper->filePath(), isModified);
+        });
+    }
+
     // add wrapper to this window.
     m_tabbar->addTabWithIndex(index, filepath, tabName);
     m_wrappers[filepath] = wrapper;
@@ -468,18 +498,13 @@ EditWrapper* Window::createEditor()
 
     if (textEditor) {
         connect(textEditor, &DTextEdit::modificationChanged, this, [=] (const QString &path, bool isModified) {
-            int tabIndex = m_tabbar->indexOf(path);
-            QString tabName = m_tabbar->textAt(tabIndex);
-            QRegularExpression reg("[^*](.+)");
-            QRegularExpressionMatch match = reg.match(tabName);
+            updateTabModifiedState(m_tabbar, path, isModified);
+        });
+    }
 
-            tabName = match.captured(0);
-
-            if (isModified) {
-                tabName.prepend('*');
-            }
-
-            m_tabbar->setTabText(tabIndex, tabName);
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        connect(scintillaEditor, &QsciScintilla::modificationChanged, this, [=] (bool isModified) {
+            updateTabModifiedState(m_tabbar, wrapper->filePath(), isModified);
         });
     }
 

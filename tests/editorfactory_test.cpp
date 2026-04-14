@@ -9,6 +9,7 @@
 #include <QString>
 #include <QObject>
 #include <QTest>
+#include <Qsci/qsciscintillabase.h>
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
 
@@ -26,6 +27,7 @@ private slots:
     void createsScintillaEditorBackend();
     void scintillaEditorImplementsCoreEditingPrimitives();
     void scintillaEditorSupportsRenderedSelectionsBulkLoadAndLexerLoading();
+    void scintillaEditorFindNavigationPreservesAdvancedMatchAndHighlightsAllMatches();
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
@@ -110,6 +112,34 @@ void EditorFactoryTest::scintillaEditorSupportsRenderedSelectionsBulkLoadAndLexe
     editor.loadHighlighter();
     QVERIFY2(qobject_cast<QsciLexerCPP *>(widget->lexer()) != nullptr,
              "loadHighlighter should attach a QScintilla lexer that matches the current file type.");
+}
+
+void EditorFactoryTest::scintillaEditorFindNavigationPreservesAdvancedMatchAndHighlightsAllMatches()
+{
+    ScintillaEditor editor;
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(editor.widget());
+
+    QVERIFY(widget != nullptr);
+
+    editor.setText(QStringLiteral("beta alpha beta alpha beta"));
+    editor.highlightKeyword(QStringLiteral("beta"), 0);
+
+    const int firstSelectionColumn = editor.currentColumn();
+
+    editor.saveMarkStatus();
+    editor.updateCursorKeywordSelection(editor.cursorPosition(), true);
+    editor.renderAllSelections();
+    editor.restoreMarkStatus();
+
+    QVERIFY2(editor.currentColumn() > firstSelectionColumn,
+             "Find Next should keep the advanced search match instead of restoring the old one.");
+
+    const long firstIndicators = widget->SendScintilla(QsciScintillaBase::SCI_INDICATORALLONFOR, 0);
+    const long secondIndicators = widget->SendScintilla(QsciScintillaBase::SCI_INDICATORALLONFOR, 11);
+    const long thirdIndicators = widget->SendScintilla(QsciScintillaBase::SCI_INDICATORALLONFOR, 22);
+
+    QVERIFY2(firstIndicators != 0 && secondIndicators != 0 && thirdIndicators != 0,
+             "highlightKeyword should mark every search match, not only the active one.");
 }
 
 void EditorFactoryTest::fallsBackToLegacyEditorForUnknownEngine()

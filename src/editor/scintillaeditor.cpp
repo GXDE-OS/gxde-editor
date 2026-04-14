@@ -39,6 +39,8 @@ ScintillaEditor::ScintillaEditor()
     m_editor->setFont(m_font);
     m_editor->setMarginsFont(m_font);
     m_editor->setMarginWidth(0, QStringLiteral("0000"));
+    m_searchIndicator = m_editor->indicatorDefine(QsciScintilla::StraightBoxIndicator);
+    m_editor->setIndicatorDrawUnder(true, m_searchIndicator);
 }
 
 ScintillaEditor::~ScintillaEditor()
@@ -235,6 +237,7 @@ bool ScintillaEditor::findKeywordForward(const QString &keyword)
 void ScintillaEditor::removeKeywords()
 {
     m_searchKeyword.clear();
+    clearSearchIndicators();
     clearSelection();
 }
 
@@ -243,10 +246,12 @@ void ScintillaEditor::highlightKeyword(const QString &keyword, int position)
     m_searchKeyword = keyword;
 
     if (m_searchKeyword.trimmed().isEmpty()) {
+        clearSearchIndicators();
         clearSelection();
         return;
     }
 
+    updateSearchIndicators();
     updateCursorKeywordSelection(position, true);
 }
 
@@ -304,34 +309,11 @@ void ScintillaEditor::renderAllSelections()
 
 void ScintillaEditor::saveMarkStatus()
 {
-    int fromLine = 0;
-    int fromIndex = 0;
-    int toLine = 0;
-    int toIndex = 0;
-    m_hasSavedSelection = m_editor->hasSelectedText();
-
-    if (m_hasSavedSelection) {
-        m_editor->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
-    }
-
-    if (m_hasSavedSelection) {
-        m_savedSelectionFromLine = fromLine;
-        m_savedSelectionFromIndex = fromIndex;
-        m_savedSelectionToLine = toLine;
-        m_savedSelectionToIndex = toIndex;
-    }
+    m_hasSavedSelection = false;
 }
 
 void ScintillaEditor::restoreMarkStatus()
 {
-    if (!m_hasSavedSelection) {
-        return;
-    }
-
-    m_editor->setSelection(m_savedSelectionFromLine,
-                           m_savedSelectionFromIndex,
-                           m_savedSelectionToLine,
-                           m_savedSelectionToIndex);
 }
 
 void ScintillaEditor::setThemeWithPath(const QString &path)
@@ -347,6 +329,7 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
     const QColor selectionForeground(normalText.value(QStringLiteral("selected-text-color")).toString());
     const QColor selectionBackground(normalText.value(QStringLiteral("selected-bg-color")).toString());
     const QColor textColor(normalText.value(QStringLiteral("text-color")).toString());
+    const QColor findMatchColor(editorColors.value(QStringLiteral("find-match-background")).toString());
 
     m_editor->setPaper(backgroundColor);
     m_editor->setColor(textColor);
@@ -355,6 +338,7 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
     m_editor->setMarginsForegroundColor(lineNumberColor);
     m_editor->setSelectionForegroundColor(selectionForeground);
     m_editor->setSelectionBackgroundColor(selectionBackground);
+    m_editor->setIndicatorForegroundColor(findMatchColor, m_searchIndicator);
     m_editor->setMatchedBraceForegroundColor(QColor(editorColors.value(QStringLiteral("bracket-match-fg")).toString()));
     m_editor->setMatchedBraceBackgroundColor(QColor(editorColors.value(QStringLiteral("bracket-match-bg")).toString()));
 }
@@ -405,6 +389,42 @@ void ScintillaEditor::clearSelection()
     int index = 0;
     m_editor->getCursorPosition(&line, &index);
     m_editor->setCursorPosition(line, index);
+}
+
+void ScintillaEditor::clearSearchIndicators()
+{
+    const int lines = lineCount();
+    if (m_searchIndicator < 0 || lines <= 0) {
+        return;
+    }
+
+    const int lastLine = lines - 1;
+    const int lastIndex = m_editor->lineLength(lastLine);
+    m_editor->clearIndicatorRange(0, 0, lastLine, lastIndex, m_searchIndicator);
+}
+
+void ScintillaEditor::updateSearchIndicators()
+{
+    clearSearchIndicators();
+
+    if (m_searchIndicator < 0 || m_searchKeyword.isEmpty()) {
+        return;
+    }
+
+    const QString content = text();
+    int matchPosition = content.indexOf(m_searchKeyword);
+    while (matchPosition >= 0) {
+        int fromLine = 0;
+        int fromIndex = 0;
+        int toLine = 0;
+        int toIndex = 0;
+
+        positionToLineIndex(matchPosition, &fromLine, &fromIndex);
+        positionToLineIndex(matchPosition + m_searchKeyword.size(), &toLine, &toIndex);
+        m_editor->fillIndicatorRange(fromLine, fromIndex, toLine, toIndex, m_searchIndicator);
+
+        matchPosition = content.indexOf(m_searchKeyword, matchPosition + m_searchKeyword.size());
+    }
 }
 
 void ScintillaEditor::positionToLineIndex(int position, int *line, int *index) const
