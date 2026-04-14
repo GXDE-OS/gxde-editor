@@ -68,6 +68,7 @@ private slots:
     void scintillaBottomBarUsesCheapCharacterCount();
     void windowAppliesConfiguredTabWidthToScintillaEditors();
     void windowHonorsConfiguredScintillaEditorShortcut();
+    void openScintillaWrappersRefreshConfiguredShortcuts();
     void openingFileReusesEmptyScintillaBlankTab();
 #ifdef USE_WEBENGINE
     void markdownPreviewReconnectsForScintillaMarkdownTabs();
@@ -421,6 +422,28 @@ void EditorFactoryTest::windowHonorsConfiguredScintillaEditorShortcut()
     QVERIFY(shortcut != nullptr);
     QCOMPARE(shortcut->key(), QKeySequence(QStringLiteral("Ctrl+U")));
     window.removeWrapper(QStringLiteral("/tmp/shortcut.txt"), true);
+}
+
+void EditorFactoryTest::openScintillaWrappersRefreshConfiguredShortcuts()
+{
+    Window window(nullptr);
+    EditWrapper *wrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QShortcut *shortcut = nullptr;
+
+    window.addTabWithWrapper(wrapper, QStringLiteral("/tmp/refresh-shortcut.txt"), QStringLiteral("refresh-shortcut.txt"), 0);
+
+    window.m_settings->settings->option("shortcuts.editor.selectall")->setValue(QStringLiteral("Ctrl+Shift+U"));
+
+    for (QShortcut *candidate : wrapper->findChildren<QShortcut *>()) {
+        if (candidate->key() == QKeySequence(QStringLiteral("Ctrl+Shift+U"))) {
+            shortcut = candidate;
+            break;
+        }
+    }
+
+    QVERIFY(shortcut != nullptr);
+    QCOMPARE(shortcut->key(), QKeySequence(QStringLiteral("Ctrl+Shift+U")));
+    window.removeWrapper(QStringLiteral("/tmp/refresh-shortcut.txt"), true);
 }
 
 void EditorFactoryTest::openingFileReusesEmptyScintillaBlankTab()

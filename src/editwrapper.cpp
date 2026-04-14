@@ -456,7 +456,7 @@ void EditWrapper::updateBottomBarHighlight()
     const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(KSyntaxHighlighting::Repository(),
                                                                            filePath(),
                                                                            m_editorBackend->text().left(4096));
-    m_bottomBar->setHightlightName(definitionName.isEmpty() ? tr("None") : definitionName);
+    handleHightlightChanged(definitionName.isEmpty() ? tr("None") : definitionName);
 }
 
 void EditWrapper::handleHightlightChanged(const QString &name)

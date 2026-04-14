@@ -45,6 +45,7 @@
 #include <QShortcut>
 #include <QStyleFactory>
 #include <QEvent>
+#include <functional>
 
 #include <QGuiApplication>
 #include <QWindow>
@@ -118,6 +119,13 @@ void installScintillaShortcuts(EditWrapper *wrapper, Settings *settings)
                                  QStringLiteral("scintillaShortcut_%1").arg(settingKey));
     };
 
+    auto bindHandler = [=] (const QString &settingKey, const std::function<void()> &handler) {
+        installScintillaShortcut(wrapper,
+                                 settings->settings->option(settingKey)->value().toString(),
+                                 handler,
+                                 QStringLiteral("scintillaShortcut_%1").arg(settingKey));
+    };
+
     bindCommand(QStringLiteral("shortcuts.editor.undo"), QsciCommand::Undo);
     bindCommand(QStringLiteral("shortcuts.editor.redo"), QsciCommand::Redo);
     bindCommand(QStringLiteral("shortcuts.editor.copy"), QsciCommand::SelectionCopy);
@@ -132,6 +140,47 @@ void installScintillaShortcuts(EditWrapper *wrapper, Settings *settings)
     bindCommand(QStringLiteral("shortcuts.editor.cutlines"), QsciCommand::LineCut);
     bindCommand(QStringLiteral("shortcuts.editor.swaplineup"), QsciCommand::MoveSelectedLinesUp);
     bindCommand(QStringLiteral("shortcuts.editor.swaplinedown"), QsciCommand::MoveSelectedLinesDown);
+    bindCommand(QStringLiteral("shortcuts.editor.forwardchar"), QsciCommand::CharRight);
+    bindCommand(QStringLiteral("shortcuts.editor.backwardchar"), QsciCommand::CharLeft);
+    bindCommand(QStringLiteral("shortcuts.editor.forwardword"), QsciCommand::WordRight);
+    bindCommand(QStringLiteral("shortcuts.editor.backwardword"), QsciCommand::WordLeft);
+    bindCommand(QStringLiteral("shortcuts.editor.nextline"), QsciCommand::LineDown);
+    bindCommand(QStringLiteral("shortcuts.editor.prevline"), QsciCommand::LineUp);
+    bindCommand(QStringLiteral("shortcuts.editor.newline"), QsciCommand::Newline);
+    bindCommand(QStringLiteral("shortcuts.editor.scrolllineup"), QsciCommand::LineScrollUp);
+    bindCommand(QStringLiteral("shortcuts.editor.scrolllinedown"), QsciCommand::LineScrollDown);
+    bindCommand(QStringLiteral("shortcuts.editor.scrollup"), QsciCommand::PageUp);
+    bindCommand(QStringLiteral("shortcuts.editor.scrolldown"), QsciCommand::PageDown);
+    bindCommand(QStringLiteral("shortcuts.editor.movetoendofline"), QsciCommand::LineEnd);
+    bindCommand(QStringLiteral("shortcuts.editor.movetostartofline"), QsciCommand::VCHome);
+    bindCommand(QStringLiteral("shortcuts.editor.movetostart"), QsciCommand::DocumentStart);
+    bindCommand(QStringLiteral("shortcuts.editor.movetoend"), QsciCommand::DocumentEnd);
+    bindCommand(QStringLiteral("shortcuts.editor.movetolineindentation"), QsciCommand::VCHome);
+    bindCommand(QStringLiteral("shortcuts.editor.upcaseword"), QsciCommand::SelectionUpperCase);
+    bindCommand(QStringLiteral("shortcuts.editor.downcaseword"), QsciCommand::SelectionLowerCase);
+    bindCommand(QStringLiteral("shortcuts.editor.killbackwardword"), QsciCommand::DeleteWordLeft);
+    bindCommand(QStringLiteral("shortcuts.editor.killforwardword"), QsciCommand::DeleteWordRight);
+    bindCommand(QStringLiteral("shortcuts.editor.transposechar"), QsciCommand::LineTranspose);
+    bindCommand(QStringLiteral("shortcuts.editor.killline"), QsciCommand::DeleteLineRight);
+    bindCommand(QStringLiteral("shortcuts.editor.forwardpair"), QsciCommand::ParaDown);
+    bindCommand(QStringLiteral("shortcuts.editor.backwardpair"), QsciCommand::ParaUp);
+    bindHandler(QStringLiteral("shortcuts.editor.opennewlineabove"), [=] {
+        int line = 0;
+        int index = 0;
+        scintillaEditor->getCursorPosition(&line, &index);
+        scintillaEditor->insertAt(QStringLiteral("\n"), qMax(0, line - 1), 0);
+        scintillaEditor->setCursorPosition(qMax(0, line - 1), 0);
+    });
+    bindHandler(QStringLiteral("shortcuts.editor.opennewlinebelow"), [=] {
+        int line = 0;
+        int index = 0;
+        scintillaEditor->getCursorPosition(&line, &index);
+        scintillaEditor->insertAt(QStringLiteral("\n"), line, 0);
+        scintillaEditor->setCursorPosition(line + 1, 0);
+    });
+    bindHandler(QStringLiteral("shortcuts.editor.togglereadonlymode"), [=] {
+        scintillaEditor->setReadOnly(!scintillaEditor->isReadOnly());
+    });
 }
 
 void updateTabModifiedState(Tabbar *tabbar, const QString &path, bool isModified)
@@ -215,6 +264,15 @@ Window::Window(DMainWindow *parent)
             if (AbstractEditor *editor = editorBackend(wrapper)) {
                 editor->setLineWrapMode(enable);
             }
+        }
+    });
+    connect(m_settings->settings, &DSettings::valueChanged, this, [=] (const QString &key, const QVariant &) {
+        if (!key.startsWith(QStringLiteral("shortcuts.editor."))) {
+            return;
+        }
+
+        for (EditWrapper *wrapper : m_wrappers.values()) {
+            installScintillaShortcuts(wrapper, m_settings);
         }
     });
 
