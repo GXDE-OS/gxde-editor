@@ -216,6 +216,9 @@ void EditWrapper::updatePath(const QString &file)
     if (m_textEdit) {
         m_textEdit->filepath = file;
     }
+    if (QWidget *widget = editorWidget()) {
+        widget->setProperty("filepath", file);
+    }
     detectEndOfLine();
 }
 

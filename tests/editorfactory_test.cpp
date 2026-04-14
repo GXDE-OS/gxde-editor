@@ -9,6 +9,7 @@
 #include <QString>
 #include <QObject>
 #include <QTest>
+#include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
 
 #include <memory>
@@ -24,6 +25,7 @@ class EditorFactoryTest : public QObject
 private slots:
     void createsScintillaEditorBackend();
     void scintillaEditorImplementsCoreEditingPrimitives();
+    void scintillaEditorSupportsRenderedSelectionsBulkLoadAndLexerLoading();
     void fallsBackToLegacyEditorForUnknownEngine();
     void editWrapperUsesLegacyFactoryBackendByDefault();
     void editWrapperToleratesNonLegacyBackendWithoutLegacyTextEditor();
@@ -73,6 +75,41 @@ void EditorFactoryTest::scintillaEditorImplementsCoreEditingPrimitives()
     editor.scrollToLine(0, 1, 2);
     QCOMPARE(editor.currentLine(), 1);
     QCOMPARE(editor.currentColumn(), 2);
+}
+
+void EditorFactoryTest::scintillaEditorSupportsRenderedSelectionsBulkLoadAndLexerLoading()
+{
+    ScintillaEditor editor;
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(editor.widget());
+
+    QVERIFY(widget != nullptr);
+
+    QStringList lines;
+    for (int i = 0; i < 80; ++i) {
+        lines << QStringLiteral("line %1").arg(i);
+    }
+
+    lines[2] = QStringLiteral("needle line");
+    editor.setText(lines.join(QStringLiteral("\n")));
+    widget->setFirstVisibleLine(50);
+
+    editor.highlightKeyword(QStringLiteral("needle"), 0);
+    editor.renderAllSelections();
+    QVERIFY2(widget->firstVisibleLine() < 50,
+             "renderAllSelections should bring the active search result back into view.");
+
+    QVERIFY(widget->updatesEnabled());
+    editor.beginBulkLoad();
+    QVERIFY2(!widget->updatesEnabled(),
+             "beginBulkLoad should suspend widget updates during large text loads.");
+    editor.endBulkLoad();
+    QVERIFY2(widget->updatesEnabled(),
+             "endBulkLoad should restore widget updates after loading.");
+
+    widget->setProperty("filepath", QStringLiteral("/tmp/example.cpp"));
+    editor.loadHighlighter();
+    QVERIFY2(qobject_cast<QsciLexerCPP *>(widget->lexer()) != nullptr,
+             "loadHighlighter should attach a QScintilla lexer that matches the current file type.");
 }
 
 void EditorFactoryTest::fallsBackToLegacyEditorForUnknownEngine()

@@ -6,6 +6,7 @@
 #include <QFont>
 
 class QWidget;
+class QsciLexer;
 class QsciScintilla;
 
 class ScintillaEditor : public AbstractEditor
@@ -65,6 +66,7 @@ private:
     int m_savedSelectionToLine = 0;
     int m_savedSelectionToIndex = 0;
     QFont m_font;
+    QsciLexer *m_lexer = nullptr;
 };
 
 #endif

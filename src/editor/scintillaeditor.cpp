@@ -1,10 +1,17 @@
 #include "scintillaeditor.h"
 
+#include "editorlanguage.h"
+#include "../syntaxutils.h"
 #include "../utils.h"
 
+#include <Qsci/qscilexer.h>
+#include <Qsci/qscilexercpp.h>
+#include <Qsci/qscilexermarkdown.h>
+#include <Qsci/qscilexerpython.h>
 #include <Qsci/qsciscintilla.h>
 
 #include <QColor>
+#include <QFileInfo>
 #include <QFontMetrics>
 #include <QVariantMap>
 
@@ -36,6 +43,7 @@ ScintillaEditor::ScintillaEditor()
 
 ScintillaEditor::~ScintillaEditor()
 {
+    delete m_lexer;
     delete m_editor;
 }
 
@@ -280,6 +288,18 @@ void ScintillaEditor::updateCursorKeywordSelection(int position, bool findNext)
 
 void ScintillaEditor::renderAllSelections()
 {
+    if (!m_editor->hasSelectedText()) {
+        return;
+    }
+
+    int fromLine = 0;
+    int fromIndex = 0;
+    int toLine = 0;
+    int toIndex = 0;
+    m_editor->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
+    m_editor->ensureLineVisible(fromLine);
+    m_editor->ensureLineVisible(toLine);
+    m_editor->repaint();
 }
 
 void ScintillaEditor::saveMarkStatus()
@@ -341,14 +361,42 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
 
 void ScintillaEditor::loadHighlighter()
 {
+    const QString filePath = m_editor->property("filepath").toString();
+    const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(
+                KSyntaxHighlighting::Repository(),
+                filePath,
+                text().left(4096));
+
+    delete m_lexer;
+    m_lexer = nullptr;
+
+    switch (EditorLanguage::fromSyntaxDefinitionName(definitionName)) {
+    case EditorLanguage::Cpp:
+        m_lexer = new QsciLexerCPP(m_editor);
+        break;
+    case EditorLanguage::Markdown:
+        m_lexer = new QsciLexerMarkdown(m_editor);
+        break;
+    case EditorLanguage::Python:
+        m_lexer = new QsciLexerPython(m_editor);
+        break;
+    case EditorLanguage::PlainText:
+    default:
+        break;
+    }
+
+    m_editor->setLexer(m_lexer);
 }
 
 void ScintillaEditor::beginBulkLoad()
 {
+    m_editor->setUpdatesEnabled(false);
 }
 
 void ScintillaEditor::endBulkLoad()
 {
+    m_editor->setUpdatesEnabled(true);
+    m_editor->update();
 }
 
 void ScintillaEditor::clearSelection()
