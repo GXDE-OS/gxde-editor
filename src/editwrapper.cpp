@@ -68,6 +68,11 @@ EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget 
     // 判断是否支持 Markdown 预览，如果支持则显示
     if (MarkdownPreviewWidget::isSupport()) {
         m_markdownPreview = new MarkdownPreviewWidget();
+        if (!m_textEdit) {
+            m_markdownPreviewProxy = new QTextEdit(this);
+            m_markdownPreviewProxy->hide();
+            m_markdownPreviewProxy->setReadOnly(true);
+        }
     }
 #endif
 
@@ -112,9 +117,15 @@ EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget 
     } else if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(editorWidget())) {
         connect(scintillaEditor, &QsciScintillaBase::SCN_UPDATEUI, this, [=] (int) {
             updateBottomBarForBackend();
+#ifdef USE_WEBENGINE
+            syncMarkdownPreviewScroll();
+#endif
         });
         connect(scintillaEditor, &QsciScintilla::textChanged, this, [=] {
             updateBottomBarForBackend();
+#ifdef USE_WEBENGINE
+            syncMarkdownPreviewProxy();
+#endif
         });
     }
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
@@ -453,11 +464,53 @@ void EditWrapper::handleHightlightChanged(const QString &name)
 #ifdef USE_WEBENGINE
     if (m_markdownPreview) {
         m_markdownPreview->setVisible(name == "Markdown");
-        m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
+        QTextEdit *previewEditor = qobject_cast<QTextEdit *>(m_textEdit);
+        if (!previewEditor) {
+            previewEditor = m_markdownPreviewProxy;
+        }
+        m_markdownPreview->setSourceEditor(name == "Markdown" ? previewEditor : NULL);
+        if (name == "Markdown") {
+            syncMarkdownPreviewProxy();
+            syncMarkdownPreviewScroll();
+        }
     }
 #endif
     m_bottomBar->setHightlightName(name);
 }
+
+#ifdef USE_WEBENGINE
+void EditWrapper::syncMarkdownPreviewProxy()
+{
+    if (!m_markdownPreviewProxy || m_textEdit || !m_editorBackend) {
+        return;
+    }
+
+    const QString content = m_editorBackend->text();
+    if (m_markdownPreviewProxy->toPlainText() == content) {
+        return;
+    }
+
+    m_markdownPreviewProxy->setPlainText(content);
+}
+
+void EditWrapper::syncMarkdownPreviewScroll()
+{
+    if (!m_markdownPreviewProxy) {
+        return;
+    }
+
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(editorWidget())) {
+        m_markdownPreviewProxy->resize(scintillaEditor->size());
+        QScrollBar *sourceBar = scintillaEditor->verticalScrollBar();
+        QScrollBar *targetBar = m_markdownPreviewProxy->verticalScrollBar();
+        if (sourceBar && targetBar) {
+            const int sourceMaximum = sourceBar->maximum();
+            const int targetMaximum = targetBar->maximum();
+            targetBar->setValue(sourceMaximum > 0 ? (sourceBar->value() * targetMaximum) / sourceMaximum : 0);
+        }
+    }
+}
+#endif
 
 void EditWrapper::setDarkTheme(bool enabled)
 {
@@ -576,6 +629,9 @@ void EditWrapper::finishPendingTextLoad()
 void EditWrapper::resizeEvent(QResizeEvent *e)
 {
     initToastPosition();
+#ifdef USE_WEBENGINE
+    syncMarkdownPreviewScroll();
+#endif
 
     QWidget::resizeEvent(e);
 }

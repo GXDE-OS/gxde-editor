@@ -6,6 +6,7 @@
 #include "../src/editor/scintillaeditor.h"
 #include "../src/editwrapper.h"
 #include "../src/tabbar.h"
+#include "../src/utils.h"
 #include "../src/window.h"
 
 #undef protected
@@ -13,15 +14,20 @@
 
 #include <QApplication>
 #include <QMimeData>
+#include <QShortcut>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <QString>
 #include <QObject>
 #include <QTest>
 #include <QStyleOptionTab>
+#include <DSettingsOption>
 #include <Qsci/qsciscintillabase.h>
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
+#ifdef USE_WEBENGINE
+#include "../src/widgets/markdownpreviewwidget.h"
+#endif
 
 #include <memory>
 #include <type_traits>
@@ -60,6 +66,12 @@ private slots:
     void scintillaRefreshReloadsHighlighter();
     void scintillaBottomBarTracksScintillaState();
     void scintillaBottomBarUsesCheapCharacterCount();
+    void windowAppliesConfiguredTabWidthToScintillaEditors();
+    void windowHonorsConfiguredScintillaEditorShortcut();
+    void openingFileReusesEmptyScintillaBlankTab();
+#ifdef USE_WEBENGINE
+    void markdownPreviewReconnectsForScintillaMarkdownTabs();
+#endif
     void windowCanPrintScintillaEditorToPdf();
     void saveAsRefreshesScintillaBottomBarHighlight();
     void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
@@ -373,6 +385,86 @@ void EditorFactoryTest::scintillaBottomBarUsesCheapCharacterCount()
     QCOMPARE(widget->length(), 10);
     QCOMPARE(editor->textCallCount, 0);
 }
+
+void EditorFactoryTest::windowAppliesConfiguredTabWidthToScintillaEditors()
+{
+    Window window(nullptr);
+    window.m_settings->settings->option("advance.editor.tabspacenumber")->setValue(8);
+
+    std::unique_ptr<EditWrapper> wrapper(window.createEditor());
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper->editorWidget());
+
+    QVERIFY(widget != nullptr);
+    QCOMPARE(widget->indentationWidth(), 8);
+    QCOMPARE(widget->tabWidth(), 8);
+}
+
+void EditorFactoryTest::windowHonorsConfiguredScintillaEditorShortcut()
+{
+    Window window(nullptr);
+    window.m_settings->settings->option("shortcuts.editor.selectall")->setValue(QStringLiteral("Ctrl+U"));
+    EditWrapper *wrapper = new EditWrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper->editorWidget());
+    QShortcut *shortcut = nullptr;
+
+    QVERIFY(widget != nullptr);
+
+    wrapper->editorBackend()->setText(QStringLiteral("alpha\nbeta"));
+    window.addTabWithWrapper(wrapper, QStringLiteral("/tmp/shortcut.txt"), QStringLiteral("shortcut.txt"), 0);
+    for (QShortcut *candidate : wrapper->findChildren<QShortcut *>()) {
+        if (candidate->key() == QKeySequence(QStringLiteral("Ctrl+U"))) {
+            shortcut = candidate;
+            break;
+        }
+    }
+
+    QVERIFY(shortcut != nullptr);
+    QCOMPARE(shortcut->key(), QKeySequence(QStringLiteral("Ctrl+U")));
+    window.removeWrapper(QStringLiteral("/tmp/shortcut.txt"), true);
+}
+
+void EditorFactoryTest::openingFileReusesEmptyScintillaBlankTab()
+{
+    Window window(nullptr);
+    QTemporaryDir dir;
+    const QString filePath = dir.filePath(QStringLiteral("reused.cpp"));
+    QFile file(filePath);
+
+    QVERIFY(dir.isValid());
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write("int main() { return 0; }\n");
+    file.close();
+
+    window.addBlankTab();
+    const QString blankPath = window.m_tabbar->currentPath();
+    QVERIFY(Utils::isDraftFile(blankPath));
+    QCOMPARE(window.m_tabbar->count(), 1);
+
+    window.addTab(filePath, true);
+
+    QCOMPARE(window.m_tabbar->count(), 1);
+    QCOMPARE(window.m_tabbar->currentPath(), filePath);
+    QVERIFY(window.wrapper(blankPath) == nullptr);
+    QVERIFY(window.wrapper(filePath) != nullptr);
+}
+
+#ifdef USE_WEBENGINE
+void EditorFactoryTest::markdownPreviewReconnectsForScintillaMarkdownTabs()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+
+    QVERIFY(wrapper.m_markdownPreview != nullptr);
+
+    wrapper.updatePath(QStringLiteral("/tmp/readme.md"));
+    wrapper.m_isLoadFinished = false;
+    wrapper.handleFileLoadFinished(QByteArrayLiteral("UTF-8"), QStringLiteral("# Title\n\ncontent"));
+    QTRY_VERIFY(wrapper.isLoadFinished());
+
+    QVERIFY(wrapper.m_markdownPreview->isVisible());
+    QVERIFY(wrapper.m_markdownPreview->m_sourceEditor != nullptr);
+    QCOMPARE(wrapper.m_markdownPreview->m_sourceEditor->toPlainText(), QStringLiteral("# Title\n\ncontent"));
+}
+#endif
 
 void EditorFactoryTest::windowCanPrintScintillaEditorToPdf()
 {

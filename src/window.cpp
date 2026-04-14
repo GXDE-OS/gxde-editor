@@ -34,12 +34,15 @@
 #include <DSettingsOption>
 #include <DTitlebar>
 #include <QApplication>
+#include <Qsci/qscicommand.h>
+#include <Qsci/qscicommandset.h>
 #include <Qsci/qsciprinter.h>
 #include <Qsci/qsciscintilla.h>
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QScreen>
+#include <QShortcut>
 #include <QStyleFactory>
 #include <QEvent>
 
@@ -50,6 +53,85 @@ namespace {
 AbstractEditor *editorBackend(EditWrapper *wrapper)
 {
     return wrapper ? wrapper->editorBackend() : nullptr;
+}
+
+void applyScintillaTabWidth(EditWrapper *wrapper, int width)
+{
+    if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper ? wrapper->editorWidget() : nullptr)) {
+        scintillaEditor->setIndentationsUseTabs(false);
+        scintillaEditor->setTabIndents(true);
+        scintillaEditor->setBackspaceUnindents(true);
+        scintillaEditor->setIndentationWidth(width);
+        scintillaEditor->setTabWidth(width);
+    }
+}
+
+bool executeScintillaShortcut(QsciScintilla *editor, QsciCommand::Command command)
+{
+    if (!editor) {
+        return false;
+    }
+
+    if (QsciCommand *scintillaCommand = editor->standardCommands()->find(command)) {
+        scintillaCommand->execute();
+        return true;
+    }
+
+    return false;
+}
+
+void installScintillaShortcut(EditWrapper *wrapper, const QString &sequence,
+                              const std::function<void()> &handler, const QString &name)
+{
+    if (!wrapper || sequence.isEmpty()) {
+        return;
+    }
+
+    QShortcut *shortcut = new QShortcut(QKeySequence(sequence), wrapper);
+    shortcut->setObjectName(name);
+    shortcut->setContext(Qt::WindowShortcut);
+    QObject::connect(shortcut, &QShortcut::activated, wrapper, handler);
+}
+
+void installScintillaShortcuts(EditWrapper *wrapper, Settings *settings)
+{
+    if (!wrapper || !settings) {
+        return;
+    }
+
+    const QList<QShortcut *> existingShortcuts = wrapper->findChildren<QShortcut *>();
+    for (QShortcut *shortcut : existingShortcuts) {
+        if (shortcut->objectName().startsWith(QStringLiteral("scintillaShortcut_"))) {
+            delete shortcut;
+        }
+    }
+
+    QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget());
+    if (!scintillaEditor) {
+        return;
+    }
+
+    auto bindCommand = [=] (const QString &settingKey, QsciCommand::Command command) {
+        installScintillaShortcut(wrapper,
+                                 settings->settings->option(settingKey)->value().toString(),
+                                 [=] { executeScintillaShortcut(scintillaEditor, command); },
+                                 QStringLiteral("scintillaShortcut_%1").arg(settingKey));
+    };
+
+    bindCommand(QStringLiteral("shortcuts.editor.undo"), QsciCommand::Undo);
+    bindCommand(QStringLiteral("shortcuts.editor.redo"), QsciCommand::Redo);
+    bindCommand(QStringLiteral("shortcuts.editor.copy"), QsciCommand::SelectionCopy);
+    bindCommand(QStringLiteral("shortcuts.editor.cut"), QsciCommand::SelectionCut);
+    bindCommand(QStringLiteral("shortcuts.editor.paste"), QsciCommand::Paste);
+    bindCommand(QStringLiteral("shortcuts.editor.selectall"), QsciCommand::SelectAll);
+    bindCommand(QStringLiteral("shortcuts.editor.indentline"), QsciCommand::Tab);
+    bindCommand(QStringLiteral("shortcuts.editor.backindentline"), QsciCommand::Backtab);
+    bindCommand(QStringLiteral("shortcuts.editor.duplicateline"), QsciCommand::LineDuplicate);
+    bindCommand(QStringLiteral("shortcuts.editor.killcurrentline"), QsciCommand::LineDelete);
+    bindCommand(QStringLiteral("shortcuts.editor.copylines"), QsciCommand::LineCopy);
+    bindCommand(QStringLiteral("shortcuts.editor.cutlines"), QsciCommand::LineCut);
+    bindCommand(QStringLiteral("shortcuts.editor.swaplineup"), QsciCommand::MoveSelectedLinesUp);
+    bindCommand(QStringLiteral("shortcuts.editor.swaplinedown"), QsciCommand::MoveSelectedLinesDown);
 }
 
 void updateTabModifiedState(Tabbar *tabbar, const QString &path, bool isModified)
@@ -88,6 +170,7 @@ void Window::disconnectEditorSignals(EditWrapper *wrapper, QObject *receiver)
 
     if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
         QObject::disconnect(scintillaEditor, nullptr, receiver, nullptr);
+        scintillaEditor->removeEventFilter(receiver);
     }
 }
 
@@ -319,10 +402,10 @@ void Window::addTab(const QString &filepath, bool activeTab)
     }
 
     if (curWrapper) {
-        DTextEdit *currentTextEditor = legacyTextEditor(curWrapper);
+        AbstractEditor *currentEditor = editorBackend(curWrapper);
         // if the current page is a draft file and is empty
         // no need to create a new tab.
-        if (currentTextEditor && currentTextEditor->toPlainText().isEmpty() &&
+        if (currentEditor && currentEditor->text().isEmpty() &&
                 !m_wrappers.keys().contains(filepath) &&
                 Utils::isDraftFile(curPath))
         {
@@ -399,6 +482,9 @@ void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, co
     connect(wrapper, &EditWrapper::requestSaveAs, this, &Window::saveAsFile);
 
     if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        applyScintillaTabWidth(wrapper, m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
+        scintillaEditor->installEventFilter(this);
+        installScintillaShortcuts(wrapper, m_settings);
         connect(scintillaEditor, &QsciScintilla::modificationChanged, this, [=] (bool isModified) {
             updateTabModifiedState(m_tabbar, wrapper->filePath(), isModified);
         });
@@ -520,6 +606,9 @@ EditWrapper* Window::createEditor()
     }
 
     if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(wrapper->editorWidget())) {
+        applyScintillaTabWidth(wrapper, m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
+        scintillaEditor->installEventFilter(this);
+        installScintillaShortcuts(wrapper, m_settings);
         connect(scintillaEditor, &QsciScintilla::modificationChanged, this, [=] (bool isModified) {
             updateTabModifiedState(m_tabbar, wrapper->filePath(), isModified);
         });
@@ -1007,7 +1096,50 @@ void Window::updateTabSpaceNumber(int number)
         if (DTextEdit *textEditor = wrapper->textEditor()) {
             textEditor->setTabSpaceNumber(number);
         }
+        applyScintillaTabWidth(wrapper, number);
     }
+}
+
+bool Window::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        if (QsciScintilla *scintillaEditor = qobject_cast<QsciScintilla *>(watched)) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            const QString key = Utils::getKeyshortcut(keyEvent);
+
+            if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "undo")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::Undo);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "redo")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::Redo);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "copy")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::SelectionCopy);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "cut")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::SelectionCut);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "paste")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::Paste);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "selectall")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::SelectAll);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "indentline")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::Tab);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "backindentline")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::Backtab);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "duplicateline")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::LineDuplicate);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "killcurrentline")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::LineDelete);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "copylines")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::LineCopy);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "cutlines")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::LineCut);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "swaplineup")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::MoveSelectedLinesUp);
+            } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "swaplinedown")) {
+                return executeScintillaShortcut(scintillaEditor, QsciCommand::MoveSelectedLinesDown);
+            }
+        }
+    }
+
+    return DMainWindow::eventFilter(watched, event);
 }
 
 void Window::changeTitlebarBackground(const QString &color)

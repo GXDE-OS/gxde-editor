@@ -84,6 +84,10 @@ signals:
 private:
     void updateBottomBarForBackend();
     void updateBottomBarHighlight();
+#ifdef USE_WEBENGINE
+    void syncMarkdownPreviewProxy();
+    void syncMarkdownPreviewScroll();
+#endif
     void detectEndOfLine();
     void appendPendingTextLoadChunk();
     void finishPendingTextLoad();
@@ -104,6 +108,7 @@ private:
     QTextCodec *m_textCodec;
 #ifdef USE_WEBENGINE
     MarkdownPreviewWidget *m_markdownPreview = nullptr;
+    QTextEdit *m_markdownPreviewProxy = nullptr;
 #endif
 
     EndOfLineMode m_endOfLineMode;
