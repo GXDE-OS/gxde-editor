@@ -4,6 +4,7 @@
 #include "abstracteditor.h"
 
 #include <QFont>
+#include <QString>
 
 class QWidget;
 class QsciLexer;
@@ -54,6 +55,7 @@ private:
     void clearSearchIndicators();
     void updateSearchIndicators();
     void clearSelection();
+    void applyLexerTheme();
     void positionToLineIndex(int position, int *line, int *index) const;
     void setSelectionByPosition(int start, int end);
 
@@ -68,6 +70,7 @@ private:
     int m_savedSelectionToLine = 0;
     int m_savedSelectionToIndex = 0;
     QFont m_font;
+    QString m_themePath;
     QsciLexer *m_lexer = nullptr;
     int m_searchIndicator = -1;
 };

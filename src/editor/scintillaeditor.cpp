@@ -387,6 +387,7 @@ void ScintillaEditor::restoreMarkStatus()
 
 void ScintillaEditor::setThemeWithPath(const QString &path)
 {
+    m_themePath = path;
     const QVariantMap jsonMap = Utils::getThemeMapFromPath(path);
     const QVariantMap editorColors = jsonMap.value(QStringLiteral("editor-colors")).toMap();
     const QVariantMap textStyles = jsonMap.value(QStringLiteral("text-styles")).toMap();
@@ -410,6 +411,8 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
     m_editor->setIndicatorForegroundColor(findMatchColor, m_searchIndicator);
     m_editor->setMatchedBraceForegroundColor(QColor(editorColors.value(QStringLiteral("bracket-match-fg")).toString()));
     m_editor->setMatchedBraceBackgroundColor(QColor(editorColors.value(QStringLiteral("bracket-match-bg")).toString()));
+
+    applyLexerTheme();
 }
 
 void ScintillaEditor::loadHighlighter()
@@ -440,6 +443,7 @@ void ScintillaEditor::loadHighlighter()
 
     m_lexer = createLexerForLanguage(EditorLanguage::fromSyntaxDefinitionName(definitionName), m_editor);
 
+    applyLexerTheme();
     m_editor->setLexer(m_lexer);
 }
 
@@ -460,6 +464,26 @@ void ScintillaEditor::clearSelection()
     int index = 0;
     m_editor->getCursorPosition(&line, &index);
     m_editor->setCursorPosition(line, index);
+}
+
+void ScintillaEditor::applyLexerTheme()
+{
+    if (!m_lexer || m_themePath.isEmpty()) {
+        return;
+    }
+
+    const QVariantMap jsonMap = Utils::getThemeMapFromPath(m_themePath);
+    const QVariantMap editorColors = jsonMap.value(QStringLiteral("editor-colors")).toMap();
+    const QVariantMap textStyles = jsonMap.value(QStringLiteral("text-styles")).toMap();
+    const QVariantMap normalText = textStyles.value(QStringLiteral("Normal")).toMap();
+
+    const QColor backgroundColor(editorColors.value(QStringLiteral("background-color")).toString());
+    const QColor textColor(normalText.value(QStringLiteral("text-color")).toString());
+
+    m_lexer->setDefaultPaper(backgroundColor);
+    m_lexer->setDefaultColor(textColor);
+    m_lexer->setPaper(backgroundColor, -1);
+    m_lexer->setColor(textColor, -1);
 }
 
 void ScintillaEditor::clearSearchIndicators()

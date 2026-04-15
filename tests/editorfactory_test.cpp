@@ -13,9 +13,10 @@
 #undef private
 
 #include <QApplication>
+#include <QFile>
 #include <QMimeData>
-#include <QShortcut>
 #include <QTemporaryDir>
+#include <QShortcut>
 #include <QTemporaryFile>
 #include <QString>
 #include <QObject>
@@ -85,6 +86,7 @@ private slots:
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
     void scintillaHighlightMenuSupportsManualSelection();
     void scintillaHighlighterMapsCommonDefinitions();
+    void scintillaHighlighterKeepsThemeColorsAfterLexerReload();
 #ifdef USE_WEBENGINE
     void markdownPreviewUsesBalancedSplitAndNonGitHubStyle();
 #endif
@@ -725,6 +727,46 @@ void EditorFactoryTest::scintillaHighlighterMapsCommonDefinitions()
     editor.setText(QStringLiteral("<html><body>Hello</body></html>\n"));
     editor.loadHighlighter();
     QVERIFY(qobject_cast<QsciLexerHTML *>(widget->lexer()) != nullptr);
+}
+
+void EditorFactoryTest::scintillaHighlighterKeepsThemeColorsAfterLexerReload()
+{
+    ScintillaEditor editor;
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(editor.widget());
+    QTemporaryDir dir;
+    QFile themeFile(dir.filePath(QStringLiteral("theme.json")));
+
+    QVERIFY(widget != nullptr);
+    QVERIFY(dir.isValid());
+    QVERIFY(themeFile.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    themeFile.write(R"({
+        "editor-colors": {
+            "background-color": "#111111",
+            "current-line": "#222222",
+            "line-numbers": "#bbbbbb",
+            "find-match-background": "#444444",
+            "bracket-match-fg": "#ffffff",
+            "bracket-match-bg": "#333333"
+        },
+        "text-styles": {
+            "Normal": {
+                "text-color": "#eeeeee",
+                "selected-text-color": "#ffffff",
+                "selected-bg-color": "#555555"
+            }
+        }
+    })");
+    themeFile.close();
+
+    editor.setThemeWithPath(themeFile.fileName());
+    widget->setProperty("filepath", QStringLiteral("/tmp/theme.cpp"));
+    editor.setText(QStringLiteral("int main() { return 0; }\n"));
+    editor.loadHighlighter();
+
+    QsciLexerCPP *lexer = qobject_cast<QsciLexerCPP *>(widget->lexer());
+    QVERIFY(lexer != nullptr);
+    QCOMPARE(lexer->paper(0), QColor(QStringLiteral("#111111")));
+    QCOMPARE(lexer->color(0), QColor(QStringLiteral("#eeeeee")));
 }
 
 #ifdef USE_WEBENGINE
