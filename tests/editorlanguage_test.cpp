@@ -54,6 +54,7 @@ class EditorLanguageTest : public QObject
 
 private slots:
     void mapsKnownSyntaxDefinitionNames();
+    void mapsCommonSyntaxDefinitionNames();
     void fallsBackToPlainTextForUnknownDefinitions();
 };
 
@@ -62,6 +63,17 @@ void EditorLanguageTest::mapsKnownSyntaxDefinitionNames()
     QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("C++")), EditorLanguage::Cpp);
     QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("Markdown")), EditorLanguage::Markdown);
     QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("Python")), EditorLanguage::Python);
+}
+
+void EditorLanguageTest::mapsCommonSyntaxDefinitionNames()
+{
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("Bash")), EditorLanguage::Bash);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("JSON")), EditorLanguage::Json);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("YAML")), EditorLanguage::Yaml);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("JavaScript")), EditorLanguage::JavaScript);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("TypeScript")), EditorLanguage::JavaScript);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("HTML")), EditorLanguage::Html);
+    QCOMPARE(EditorLanguage::fromSyntaxDefinitionName(QStringLiteral("XML")), EditorLanguage::Xml);
 }
 
 void EditorLanguageTest::fallsBackToPlainTextForUnknownDefinitions()

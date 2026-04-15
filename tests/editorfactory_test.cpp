@@ -24,6 +24,10 @@
 #include <DSettingsOption>
 #include <Qsci/qsciscintillabase.h>
 #include <Qsci/qscilexercpp.h>
+#include <Qsci/qscilexerbash.h>
+#include <Qsci/qscilexerhtml.h>
+#include <Qsci/qscilexerjson.h>
+#include <Qsci/qscilexerpython.h>
 #include <Qsci/qsciscintilla.h>
 #ifdef USE_WEBENGINE
 #include "../src/widgets/markdownpreviewwidget.h"
@@ -79,6 +83,11 @@ private slots:
     void saveAsRefreshesScintillaBottomBarHighlight();
     void windowDisconnectEditorSignalsHandlesLegacyAndScintillaBackends();
     void windowLegacyTextEditorHelperHandlesNonLegacyWrappers();
+    void scintillaHighlightMenuSupportsManualSelection();
+    void scintillaHighlighterMapsCommonDefinitions();
+#ifdef USE_WEBENGINE
+    void markdownPreviewUsesBalancedSplitAndNonGitHubStyle();
+#endif
 };
 
 void EditorFactoryTest::createsScintillaEditorBackend()
@@ -651,6 +660,99 @@ void EditorFactoryTest::windowLegacyTextEditorHelperHandlesNonLegacyWrappers()
     QVERIFY(Window::legacyTextEditor(&legacyWrapper) != nullptr);
     QVERIFY(Window::legacyTextEditor(&scintillaWrapper) == nullptr);
 }
+
+void EditorFactoryTest::scintillaHighlightMenuSupportsManualSelection()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(wrapper.editorWidget());
+
+    QVERIFY(widget != nullptr);
+    QVERIFY(wrapper.bottomBar()->m_highlightMenu->m_menu != nullptr);
+    QVERIFY(!wrapper.bottomBar()->m_highlightMenu->actions().isEmpty());
+
+    QAction *pythonAction = nullptr;
+    const QList<QAction *> rootActions = wrapper.bottomBar()->m_highlightMenu->m_menu->actions();
+    for (QAction *rootAction : rootActions) {
+        if (rootAction->data().toString() == QStringLiteral("Python")) {
+            pythonAction = rootAction;
+            break;
+        }
+
+        if (QMenu *subMenu = rootAction->menu()) {
+            for (QAction *action : subMenu->actions()) {
+                if (action->data().toString() == QStringLiteral("Python")) {
+                    pythonAction = action;
+                    break;
+                }
+            }
+        }
+
+        if (pythonAction) {
+            break;
+        }
+    }
+
+    QVERIFY2(pythonAction != nullptr,
+             "Scintilla-backed wrappers should expose the manual highlight menu with syntax actions.");
+
+    wrapper.updatePath(QStringLiteral("/tmp/manual-highlight.txt"));
+    wrapper.editorBackend()->setText(QStringLiteral("plain text\n"));
+    pythonAction->trigger();
+
+    QVERIFY2(qobject_cast<QsciLexerPython *>(widget->lexer()) != nullptr,
+             "Selecting a manual highlight scheme should attach the matching Scintilla lexer.");
+    QCOMPARE(wrapper.bottomBar()->m_highlightMenu->m_text->text(), QStringLiteral("Python"));
+}
+
+void EditorFactoryTest::scintillaHighlighterMapsCommonDefinitions()
+{
+    ScintillaEditor editor;
+    QsciScintilla *widget = qobject_cast<QsciScintilla *>(editor.widget());
+
+    QVERIFY(widget != nullptr);
+
+    widget->setProperty("filepath", QStringLiteral("/tmp/highlight.json"));
+    editor.setText(QStringLiteral("{\"name\": \"gxde\"}\n"));
+    editor.loadHighlighter();
+    QVERIFY(qobject_cast<QsciLexerJSON *>(widget->lexer()) != nullptr);
+
+    widget->setProperty("filepath", QStringLiteral("/tmp/highlight.sh"));
+    editor.setText(QStringLiteral("#!/bin/bash\necho ok\n"));
+    editor.loadHighlighter();
+    QVERIFY(qobject_cast<QsciLexerBash *>(widget->lexer()) != nullptr);
+
+    widget->setProperty("filepath", QStringLiteral("/tmp/highlight.html"));
+    editor.setText(QStringLiteral("<html><body>Hello</body></html>\n"));
+    editor.loadHighlighter();
+    QVERIFY(qobject_cast<QsciLexerHTML *>(widget->lexer()) != nullptr);
+}
+
+#ifdef USE_WEBENGINE
+void EditorFactoryTest::markdownPreviewUsesBalancedSplitAndNonGitHubStyle()
+{
+    EditWrapper wrapper(std::unique_ptr<AbstractEditor>(new ScintillaEditor()));
+
+    QVERIFY(wrapper.m_markdownPreview != nullptr);
+
+    wrapper.resize(1000, 700);
+    wrapper.updatePath(QStringLiteral("/tmp/readme.md"));
+    wrapper.m_isLoadFinished = false;
+    wrapper.handleFileLoadFinished(QByteArrayLiteral("UTF-8"), QStringLiteral("# Title\n\ncontent"));
+    QTRY_VERIFY(wrapper.isLoadFinished());
+    QVERIFY(wrapper.m_markdownPreview->isVisible());
+
+    wrapper.layout()->activate();
+    const int editorWidth = wrapper.editorWidget()->width();
+    const int previewWidth = wrapper.m_markdownPreview->width();
+    QVERIFY2(qAbs(editorWidth - previewWidth) < 80,
+             "Markdown split view should keep the editor and preview close to a 50/50 layout.");
+
+    const QString html = wrapper.m_markdownPreview->generateHtml(QStringLiteral("# Title\n\ncontent"));
+    QVERIFY2(!html.contains(QStringLiteral("github-markdown.css")) &&
+             !html.contains(QStringLiteral("github-markdown-dark.css")),
+             "Markdown preview should no longer inject the GitHub-style stylesheet.");
+}
+#endif
 
 int main(int argc, char **argv)
 {

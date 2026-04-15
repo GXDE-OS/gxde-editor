@@ -5,9 +5,27 @@
 #include "../utils.h"
 
 #include <Qsci/qscilexer.h>
+#include <Qsci/qscilexerbash.h>
+#include <Qsci/qscilexerbatch.h>
+#include <Qsci/qscilexercmake.h>
 #include <Qsci/qscilexercpp.h>
+#include <Qsci/qscilexercsharp.h>
+#include <Qsci/qscilexercss.h>
+#include <Qsci/qscilexerdiff.h>
+#include <Qsci/qscilexerhtml.h>
+#include <Qsci/qscilexerjava.h>
+#include <Qsci/qscilexerjavascript.h>
+#include <Qsci/qscilexerjson.h>
+#include <Qsci/qscilexerlua.h>
+#include <Qsci/qscilexermakefile.h>
 #include <Qsci/qscilexermarkdown.h>
+#include <Qsci/qscilexerperl.h>
+#include <Qsci/qscilexerproperties.h>
 #include <Qsci/qscilexerpython.h>
+#include <Qsci/qscilexerruby.h>
+#include <Qsci/qscilexersql.h>
+#include <Qsci/qscilexerxml.h>
+#include <Qsci/qscilexeryaml.h>
 #include <Qsci/qsciscintilla.h>
 
 #include <QColor>
@@ -19,6 +37,57 @@ namespace {
 int boundedPosition(int position, int size)
 {
     return qBound(0, position, size);
+}
+
+QsciLexer *createLexerForLanguage(EditorLanguage::Type language, QsciScintilla *editor)
+{
+    switch (language) {
+    case EditorLanguage::Bash:
+        return new QsciLexerBash(editor);
+    case EditorLanguage::Batch:
+        return new QsciLexerBatch(editor);
+    case EditorLanguage::CMake:
+        return new QsciLexerCMake(editor);
+    case EditorLanguage::Cpp:
+        return new QsciLexerCPP(editor);
+    case EditorLanguage::CSharp:
+        return new QsciLexerCSharp(editor);
+    case EditorLanguage::Css:
+        return new QsciLexerCSS(editor);
+    case EditorLanguage::Diff:
+        return new QsciLexerDiff(editor);
+    case EditorLanguage::Html:
+        return new QsciLexerHTML(editor);
+    case EditorLanguage::Ini:
+        return new QsciLexerProperties(editor);
+    case EditorLanguage::Java:
+        return new QsciLexerJava(editor);
+    case EditorLanguage::JavaScript:
+        return new QsciLexerJavaScript(editor);
+    case EditorLanguage::Json:
+        return new QsciLexerJSON(editor);
+    case EditorLanguage::Lua:
+        return new QsciLexerLua(editor);
+    case EditorLanguage::Makefile:
+        return new QsciLexerMakefile(editor);
+    case EditorLanguage::Markdown:
+        return new QsciLexerMarkdown(editor);
+    case EditorLanguage::Perl:
+        return new QsciLexerPerl(editor);
+    case EditorLanguage::Python:
+        return new QsciLexerPython(editor);
+    case EditorLanguage::Ruby:
+        return new QsciLexerRuby(editor);
+    case EditorLanguage::Sql:
+        return new QsciLexerSQL(editor);
+    case EditorLanguage::Xml:
+        return new QsciLexerXML(editor);
+    case EditorLanguage::Yaml:
+        return new QsciLexerYAML(editor);
+    case EditorLanguage::PlainText:
+    default:
+        return nullptr;
+    }
 }
 }
 
@@ -346,34 +415,30 @@ void ScintillaEditor::setThemeWithPath(const QString &path)
 void ScintillaEditor::loadHighlighter()
 {
     const QString filePath = m_editor->property("filepath").toString();
+    const QString forcedDefinitionName = m_editor->property("forcedSyntaxDefinitionName").toString();
+    const bool forceNoHighlight = m_editor->property("forceDisableSyntaxHighlight").toBool();
 
     delete m_lexer;
     m_lexer = nullptr;
+
+    if (forceNoHighlight) {
+        m_editor->setProperty("currentSyntaxDefinitionName", QString());
+        m_editor->setLexer(nullptr);
+        return;
+    }
+
+    const QString definitionName = forcedDefinitionName.isEmpty()
+            ? SyntaxUtils::detectSyntaxDefinitionName(KSyntaxHighlighting::Repository(), filePath, text().left(4096))
+            : forcedDefinitionName;
+
+    m_editor->setProperty("currentSyntaxDefinitionName", definitionName);
 
     if (SyntaxUtils::shouldSkipSyntaxHighlightForLargeDocuments(text().size())) {
         m_editor->setLexer(nullptr);
         return;
     }
 
-    const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(
-                KSyntaxHighlighting::Repository(),
-                filePath,
-                text().left(4096));
-
-    switch (EditorLanguage::fromSyntaxDefinitionName(definitionName)) {
-    case EditorLanguage::Cpp:
-        m_lexer = new QsciLexerCPP(m_editor);
-        break;
-    case EditorLanguage::Markdown:
-        m_lexer = new QsciLexerMarkdown(m_editor);
-        break;
-    case EditorLanguage::Python:
-        m_lexer = new QsciLexerPython(m_editor);
-        break;
-    case EditorLanguage::PlainText:
-    default:
-        break;
-    }
+    m_lexer = createLexerForLanguage(EditorLanguage::fromSyntaxDefinitionName(definitionName), m_editor);
 
     m_editor->setLexer(m_lexer);
 }

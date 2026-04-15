@@ -14,31 +14,70 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 
-// 使用GitHub风格的Markdown样式
 const QString STYLE_LIGHT = R"(
-  <link rel="stylesheet" href="qrc:/markdown/github-markdown.css">
   <style>
+    body {
+      margin: 0;
+      background: transparent;
+    }
     .markdown-body {
       box-sizing: border-box;
-      min-width: 200px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 45px;
+      width: 100%;
+      margin: 0;
+      padding: 24px;
+      color: #303133;
+      line-height: 1.65;
+      font-size: 14px;
     }
-    @media (max-width: 767px) {
-      .markdown-body {
-        padding: 15px;
-      }
+    .markdown-body pre,
+    .markdown-body code {
+      font-family: "Noto Sans Mono", "Source Code Pro", monospace;
+    }
+    .markdown-body pre {
+      padding: 12px;
+      border-radius: 6px;
+      background: #f6f8fa;
+      overflow-x: auto;
+    }
+    .markdown-body blockquote {
+      margin: 0;
+      padding-left: 12px;
+      border-left: 4px solid #d0d7de;
+      color: #57606a;
     }
   </style>
 )";
 
 const QString STYLE_DARK = R"(
-  <link rel="stylesheet" href="qrc:/markdown/github-markdown-dark.css">
   <style>
+    body {
+      margin: 0;
+      background: transparent;
+    }
     .markdown-body {
-      background-color: #0d111700;
-      color: #c9d1d9;
+      width: 100%;
+      margin: 0;
+      padding: 24px;
+      background-color: transparent;
+      color: #d7dae0;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+    .markdown-body pre,
+    .markdown-body code {
+      font-family: "Noto Sans Mono", "Source Code Pro", monospace;
+    }
+    .markdown-body pre {
+      padding: 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+    }
+    .markdown-body blockquote {
+      margin: 0;
+      padding-left: 12px;
+      border-left: 4px solid rgba(255, 255, 255, 0.2);
+      color: #9ca3af;
     }
   </style>
 )";

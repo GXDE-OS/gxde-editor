@@ -30,6 +30,7 @@
 #endif
 
 #include <memory>
+#include <QActionGroup>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -84,6 +85,8 @@ signals:
 private:
     void updateBottomBarForBackend();
     void updateBottomBarHighlight();
+    void initializeScintillaHighlightMenu();
+    void applyScintillaHighlightDefinition(const QString &definitionName, const QString &displayName);
 #ifdef USE_WEBENGINE
     void syncMarkdownPreviewProxy();
     void syncMarkdownPreviewScroll();
@@ -104,6 +107,8 @@ private:
     QString m_filePath;
     std::unique_ptr<AbstractEditor> m_editorBackend;
     DTextEdit *m_textEdit;
+    QActionGroup *m_scintillaHighlightActionGroup = nullptr;
+    QMenu *m_scintillaHighlightMenu = nullptr;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
 #ifdef USE_WEBENGINE

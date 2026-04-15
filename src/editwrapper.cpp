@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include <QCoreApplication>
+#include <QActionGroup>
 #include <QApplication>
 #include <QSaveFile>
 #include <QScrollBar>
@@ -91,14 +92,18 @@ EditWrapper::EditWrapper(std::unique_ptr<AbstractEditor> editorBackend, QWidget 
         m_layout->addWidget(m_markdownPreview);
         m_markdownPreview->setVisible(false);
         m_markdownPreview->setSourceEditor(NULL);
-        m_layout->setStretch(1, 1);
-        m_layout->setStretch(2, 1);
+        const int editorIndex = m_textEdit ? 1 : 0;
+        const int previewIndex = editorIndex + 1;
+        m_layout->setStretch(editorIndex, 1);
+        m_layout->setStretch(previewIndex, 1);
     }
 #endif
 
     if (m_textEdit) {
         m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
         m_textEdit->setWrapper(this);
+    } else {
+        initializeScintillaHighlightMenu();
     }
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -453,10 +458,87 @@ void EditWrapper::updateBottomBarHighlight()
         return;
     }
 
-    const QString definitionName = SyntaxUtils::detectSyntaxDefinitionName(KSyntaxHighlighting::Repository(),
-                                                                           filePath(),
-                                                                           m_editorBackend->text().left(4096));
-    handleHightlightChanged(definitionName.isEmpty() ? tr("None") : definitionName);
+    if (QWidget *widget = editorWidget()) {
+        if (widget->property("forceDisableSyntaxHighlight").toBool()) {
+            handleHightlightChanged(tr("None"));
+            return;
+        }
+
+        const QString forcedDefinitionName = widget->property("forcedSyntaxDefinitionName").toString();
+        const QString currentDefinitionName = widget->property("currentSyntaxDefinitionName").toString();
+        const QString definitionName = !forcedDefinitionName.isEmpty()
+                ? forcedDefinitionName
+                : (!currentDefinitionName.isEmpty()
+                   ? currentDefinitionName
+                   : SyntaxUtils::detectSyntaxDefinitionName(KSyntaxHighlighting::Repository(),
+                                                             filePath(),
+                                                             m_editorBackend->text().left(4096)));
+
+        handleHightlightChanged(definitionName.isEmpty() ? tr("None") : definitionName);
+        return;
+    }
+
+    handleHightlightChanged(tr("None"));
+}
+
+void EditWrapper::initializeScintillaHighlightMenu()
+{
+    if (m_textEdit) {
+        return;
+    }
+
+    m_scintillaHighlightMenu = new QMenu(this);
+    m_scintillaHighlightActionGroup = new QActionGroup(m_scintillaHighlightMenu);
+    m_scintillaHighlightActionGroup->setExclusive(true);
+
+    QAction *noneAction = m_scintillaHighlightMenu->addAction(tr("None"));
+    noneAction->setCheckable(true);
+    noneAction->setData(QString());
+    noneAction->setChecked(true);
+    m_scintillaHighlightActionGroup->addAction(noneAction);
+
+    KSyntaxHighlighting::Repository repository;
+    QMenu *sectionMenu = nullptr;
+    QString currentSection;
+
+    for (const auto &definition : repository.definitions()) {
+        if (definition.isHidden()) {
+            continue;
+        }
+
+        if (currentSection != definition.section()) {
+            currentSection = definition.section();
+            sectionMenu = m_scintillaHighlightMenu->addMenu(definition.translatedSection());
+        }
+
+        if (!sectionMenu) {
+            continue;
+        }
+
+        QAction *action = sectionMenu->addAction(definition.translatedName());
+        action->setCheckable(true);
+        action->setData(definition.name());
+        m_scintillaHighlightActionGroup->addAction(action);
+    }
+
+    connect(m_scintillaHighlightActionGroup, &QActionGroup::triggered, this, [this] (QAction *action) {
+        applyScintillaHighlightDefinition(action->data().toString(), action->text());
+    });
+
+    m_bottomBar->setHighlightMenu(m_scintillaHighlightMenu);
+}
+
+void EditWrapper::applyScintillaHighlightDefinition(const QString &definitionName, const QString &displayName)
+{
+    QWidget *widget = editorWidget();
+    if (!widget || m_textEdit || !m_editorBackend) {
+        return;
+    }
+
+    widget->setProperty("forcedSyntaxDefinitionName", definitionName);
+    widget->setProperty("forceDisableSyntaxHighlight", definitionName.isEmpty());
+    m_editorBackend->loadHighlighter();
+    handleHightlightChanged(definitionName.isEmpty() ? tr("None") : displayName);
 }
 
 void EditWrapper::handleHightlightChanged(const QString &name)
