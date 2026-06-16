@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QTest>
 
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/definition.h>
+#include <KSyntaxHighlighting/definition.h>
 
 class SyntaxUtilsTest : public QObject
 {
