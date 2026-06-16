@@ -22,9 +22,9 @@
 
 #include "window.h"
 #include "toolbar.h"
-#include "danchors.h"
-#include "dthememanager.h"
-#include "dtoast.h"
+#include <DAnchors>
+#include <dthememanager.h>
+#include <DToast>
 #include "utils.h"
 
 #include <DSettingsWidgetFactory>
@@ -63,7 +63,7 @@ Window::Window(DMainWindow *parent)
       m_menu(new QMenu),
       m_titlebarStyleSheet(titlebar()->styleSheet())
 {
-    m_blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first()).filePath("blank-files");
+    m_blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first()).filePath("blank-files");
     m_themePath = m_settings->settings->option("advance.editor.theme")->value().toString();
     m_rootSaveDBus = new DBusDaemon::dbus("com.deepin.editor.daemon", "/", QDBusConnection::systemBus(), this);
 
@@ -87,7 +87,7 @@ Window::Window(DMainWindow *parent)
     });
 
     // Init layout and editor.
-    m_centralLayout->setMargin(0);
+    m_centralLayout->setContentsMargins(0, 0, 0, 0);
     m_centralLayout->setSpacing(0);
 
     m_centralLayout->addWidget(m_editorWidget);
@@ -1254,7 +1254,7 @@ void Window::loadTheme(const QString &path)
     QColor backgroundColorWithoutAlpha = QColor(backgroundColor);
     backgroundColorWithoutAlpha.setAlpha(255);
     QPalette palette = this->palette();
-    palette.setColor(QPalette::Background, backgroundColorWithoutAlpha);
+    palette.setColor(QPalette::Window, backgroundColorWithoutAlpha);
     setPalette(palette);
 
     m_themePanel->setBackground(backgroundColor);

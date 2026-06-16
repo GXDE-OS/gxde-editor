@@ -26,7 +26,8 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QGuiApplication>
-#include <DPlatformWindowHandle>
+#include <dplatformwindowhandle.h>
+#include <algorithm>
 
 Tabbar::Tabbar(QWidget *parent)
     : DTabBar(parent)
@@ -355,7 +356,7 @@ bool Tabbar::eventFilter(QObject *, QEvent *event)
 
 void Tabbar::handleTabMoved(int fromIndex, int toIndex)
 {
-    m_tabPaths.swap(fromIndex, toIndex);
+    std::swap(m_tabPaths[fromIndex], m_tabPaths[toIndex]);
 }
 
 void Tabbar::handleTabReleased(int index)

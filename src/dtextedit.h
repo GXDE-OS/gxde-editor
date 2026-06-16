@@ -23,7 +23,7 @@
 #ifndef DTEXTEDIT_H
 #define DTEXTEDIT_H
 
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/repository.h>
+#include <KSyntaxHighlighting/repository.h>
 #include "uncommentselection.h"
 #include "linenumberarea.h"
 

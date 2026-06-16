@@ -1,3 +1,3 @@
 #!/bin/bash
 cd `dirname $0`
-lupdate -recursive */ -ts translations/gxde-editor_*.ts
+/usr/lib/qt6/bin/lupdate -recursive */ -ts translations/gxde-editor_*.ts

@@ -20,7 +20,7 @@
 #ifndef TABBAR_H
 #define TABBAR_H
 
-#include <DTabBar>
+#include <dtabbar.h>
 #include <QMenu>
 
 DWIDGET_USE_NAMESPACE

@@ -23,7 +23,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "dsettingsdialog.h"
+#include <DSettingsDialog>
 #include <qsettingbackend.h>
 #include <QSettings>
 #include <QPointer>

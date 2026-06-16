@@ -19,7 +19,7 @@
 
 #include "toolbar.h"
 #include <QLabel>
-#include <DHiDPIHelper>
+#include <dhidpihelper.h>
 
 DWIDGET_USE_NAMESPACE
 

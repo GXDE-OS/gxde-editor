@@ -23,7 +23,6 @@
 #include "startmanager.h"
 
 #include <DApplication>
-#include <QDesktopWidget>
 #include <DWidgetUtil>
 #include <QDebug>
 #include <QScreen>
@@ -45,7 +44,7 @@ StartManager::StartManager(QObject *parent)
     : QObject(parent)
 {
     // Create blank directory if it not exist.
-    QString blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first()).filePath("blank-files");
+    QString blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first()).filePath("blank-files");
 
     if (!QFileInfo(blankFileDir).exists()) {
         QDir().mkpath(blankFileDir);
@@ -81,7 +80,7 @@ void StartManager::openFilesInTab(QStringList files)
 {
     if (files.isEmpty()) {
         if (m_windows.isEmpty()) {
-            QDir blankDirectory = QDir(QDir(QStandardPaths::standardLocations(QStandardPaths::DataLocation).first()).filePath("blank-files"));
+            QDir blankDirectory = QDir(QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first()).filePath("blank-files"));
             QStringList blankFiles = blankDirectory.entryList(QStringList(), QDir::Files);
 
             Window *window = createWindow(true);
@@ -192,7 +191,7 @@ void StartManager::initWindowPosition(Window *window, bool alwaysCenter)
     } else {
         // Add window offset to avoid all editor window popup at same coordinate.
         int windowOffset = m_windows.size() * 50;
-        QRect screenGeometry = qApp->desktop()->screenGeometry(QCursor::pos());
+        QRect screenGeometry = QGuiApplication::screenAt(QCursor::pos())->geometry();
         window->move(screenGeometry.x() + windowOffset, screenGeometry.y() + windowOffset);
     }
 }

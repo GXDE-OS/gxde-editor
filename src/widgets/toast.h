@@ -27,10 +27,10 @@
 #include <QPropertyAnimation>
 #include <QPushButton>
 
-#include "dhidpihelper.h"
-#include "dthememanager.h"
-#include "dimagebutton.h"
-#include "dgraphicsgloweffect.h"
+#include <dhidpihelper.h>
+#include <dthememanager.h>
+#include <dimagebutton.h>
+#include <dgraphicsgloweffect.h>
 #include <QHBoxLayout>
 
 DWIDGET_USE_NAMESPACE

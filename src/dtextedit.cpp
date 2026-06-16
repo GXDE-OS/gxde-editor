@@ -27,9 +27,9 @@
 #include "editwrapper.h"
 #include "widgets/bottombar.h"
 
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/definition.h>
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/syntaxhighlighter.h>
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/theme.h>
+#include <KSyntaxHighlighting/definition.h>
+#include <KSyntaxHighlighting/syntaxhighlighter.h>
+#include <KSyntaxHighlighting/theme.h>
 
 #include <QAbstractTextDocumentLayout>
 #include <QTextDocumentFragment>
@@ -46,6 +46,7 @@
 #include <QScrollBar>
 #include <QStyleFactory>
 #include <QTextBlock>
+#include <QActionGroup>
 #include <QMimeData>
 #include <QTimer>
 
@@ -279,7 +280,7 @@ int DTextEdit::lineNumberAreaWidth()
         ++digits;
     }
 
-    int space = 13 +  fontMetrics().width(QLatin1Char('9')) * (digits);
+    int space = 13 +  fontMetrics().horizontalAdvance(QLatin1Char('9')) * (digits);
 
     return space;
 }
@@ -372,7 +373,7 @@ void DTextEdit::forwardPair()
     setTextCursor(removeSelectionCursor);
 
     // Start search.
-    if (find(QRegExp("[\"'>)}]"))) {
+    if (find(QRegularExpression("[\"'>)}]"))) {
         int findPos = textCursor().position();
 
         QTextCursor cursor = textCursor();
@@ -406,7 +407,7 @@ void DTextEdit::backwardPair()
     QTextDocument::FindFlags options;
     options |= QTextDocument::FindBackward;
 
-    if (find(QRegExp("[\"'<({]"), options)) {
+    if (find(QRegularExpression("[\"'<({]"), options)) {
         QTextCursor cursor = textCursor();
         auto moveMode = m_cursorMark ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor;
 
@@ -1304,7 +1305,7 @@ void DTextEdit::updateFont()
     font.setPointSize(m_fontSize);
     font.setFamily(m_fontName);
     setFont(font);
-    setTabStopWidth(m_tabSpaceNumber * QFontMetrics(font).width(' '));
+    setTabStopDistance(m_tabSpaceNumber * QFontMetrics(font).horizontalAdvance(' '));
 }
 
 void DTextEdit::replaceAll(const QString &replaceText, const QString &withText)
@@ -1597,7 +1598,7 @@ void DTextEdit::updateLineNumber()
 
     int blockSize = QString::number(blockCount()).size();
 
-    lineNumberArea->setFixedWidth(blockSize * fontMetrics().width('9') + m_lineNumberPaddingX * 4);
+    lineNumberArea->setFixedWidth(blockSize * fontMetrics().horizontalAdvance('9') + m_lineNumberPaddingX * 4);
     lineNumberArea->update();
 }
 
@@ -1847,7 +1848,7 @@ void DTextEdit::setTheme(const KSyntaxHighlighting::Theme &theme, const QString 
     // TODO
     if (m_wrapper) {
         QPalette palette = m_wrapper->bottomBar()->palette();
-        palette.setColor(QPalette::Background, m_backgroundColor);
+        palette.setColor(QPalette::Window, m_backgroundColor);
         palette.setColor(QPalette::Text, textColor);
         m_wrapper->bottomBar()->setPalette(palette);
     }

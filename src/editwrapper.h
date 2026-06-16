@@ -24,6 +24,7 @@
 #include "dtextedit.h"
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
+#include <QTextCodec>
 #ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
 #endif

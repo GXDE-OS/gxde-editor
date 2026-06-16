@@ -36,11 +36,11 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QScreen>
 #include <iostream>
 
 DWIDGET_USE_NAMESPACE
+DTK_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {

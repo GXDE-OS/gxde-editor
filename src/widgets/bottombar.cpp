@@ -102,7 +102,7 @@ void BottomBar::setPalette(const QPalette &palette)
     m_charCountLabel->setStyleSheet(QString("QLabel { color: %1; }").
                                    arg(palette.color(QPalette::Text).name()));
 
-    QString theme = (palette.color(QPalette::Background).lightness() < 128) ? "dark" : "light";
+    QString theme = (palette.color(QPalette::Window).lightness() < 128) ? "dark" : "light";
     m_encodeMenu->setTheme(theme);
     m_highlightMenu->setTheme(theme);
 
@@ -119,7 +119,7 @@ void BottomBar::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.setOpacity(1);
 
-    QColor backgroundColor = palette().color(QPalette::Background);
+    QColor backgroundColor = palette().color(QPalette::Window);
     QPainterPath path;
     path.addRect(rect());
     painter.fillPath(path, backgroundColor);

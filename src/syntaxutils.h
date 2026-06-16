@@ -2,8 +2,8 @@
 #define SYNTAXUTILS_H
 
 #include <QString>
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/definition.h>
-#include <KF5/KSyntaxHighlighting/KSyntaxHighlighting/repository.h>
+#include <KSyntaxHighlighting/definition.h>
+#include <KSyntaxHighlighting/repository.h>
 
 class SyntaxUtils
 {

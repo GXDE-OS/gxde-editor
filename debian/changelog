@@ -1,4 +1,4 @@
-gxde-editor (1.4.6) UNRELEASED; urgency=medium
+gxde-editor (2.0.0) UNRELEASED; urgency=medium
 
   * 新增 Markdown 预览功能
   * 初步实现预览框同步
@@ -9,8 +9,9 @@ gxde-editor (1.4.6) UNRELEASED; urgency=medium
   * 禁用 Markdown 预览
   * 修复编译问题
   * 支持 shebang 识别
+  * Qt6 迁移
 
- -- gfdgd_xi <3025613752@qq.com>  Sat, 10 Jan 2026 21:48:56 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Tue, 16 Jun 2026 10:12:17 +0800
 
 gxde-editor (1.0-1) unstable; urgency=medium
 

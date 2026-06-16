@@ -23,8 +23,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "ddialog.h"
-#include "dmainwindow.h"
+#include <DDialog>
+#include <DMainWindow>
 #include "editwrapper.h"
 #include "findbar.h"
 #include "jumplinebar.h"

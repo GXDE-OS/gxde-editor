@@ -30,7 +30,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QWidget>
-#include "dimagebutton.h"
+#include <dimagebutton.h>
 
 DWIDGET_USE_NAMESPACE
 

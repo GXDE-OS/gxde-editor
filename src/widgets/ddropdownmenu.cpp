@@ -122,7 +122,7 @@ void DDropdownMenu::setText(const QString &text)
     m_text->setText(text);
 
     QFontMetrics fm(font());
-    setFixedWidth(fm.width(text) + 40);
+    setFixedWidth(fm.horizontalAdvance(text) + 40);
 }
 
 void DDropdownMenu::setMenu(QMenu *menu)

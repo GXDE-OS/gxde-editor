@@ -151,7 +151,6 @@ bool EditWrapper::saveFile()
     }
 
     QTextStream stream(&file);
-    stream.setCodec(m_textCodec);
     stream << m_textEdit->toPlainText().replace(eolRegex, eol);
 
     // flush stream.
@@ -213,7 +212,6 @@ void EditWrapper::refresh()
         m_isRefreshing = true;
 
         QTextStream out(&file);
-        out.setCodec(m_textCodec);
         QString content = out.readAll();
 
         m_textEdit->setPlainText(QString());

@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dthememanager.h"
+#include <dthememanager.h>
 #include "jumplinebar.h"
 
 #include <QDebug>

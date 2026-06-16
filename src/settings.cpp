@@ -22,7 +22,7 @@
 
 #include "settings.h"
 
-#include "dthememanager.h"
+#include <dthememanager.h>
 #include "fontitemdelegate.h"
 #include <DSettings>
 #include <DSettingsGroup>

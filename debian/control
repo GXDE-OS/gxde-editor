@@ -5,17 +5,16 @@ Maintainer: gfdgd xi <3025613752@qq.com>, Deepin Packages Builder <packages@linu
 Build-Depends:
  debhelper (>= 9),
  cmake, 
- pkg-config, 
- libqt5widgets5, 
- libdtkcore2-dev, 
- libdtkwidget2-dev, 
- qtbase5-dev, 
- libpolkit-qt5-1-dev, 
- libkf5syntaxhighlighting-dev, 
- libkf5codecs-dev, 
- qttools5-dev-tools, 
- qtbase5-private-dev,
-# qtwebengine5-dev [i386 amd64 armhf arm64 mips64el]
+ pkg-config,
+ libdtk6core-dev, 
+ libdtk2widget6-dev, 
+ qt6-base-dev, 
+ libpolkit-qt6-1-dev, 
+ libkf6syntaxhighlighting-dev, 
+ libkf6codecs-dev, 
+ qt6-tools-dev-tools,
+ qt6-base-private-dev,
+# qt6-webengine-dev [i386 amd64 armhf arm64 mips64el loong64]
 Standards-Version: 3.9.8
 Homepage: https://www.gxde.top
 
@@ -23,6 +22,6 @@ Package: gxde-editor
 Architecture: any
 Replaces: deepin-editor
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: gxde-qt5integration, gxde-daemon (>= 1.2.6)
+Recommends: gxde-qt6integration, gxde-daemon (>= 1.2.6)
 Description: dtk based text editor
  Advanced text editor based on dtk.

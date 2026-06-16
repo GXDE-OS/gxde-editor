@@ -55,10 +55,7 @@ void FileLoadThread::run()
         // read the encode.
         QByteArray encode = Utils::detectEncode(fileContent);
 
-        QTextStream stream(&fileContent);
-        stream.setCodec(encode);
-
-        QString content = stream.readAll();
+        QString content = QString::fromUtf8(fileContent);
 
         emit loadFinished(encode, content);
     }

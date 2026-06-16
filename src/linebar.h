@@ -23,7 +23,7 @@
 #ifndef LINEBAR_H
 #define LINEBAR_H
 
-#include "dlineedit.h"
+#include <dlineedit.h>
 
 #include <QTimer>
 
