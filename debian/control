@@ -14,6 +14,7 @@ Build-Depends:
  libkf6codecs-dev, 
  qt6-tools-dev-tools,
  qt6-base-private-dev,
+ qt6-5compat-dev,
 # qt6-webengine-dev [i386 amd64 armhf arm64 mips64el loong64]
 Standards-Version: 3.9.8
 Homepage: https://www.gxde.top
