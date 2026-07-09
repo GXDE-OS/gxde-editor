@@ -146,7 +146,9 @@ void Toast::showAnimation()
     animation->start();
 
     connect(animation, &QPropertyAnimation::finished, this, [=] {
-        m_animation->deleteLater();
+        // 修复当文件被软件打开，此时再删掉该文件，软件会崩溃的问题
+        // m_animation->deleteLater();
+        animation->deleteLater();
     });
 }
 
