@@ -67,6 +67,7 @@ public:
     void removeWrapper(const QString &filePath, bool isDelete = false);
 
     void openFile();
+    void raiseAndActivate();
     bool saveFile();
     bool saveAsFile();
 

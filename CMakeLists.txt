@@ -31,7 +31,8 @@ configure_file(src/environments.h.in environments.h @ONLY)
 # Sources files
 file(GLOB SRCS "src/*.h" "src/*.cpp"
                "src/thememodule/*.h" "src/thememodule/*.cpp"
-               "src/widgets/*.h" "src/widgets/*.cpp")
+               "src/widgets/*.h" "src/widgets/*.cpp"
+               "src/kywc-toplevel-v1-protocol.c")
 
 # Find the library
 find_package(PkgConfig REQUIRED)
@@ -42,6 +43,7 @@ find_package(Qt6DBus REQUIRED)
 find_package(Qt6Concurrent REQUIRED)
 find_package(Qt6PrintSupport REQUIRED)
 find_package(Qt6Gui REQUIRED)
+find_package(Qt6WaylandClient REQUIRED)
 find_package(Dtk2widget REQUIRED)
 find_package(Dtk6Core REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
@@ -72,6 +74,8 @@ target_link_libraries(gxde-editor
     Qt6::Concurrent
     Qt6::Network
     Qt6::Core5Compat
+    Qt6::Gui
+    Qt6::WaylandClient
 
     KF6::Codecs
     KF6::SyntaxHighlighting

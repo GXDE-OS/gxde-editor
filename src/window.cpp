@@ -43,6 +43,8 @@
 #include <QGuiApplication>
 #include <QWindow>
 
+#include "waylandactivator.h"
+
 #ifdef DTKWIDGET_CLASS_DFileDialog
 #include <DFileDialog>
 #else
@@ -308,7 +310,7 @@ void Window::addTab(const QString &filepath, bool activeTab)
     }
 
     // Activate window.
-    activateWindow();
+    raiseAndActivate();
 
     // Active tab if activeTab is true.
     if (activeTab) {
@@ -320,6 +322,23 @@ void Window::addTab(const QString &filepath, bool activeTab)
     /*} else {
         showNotify(tr("Invalid file: %1").arg(QFileInfo(filepath).fileName()));
     }*/
+}
+
+void Window::raiseAndActivate()
+{
+    if (isMinimized()) {
+        showNormal();
+    } else if (!isVisible()) {
+        show();
+    }
+
+    activateWindow();
+
+    if (QWindow *win = windowHandle()) {
+        win->requestActivate();
+    }
+
+    WaylandActivator::instance().activateOwnWindow();
 }
 
 void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, const QString &tabName, int index)
