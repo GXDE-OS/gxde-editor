@@ -32,7 +32,8 @@ configure_file(src/environments.h.in environments.h @ONLY)
 file(GLOB SRCS "src/*.h" "src/*.cpp"
                "src/thememodule/*.h" "src/thememodule/*.cpp"
                "src/widgets/*.h" "src/widgets/*.cpp"
-               "src/kywc-toplevel-v1-protocol.c")
+               "src/wayland/kywc-toplevel-v1-protocol.c" 
+               "src/wayland/*.cpp" "src/wayland/*.h")
 
 # Find the library
 find_package(PkgConfig REQUIRED)

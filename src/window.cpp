@@ -43,7 +43,7 @@
 #include <QGuiApplication>
 #include <QWindow>
 
-#include "waylandactivator.h"
+#include "wayland/waylandactivator.h"
 
 #ifdef DTKWIDGET_CLASS_DFileDialog
 #include <DFileDialog>
