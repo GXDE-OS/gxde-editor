@@ -229,6 +229,19 @@ void WaylandActivator::bind()
         return;
     }
 
+    for (kywc_toplevel_v1 *t : std::as_const(m_ownToplevels)) {
+        kywc_toplevel_v1_destroy(t);
+    }
+    m_ownToplevels.clear();
+    if (m_manager) {
+        kywc_toplevel_manager_v1_destroy(m_manager);
+        m_manager = nullptr;
+    }
+    if (m_registry) {
+        wl_registry_destroy(m_registry);
+        m_registry = nullptr;
+    }
+
     auto *waylandApp = qApp->nativeInterface<QNativeInterface::QWaylandApplication>();
     if (!waylandApp) {
         return;
@@ -244,16 +257,17 @@ void WaylandActivator::bind()
     }
     wl_registry_add_listener(m_registry, registryListener(), this);
     wl_display_roundtrip(m_display);
+    wl_display_roundtrip(m_display);
 
-    // After the roundtrip the compositor has enumerated all current
-    // toplevels (including our own already-running window) and we have
-    // recorded those whose pid matches ours.
     m_initialized = (m_manager != nullptr);
 }
 
 bool WaylandActivator::activateOwnWindow()
 {
     if (!m_initialized) {
+        bind();
+    }
+    if (m_ownToplevels.isEmpty()) {
         bind();
     }
     if (!m_initialized || m_ownToplevels.isEmpty()) {

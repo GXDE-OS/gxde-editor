@@ -168,6 +168,8 @@ Window::Window(DMainWindow *parent)
 
     // 允许设置背景
     setEnableWindowBackground(1);
+
+    WaylandActivator::instance();
 }
 
 Window::~Window()
