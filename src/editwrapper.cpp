@@ -35,6 +35,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDir>
+#include <DGuiApplicationHelper>
 
 #include "drecentmanager.h"
 
@@ -101,7 +102,7 @@ EditWrapper::EditWrapper(QWidget *parent)
     connect(m_toast, &Toast::saveAsBtnClicked, this, &EditWrapper::requestSaveAs);
     connect(m_pendingLoadTimer, &QTimer::timeout, this, &EditWrapper::appendPendingTextLoadChunk);
 
-    setDarkTheme(DThemeManager::instance()->theme() == "dark");
+    setDarkTheme(Dtk::Gui::DGuiApplicationHelper::instance()->themeType() == Dtk::Gui::DGuiApplicationHelper::DarkType);
 }
 
 EditWrapper::~EditWrapper()

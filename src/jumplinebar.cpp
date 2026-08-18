@@ -41,7 +41,7 @@ JumpLineBar::JumpLineBar(QWidget *parent)
     m_editLine = new LineBar();
 
     m_lineValidator = new QIntValidator;
-    m_editLine->setValidator(m_lineValidator);
+    m_editLine->lineEdit()->setValidator(m_lineValidator);
 
     m_layout->addWidget(m_label);
     m_layout->addWidget(m_editLine);

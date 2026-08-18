@@ -32,6 +32,7 @@
 #include <QFontDatabase>
 #include <QApplication>
 #include <QComboBox>
+#include <QHBoxLayout>
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
@@ -144,7 +145,13 @@ QWidget *Settings::createFontComBoBoxHandle(QObject *obj)
     auto option = qobject_cast<DTK_CORE_NAMESPACE::DSettingsOption *>(obj);
 
     QComboBox *comboBox = new QComboBox;
-    QWidget *optionWidget = DSettingsWidgetFactory::createTwoColumWidget(option, comboBox);
+    const auto pair = DSettingsWidgetFactory::createStandardItem(QByteArray(), option, comboBox);
+    QWidget *optionWidget = new QWidget;
+    QHBoxLayout *layout = new QHBoxLayout(optionWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(pair.first);
+    layout->addWidget(pair.second);
 
     QFontDatabase fontDatabase;
     comboBox->addItems(fontDatabase.families());

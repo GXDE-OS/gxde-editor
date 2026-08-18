@@ -4,15 +4,13 @@
 #include <QScrollBar>
 #include <QFile>
 #include <QWebEngineSettings>
+#include <QUrl>
 #include <QJsonDocument>
-#include <QWebEngineScript>
-#include <QWebEngineScriptCollection>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-
-#include <QDBusMessage>
-#include <QDBusConnection>
+#include <QtMath>
+#include <QWebChannel>
 
 // 使用GitHub风格的Markdown样式
 const QString STYLE_LIGHT = R"(
@@ -43,19 +41,18 @@ const QString STYLE_DARK = R"(
   </style>
 )";
 
-// JavaScript 同步代码
-const QString SCROLL_SYNC_JS = R"(
-let lastSentPosition = 0;
-const SYNC_THRESHOLD = 5; // 像素阈值避免微小抖动
+MarkdownPreviewBridge::MarkdownPreviewBridge(MarkdownPreviewWidget* widget)
+    : QObject(widget)
+    , m_widget(widget)
+{
+}
 
-window.addEventListener('scroll', function(e) {
-    const current = window.scrollY || document.documentElement.scrollTop;
-    if (Math.abs(current - lastSentPosition) > SYNC_THRESHOLD) {
-        lastSentPosition = current;
-        window.external.syncPreviewScroll(current);
+void MarkdownPreviewBridge::syncPreviewToEditor(double ratio)
+{
+    if (m_widget) {
+        m_widget->syncPreviewToEditor(ratio);
     }
-});
-)";
+}
 
 MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     : QWidget(parent)
@@ -65,6 +62,10 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
 
     m_webView = new QWebEngineView(this);
     m_webPage = new MarkdownWebPage(this);
+    m_webChannel = new QWebChannel(this);
+    m_bridge = new MarkdownPreviewBridge(this);
+    m_webChannel->registerObject(QStringLiteral("markdownPreview"), m_bridge);
+    m_webPage->setWebChannel(m_webChannel);
 
     m_webView->setPage(m_webPage);
     m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessRemoteUrls, true);
@@ -78,132 +79,177 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     m_updateTimer->setSingleShot(true);
     connect(m_updateTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::performUpdate);
 
+    // 定时轮询预览区滚动位置，用于预览 -> 编辑器的同步
     m_scrollSyncTimer = new QTimer(this);
-    m_scrollSyncTimer->setSingleShot(true);
-    //connect(m_scrollSyncTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::setupScrollSync);
+    m_scrollSyncTimer->setInterval(50);
+    connect(m_scrollSyncTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::pollPreviewScroll);
+
+    // 页面加载完成后恢复滚动比例并开始监听预览区滚动
+    connect(m_webView, &QWebEngineView::loadFinished,
+            this, &MarkdownPreviewWidget::onPreviewLoadFinished);
 }
 
 bool MarkdownPreviewWidget::isSupport()
 {
-    // 检测是否是 root 用户且有设置 QTWEBENGINE_DISABLE_SANDBOX
-    if (QProcessEnvironment::systemEnvironment().value("USER") != "root" ||
-        QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
-        QDBusMessage dbus = QDBusMessage::createMethodCall("com.gxde.daemon.system.info",
-                                                           "/com/gxde/daemon/system/info",
-                                                           "com.gxde.daemon.system.info",
-                                                           "IsInChroot");
-        auto result = QDBusConnection::sessionBus().call(dbus);
-        bool isInChroot = false;
-        if (result.arguments().count() > 0) {
-            isInChroot = result.arguments().at(0).toBool();
-        }
-        if (!isInChroot) {
-            return 1;
-        }
-    }
-    return 0;
+    // 只要编译期启用了 WebEngine，就启用 Markdown 预览。
+    // 之前还会根据 root/chroot 环境禁用，导致部分环境下看不到预览界面。
+    return true;
 }
 
-void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor) {
-    if (m_sourceEditor == editor) return;
+void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor)
+{
+    if (m_sourceEditor == editor)
+        return;
 
     if (m_sourceEditor) {
         disconnect(m_sourceEditor, &QTextEdit::textChanged,
                    this, &MarkdownPreviewWidget::scheduleUpdate);
-    }
-
-    if (m_sourceEditor) {
         disconnect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
-            this, &MarkdownPreviewWidget::syncEditorToPreview);
+                   this, &MarkdownPreviewWidget::syncEditorToPreview);
     }
 
     m_sourceEditor = editor;
+    ++m_loadGeneration;
+    m_syncing = false;
+    m_lastScrollRatio = 0.0;
+    m_lastPreviewRatio = 0.0;
 
-    if (m_sourceEditor) {
-        connect(m_sourceEditor, &QTextEdit::textChanged,
-                this, &MarkdownPreviewWidget::scheduleUpdate);
-        scheduleUpdate();
+    if (m_scrollSyncTimer)
+        m_scrollSyncTimer->stop();
+
+    if (!m_sourceEditor) {
+        m_webView->setHtml(QString());
+        return;
     }
 
-    // 初始化滚动同步
-    if (m_sourceEditor) {
-        connect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
-                this, &MarkdownPreviewWidget::syncEditorToPreview);
-        // 初始化内容
-        m_webView->setHtml(generateHtml(m_sourceEditor->toPlainText()));
-    }
+    connect(m_sourceEditor, &QTextEdit::textChanged,
+            this, &MarkdownPreviewWidget::scheduleUpdate);
+    connect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &MarkdownPreviewWidget::syncEditorToPreview);
+
+    // 初始化内容，页面加载完成后会恢复滚动位置
+    m_webView->setHtml(generateHtml(m_sourceEditor->toPlainText()), QUrl("qrc:/"));
 }
 
-void MarkdownPreviewWidget::setupScrollSync() {
-    // 注入JavaScript同步处理器
-    QWebEngineScript script;
-    script.setSourceCode(SCROLL_SYNC_JS);
-    script.setName("ScrollSync");
-    script.setWorldId(QWebEngineScript::MainWorld);
-    script.setInjectionPoint(QWebEngineScript::DocumentReady);
-    m_webView->page()->scripts().insert(script);
-}
+void MarkdownPreviewWidget::syncEditorToPreview()
+{
+    if (!m_sourceEditor || m_syncing)
+        return;
 
-double MarkdownPreviewWidget::calculateSyncRatio() {
-    const int editorHeight = m_sourceEditor->height();
-    const int editorContentHeight = m_sourceEditor->document()->size().height();
-    const double editorVisibleRatio = static_cast<double>(editorHeight) / editorContentHeight;
-
-    // 获取预览内容高度
-    int previewContentHeight = 0;
-    m_webView->page()->runJavaScript("document.documentElement.scrollHeight",
-        [&](const QVariant& result) {
-            previewContentHeight = result.toInt();
-        });
-
-    const int previewHeight = m_webView->height();
-    const double previewVisibleRatio = static_cast<double>(previewHeight) / previewContentHeight;
-
-    // 计算比例修正系数（考虑padding等因素）
-    return (1.0 - previewVisibleRatio) / (1.0 - editorVisibleRatio);
-}
-
-void MarkdownPreviewWidget::syncEditorToPreview() {
-    //if (m_syncing) return;
-    m_syncing = true;
-
-    // 计算滚动比例
     QScrollBar* scrollBar = m_sourceEditor->verticalScrollBar();
+    if (scrollBar->maximum() <= 0)
+        return;
+
     const double ratio = static_cast<double>(scrollBar->value()) / scrollBar->maximum();
+    m_lastPreviewRatio = ratio;
 
-    // 异步执行滚动操作
-    m_webView->page()->runJavaScript(
-        QString("window.scrollTo(0, document.documentElement.scrollHeight * %1);")
-            .arg(ratio)
-    );
+    m_syncing = true;
+    setPreviewScrollRatio(ratio);
 
-    // 200ms后解除同步锁定
-    //QTimer::singleShot(200, this, [this](){ m_syncing = false; });
+    // 短暂锁定，避免 JS 侧回读滚动位置再次触发编辑器滚动
+    QTimer::singleShot(100, this, [this] {
+        m_syncing = false;
+    });
 }
 
+void MarkdownPreviewWidget::syncPreviewToEditor(double ratio)
+{
+    if (!m_sourceEditor || m_syncing)
+        return;
 
-void MarkdownPreviewWidget::scheduleUpdate() {
-    m_lastScrollPosition = m_webView->page()->scrollPosition().y();
+    QScrollBar* scrollBar = m_sourceEditor->verticalScrollBar();
+    if (scrollBar->maximum() <= 0)
+        return;
+
+    m_lastPreviewRatio = ratio;
+    m_syncing = true;
+    scrollBar->setValue(qRound(ratio * scrollBar->maximum()));
+
+    QTimer::singleShot(100, this, [this] {
+        m_syncing = false;
+    });
+}
+
+void MarkdownPreviewWidget::pollPreviewScroll()
+{
+    if (!m_sourceEditor || m_syncing || !m_webView)
+        return;
+
+    const int generation = m_loadGeneration;
+    m_webView->page()->runJavaScript(
+        "var e = document.documentElement;"
+        "var h = e.scrollHeight - e.clientHeight;"
+        "h > 0 ? (window.scrollY || e.scrollTop || 0) / h : 0;",
+        [this, generation](const QVariant &result) {
+            if (generation != m_loadGeneration || !m_sourceEditor || m_syncing)
+                return;
+
+            const double ratio = result.toDouble();
+            if (qAbs(ratio - m_lastPreviewRatio) < 0.0005)
+                return;
+
+            m_lastPreviewRatio = ratio;
+
+            QScrollBar* scrollBar = m_sourceEditor->verticalScrollBar();
+            if (scrollBar->maximum() <= 0)
+                return;
+
+            m_syncing = true;
+            scrollBar->setValue(qRound(ratio * scrollBar->maximum()));
+            QTimer::singleShot(100, this, [this] {
+                m_syncing = false;
+            });
+        });
+}
+
+void MarkdownPreviewWidget::onPreviewLoadFinished(bool ok)
+{
+    if (!ok || !m_sourceEditor)
+        return;
+
+    // 在 JS 真正执行 scrollTo 后再记录比例并启动轮询，
+    // 避免轮询读到恢复前的旧位置导致滚动被拉回去。
+    const double ratio = m_lastScrollRatio;
+    const int generation = m_loadGeneration;
+    m_webView->page()->runJavaScript(
+        QString("var e = document.documentElement;"
+                "var h = e.scrollHeight - e.clientHeight;"
+                "window.scrollTo(0, %1 * (h > 0 ? h : 0));").arg(ratio),
+        [this, ratio, generation](const QVariant &) {
+            if (generation != m_loadGeneration)
+                return;
+            m_lastPreviewRatio = ratio;
+            if (m_sourceEditor && m_scrollSyncTimer && !m_scrollSyncTimer->isActive())
+                m_scrollSyncTimer->start();
+        }
+    );
+}
+
+void MarkdownPreviewWidget::scheduleUpdate()
+{
+    // 记录当前预览比例，内容刷新后尽量维持阅读位置
+    m_lastScrollRatio = m_lastPreviewRatio;
     m_updateTimer->start(200); // 200ms防抖
 }
 
-void MarkdownPreviewWidget::performUpdate() {
-    if (!m_sourceEditor) return;
+void MarkdownPreviewWidget::performUpdate()
+{
+    if (!m_sourceEditor)
+        return;
+
+    // 刷新期间暂停轮询，避免在页面重新加载过程中误同步
+    if (m_scrollSyncTimer)
+        m_scrollSyncTimer->stop();
 
     const QString content = m_sourceEditor->toPlainText();
     const QString html = generateHtml(content);
 
+    ++m_loadGeneration;
     m_webView->setHtml(html, QUrl("qrc:/"));
-
-    // 延迟恢复滚动位置
-    QTimer::singleShot(50, this, [this] {
-        m_webView->page()->runJavaScript(
-            QString("window.scrollTo(0, %1);").arg(m_lastScrollPosition)
-        );
-    });
 }
 
-QString MarkdownPreviewWidget::generateHtml(const QString& markdown) {
+QString MarkdownPreviewWidget::generateHtml(const QString& markdown)
+{
     // 使用 QJsonDocument 正确序列化字符串
     QJsonArray a;
     a.append(QJsonValue(markdown));
@@ -223,6 +269,7 @@ QString MarkdownPreviewWidget::generateHtml(const QString& markdown) {
             <meta charset="utf-8">
             %1
             <script src="qrc:/markdown/marked.min.js"></script>
+            <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
         </head>
         <body>
             <article class="markdown-body">
@@ -237,6 +284,19 @@ QString MarkdownPreviewWidget::generateHtml(const QString& markdown) {
                     img.style.maxWidth = '100%';
                     img.style.height = 'auto';
                 });
+
+                // 通过 QWebChannel 将预览区滚动事件实时通知给 C++ 侧
+                new QWebChannel(qt.webChannelTransport, function(channel) {
+                    const bridge = channel.objects.markdownPreview;
+                    if (!bridge) return;
+                    window.addEventListener('scroll', function() {
+                        const e = document.documentElement;
+                        const h = e.scrollHeight - e.clientHeight;
+                        if (h > 0) {
+                            bridge.syncPreviewToEditor((window.scrollY || e.scrollTop || 0) / h);
+                        }
+                    });
+                });
             </script>
         </body>
         </html>
@@ -244,12 +304,27 @@ QString MarkdownPreviewWidget::generateHtml(const QString& markdown) {
       .arg(escapedMarkdown); // 直接插入已转义内容
 }
 
-void MarkdownPreviewWidget::setDarkTheme(bool enabled) {
+void MarkdownPreviewWidget::setDarkTheme(bool enabled)
+{
     m_darkMode = enabled;
     scheduleUpdate();
 }
 
-void MarkdownPreviewWidget::initWebView() {
+void MarkdownPreviewWidget::setPreviewScrollRatio(double ratio)
+{
+    if (!m_webView || !m_sourceEditor)
+        return;
+
+    m_lastPreviewRatio = ratio;
+    m_webView->page()->runJavaScript(
+        QString("var e = document.documentElement;"
+                "var h = e.scrollHeight - e.clientHeight;"
+                "window.scrollTo(0, %1 * (h > 0 ? h : 0));").arg(ratio)
+    );
+}
+
+void MarkdownPreviewWidget::initWebView()
+{
     // 禁用上下文菜单
     //m_webView->setContextMenuPolicy(Qt::NoContextMenu);
 

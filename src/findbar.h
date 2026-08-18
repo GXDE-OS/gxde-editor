@@ -30,7 +30,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QWidget>
-#include <dimagebutton.h>
+#include <QPushButton>
 
 DWIDGET_USE_NAMESPACE
 
@@ -67,7 +67,7 @@ protected:
 private:
     QPushButton *m_findNextButton;
     QPushButton *m_findPrevButton;
-    DImageButton *m_closeButton;
+    QPushButton *m_closeButton;
     LineBar *m_editLine;
     QHBoxLayout *m_layout;
     QLabel *m_findLabel;

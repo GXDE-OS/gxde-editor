@@ -4,19 +4,19 @@ Priority: optional
 Maintainer: gfdgd xi <3025613752@qq.com>, Deepin Packages Builder <packages@linuxdeepin.com>
 Build-Depends:
  debhelper (>= 9),
- cmake, 
+ cmake,
  pkg-config,
- libdtk6core-dev, 
- libdtk2widget6-dev, 
- qt6-base-dev, 
- libpolkit-qt6-1-dev, 
- libkf6syntaxhighlighting-dev, 
- libkf6codecs-dev, 
+ libdtk6core-dev,
+ libdtk6widget-dev,
+ qt6-base-dev,
+ libpolkit-qt6-1-dev,
+ libkf6syntaxhighlighting-dev,
+ libkf6codecs-dev,
  qt6-tools-dev-tools,
  qt6-base-private-dev,
  qt6-5compat-dev,
- qt6-wayland-dev
-# qt6-webengine-dev [i386 amd64 armhf arm64 mips64el loong64]
+ qt6-wayland-dev,
+ qt6-webengine-dev,
 Standards-Version: 3.9.8
 Homepage: https://www.gxde.top
 

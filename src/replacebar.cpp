@@ -25,6 +25,7 @@
 
 #include <QPainterPath>
 #include <QDebug>
+#include <QIcon>
 
 ReplaceBar::ReplaceBar(QWidget *parent)
     : QWidget(parent)
@@ -43,7 +44,7 @@ ReplaceBar::ReplaceBar(QWidget *parent)
     m_replaceSkipButton = new QPushButton(tr("Skip"));
     m_replaceRestButton = new QPushButton(tr("Replace Rest"));
     m_replaceAllButton = new QPushButton(tr("Replace All"));
-    m_closeButton = new DImageButton();
+    m_closeButton = new QPushButton();
     m_closeButton->setFixedSize(16, 16);
 
     m_layout->addWidget(m_replaceLabel);
@@ -85,7 +86,7 @@ ReplaceBar::ReplaceBar(QWidget *parent)
     connect(m_replaceRestButton, &QPushButton::clicked, this, &ReplaceBar::handleReplaceRest, Qt::QueuedConnection);
     connect(m_replaceAllButton, &QPushButton::clicked, this, &ReplaceBar::handleReplaceAll, Qt::QueuedConnection);
 
-    connect(m_closeButton, &DImageButton::clicked, this, &ReplaceBar::replaceCancel, Qt::QueuedConnection);
+    connect(m_closeButton, &QPushButton::clicked, this, &ReplaceBar::replaceCancel, Qt::QueuedConnection);
 }
 
 bool ReplaceBar::isFocus()
@@ -102,8 +103,8 @@ void ReplaceBar::activeInput(QString text, QString file, int row, int column, in
 {
     // Try fill keyword with select text.
     m_replaceLine->clear();
-    m_replaceLine->insert(text);
-    m_replaceLine->selectAll();
+    m_replaceLine->lineEdit()->insert(text);
+    m_replaceLine->lineEdit()->selectAll();
 
     // Show.
     show();
@@ -176,16 +177,14 @@ void ReplaceBar::setBackground(QString color)
         m_replaceLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#AAAAAA"));
         m_withLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#AAAAAA"));
 
-        m_closeButton->setNormalPic(Utils::getQrcPath("bar_close_normal_dark.svg"));
-        m_closeButton->setHoverPic(Utils::getQrcPath("bar_close_hover_dark.svg"));
-        m_closeButton->setPressPic(Utils::getQrcPath("bar_close_press_dark.svg"));
+        m_closeButton->setIcon(QIcon(Utils::getQrcPath("bar_close_normal_dark.svg")));
+        m_closeButton->setStyleSheet("QPushButton { border: none; }");
     } else {
         m_replaceLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#000000"));
         m_withLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#000000"));
 
-        m_closeButton->setNormalPic(Utils::getQrcPath("bar_close_normal_light.svg"));
-        m_closeButton->setHoverPic(Utils::getQrcPath("bar_close_hover_light.svg"));
-        m_closeButton->setPressPic(Utils::getQrcPath("bar_close_press_light.svg"));
+        m_closeButton->setIcon(QIcon(Utils::getQrcPath("bar_close_normal_light.svg")));
+        m_closeButton->setStyleSheet("QPushButton { border: none; }");
     }
 
     repaint();

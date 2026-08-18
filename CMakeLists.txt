@@ -32,7 +32,7 @@ configure_file(src/environments.h.in environments.h @ONLY)
 file(GLOB SRCS "src/*.h" "src/*.cpp"
                "src/thememodule/*.h" "src/thememodule/*.cpp"
                "src/widgets/*.h" "src/widgets/*.cpp"
-               "src/wayland/kywc-toplevel-v1-protocol.c" 
+               "src/wayland/kywc-toplevel-v1-protocol.c"
                "src/wayland/*.cpp" "src/wayland/*.h")
 
 # Find the library
@@ -45,29 +45,30 @@ find_package(Qt6Concurrent REQUIRED)
 find_package(Qt6PrintSupport REQUIRED)
 find_package(Qt6Gui REQUIRED)
 find_package(Qt6WaylandClient REQUIRED)
-find_package(Dtk2widget REQUIRED)
+find_package(Dtk6Widget REQUIRED)
 find_package(Dtk6Core REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(KF6Codecs REQUIRED)
 
 # 尝试查找WebEngine模块
-find_package(Qt6WebEngine QUIET)
+find_package(Qt6WebEngineCore QUIET)
 find_package(Qt6WebEngineWidgets QUIET)
+find_package(Qt6WebChannel QUIET)
 
 include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
-target_include_directories(gxde-editor PUBLIC 
-    /usr/include/dtk2/DWidget 
-    /usr/include/dtk6/DCore 
-    /usr/include/dtk6/DLog 
+target_include_directories(gxde-editor PUBLIC
+    /usr/include/dtk6/DWidget
+    /usr/include/dtk6/DCore
+    /usr/include/dtk6/DLog
     /usr/include/dtk6/DGui
-    ${OBJECT_BINARY_DIR} 
+    ${OBJECT_BINARY_DIR}
     ${CMARK_INCLUDE_DIRS}
 )
 target_link_libraries(gxde-editor
-    ${Dtk2widget_LIBRARIES}
+    Dtk6::Widget
     Dtk6::Core
     Qt6::Widgets
     Qt6::DBus
@@ -83,11 +84,12 @@ target_link_libraries(gxde-editor
 )
 
 # 判断 Qt6WebEngine 模块是否存在
-if(Qt6WebEngine_FOUND AND Qt6WebEngineWidgets_FOUND)
+if(Qt6WebEngineCore_FOUND AND Qt6WebEngineWidgets_FOUND AND Qt6WebChannel_FOUND)
     # 添加模块链接和宏定义
     target_link_libraries(gxde-editor
-        Qt6::WebEngine
+        Qt6::WebEngineCore
         Qt6::WebEngineWidgets
+        Qt6::WebChannel
     )
     target_compile_definitions(gxde-editor
         PRIVATE

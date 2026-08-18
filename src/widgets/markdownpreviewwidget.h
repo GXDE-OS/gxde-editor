@@ -12,6 +12,22 @@
 #include <QProcessEnvironment>
 
 // 用于实现调用浏览器打开超链接
+class QWebChannel;
+class MarkdownPreviewWidget;
+
+// 仅暴露滚动同步接口给 QWebChannel，避免把整个 QWidget 暴露给页面
+class MarkdownPreviewBridge : public QObject {
+    Q_OBJECT
+public:
+    explicit MarkdownPreviewBridge(MarkdownPreviewWidget* widget);
+
+public slots:
+    void syncPreviewToEditor(double ratio);
+
+private:
+    MarkdownPreviewWidget* m_widget;
+};
+
 class MarkdownWebPage : public QWebEnginePage {
     Q_OBJECT
 public:
@@ -34,35 +50,35 @@ public:
     void setSourceEditor(QTextEdit* editor);
     void setDarkTheme(bool enabled);
 
-    static bool isSupport()/* {
-        // 检测是否有设置 QTWEBENGINE_DISABLE_SANDBOX
-        if (QProcessEnvironment::systemEnvironment().value("QTWEBENGINE_DISABLE_SANDBOX") == "1") {
-            return true;
-        }
-        return QProcessEnvironment::systemEnvironment().value("USER") != "root";
-    }*/;
+    static bool isSupport();
+
+    void syncPreviewToEditor(double ratio);
 
 private slots:
     void scheduleUpdate();
     void performUpdate();
 
-    void setupScrollSync();
     void syncEditorToPreview();
+    void pollPreviewScroll();
+    void onPreviewLoadFinished(bool ok);
 
 private:
     void initWebView();
-    void updateScrollPosition();
     QString generateHtml(const QString& markdown);
-    double calculateSyncRatio();
+    void setPreviewScrollRatio(double ratio);
 
-    QWebEngineView* m_webView;
-    MarkdownWebPage* m_webPage;
+    QWebEngineView* m_webView = nullptr;
+    MarkdownWebPage* m_webPage = nullptr;
+    QWebChannel* m_webChannel = nullptr;
+    MarkdownPreviewBridge* m_bridge = nullptr;
     QTextEdit* m_sourceEditor = nullptr;
-    QTimer* m_scrollSyncTimer;
-    QTimer* m_updateTimer;
+    QTimer* m_updateTimer = nullptr;
+    QTimer* m_scrollSyncTimer = nullptr;
     bool m_syncing = false;
-    int m_lastScrollPosition = 0;
     bool m_darkMode = false;
+    double m_lastScrollRatio = 0.0;
+    double m_lastPreviewRatio = 0.0;
+    int m_loadGeneration = 0;
 };
 #endif
 #endif
