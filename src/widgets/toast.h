@@ -28,6 +28,8 @@
 #include <QPushButton>
 
 #include <dhidpihelper.h>
+#include <dthememanager.h>
+#include <dimagebutton.h>
 #include <dgraphicsgloweffect.h>
 #include <QHBoxLayout>
 
@@ -80,7 +82,7 @@ private:
 
     QPropertyAnimation *m_animation = nullptr;
     DGraphicsGlowEffect *m_effect = nullptr;
-    QPushButton *m_closeBtn;
+    DImageButton *m_closeBtn;
     QPushButton *m_reloadBtn;
     QPushButton *m_saveAsBtn;
 };

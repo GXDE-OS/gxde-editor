@@ -45,7 +45,7 @@ find_package(Qt6Concurrent REQUIRED)
 find_package(Qt6PrintSupport REQUIRED)
 find_package(Qt6Gui REQUIRED)
 find_package(Qt6WaylandClient REQUIRED)
-find_package(Dtk6Widget REQUIRED)
+find_package(Dtk2widget REQUIRED)
 find_package(Dtk6Core REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(KF6Codecs REQUIRED)
@@ -60,7 +60,7 @@ include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
 target_include_directories(gxde-editor PUBLIC
-    /usr/include/dtk6/DWidget
+    /usr/include/dtk2/DWidget
     /usr/include/dtk6/DCore
     /usr/include/dtk6/DLog
     /usr/include/dtk6/DGui
@@ -68,7 +68,7 @@ target_include_directories(gxde-editor PUBLIC
     ${CMARK_INCLUDE_DIRS}
 )
 target_link_libraries(gxde-editor
-    Dtk6::Widget
+    ${Dtk2widget_LIBRARIES}
     Dtk6::Core
     Qt6::Widgets
     Qt6::DBus

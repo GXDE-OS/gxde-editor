@@ -22,7 +22,6 @@
 #include "../editwrapper.h"
 #include <QLabel>
 #include <QPainter>
-#include <QPainterPath>
 #include <QHBoxLayout>
 #include <QMenu>
 

@@ -44,6 +44,8 @@ DTK_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {
+    // Init DTK.
+    DApplication::loadDXcbPlugin();
 
     const char *descriptionText = QT_TRANSLATE_NOOP("MainWindow",
                                                     "GXDE Editor is a desktop text editor that supports common text editing features.");

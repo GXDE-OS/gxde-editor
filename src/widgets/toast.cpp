@@ -19,13 +19,6 @@
 
 #include "toast.h"
 #include <QApplication>
-#include <DGuiApplicationHelper>
-#include <QIcon>
-
-static QString currentThemeName()
-{
-    return Dtk::Gui::DGuiApplicationHelper::instance()->themeType() == Dtk::Gui::DGuiApplicationHelper::DarkType ? "dark" : "light";
-}
 
 Toast::Toast(QWidget *parent)
     : QFrame(parent)
@@ -56,10 +49,8 @@ Toast::Toast(QWidget *parent)
     setGraphicsEffect(m_effect);
     hide();
 
-    setTheme(currentThemeName());
-    connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged, this, [this](Dtk::Gui::DGuiApplicationHelper::ColorType) {
-        setTheme(currentThemeName());
-    });
+    setTheme(DThemeManager::instance()->theme());
+    connect(DThemeManager::instance(), &DThemeManager::themeChanged, this, &Toast::setTheme);
 
     connect(m_reloadBtn, &QPushButton::clicked, this, [=] {
         hideAnimation();
@@ -117,18 +108,16 @@ void Toast::setOnlyShow(bool onlyshow)
     m_onlyshow = onlyshow;
 
     if (m_onlyshow) {
-        m_closeBtn = new QPushButton;
+        m_closeBtn = new DImageButton;
         m_closeBtn->setFixedSize(14, 14);
         m_layout->addWidget(m_reloadBtn);
         m_layout->addWidget(m_saveAsBtn);
         m_layout->addWidget(m_closeBtn);
-        initCloseBtn(currentThemeName());
+        initCloseBtn(DThemeManager::instance()->theme());
 
-        connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged, this, [this](Dtk::Gui::DGuiApplicationHelper::ColorType) {
-            initCloseBtn(currentThemeName());
-        });
-        connect(m_closeBtn, &QPushButton::clicked, this, &Toast::hideAnimation);
-        connect(m_closeBtn, &QPushButton::clicked, this, &Toast::closeBtnClicked);
+        connect(DThemeManager::instance(), &DThemeManager::themeChanged, this, &Toast::initCloseBtn);
+        connect(m_closeBtn, &DImageButton::clicked, this, &Toast::hideAnimation);
+        connect(m_closeBtn, &DImageButton::clicked, this, &Toast::closeBtnClicked);
     }
 }
 
@@ -219,8 +208,9 @@ void Toast::setOpacity(qreal opacity)
 
 void Toast::initCloseBtn(QString theme)
 {
-    m_closeBtn->setIcon(QIcon(QString(":/images/close_%1_%2.svg").arg("normal", theme)));
-    m_closeBtn->setStyleSheet("QPushButton { border: none; }");
+    m_closeBtn->setNormalPic(QString(":/images/close_%1_%2.svg").arg("normal", theme));
+    m_closeBtn->setHoverPic(QString(":/images/close_%1_%2.svg").arg("hover", theme));
+    m_closeBtn->setPressPic(QString(":/images/close_%1_%2.svg").arg("press", theme));
 }
 
 void Toast::showEvent(QShowEvent *e)

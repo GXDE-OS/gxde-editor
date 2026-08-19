@@ -23,8 +23,8 @@
 #include "window.h"
 #include "toolbar.h"
 #include <DAnchors>
-#include <DGuiApplicationHelper>
-#include <dtoast.h>
+#include <dthememanager.h>
+#include <DToast>
 #include "utils.h"
 
 #include <DSettingsWidgetFactory>
@@ -166,6 +166,8 @@ Window::Window(DMainWindow *parent)
 
     connect(qApp, &QGuiApplication::focusWindowChanged, this, &Window::handleFocusWindowChanged);
 
+    // 允许设置背景
+    setEnableWindowBackground(1);
 
     WaylandActivator::instance();
 }
@@ -207,7 +209,7 @@ void Window::initTitlebar()
     ToolBar *toolBar = new ToolBar;
     toolBar->setTabbar(m_tabbar);
 
-    titlebar()->setCustomWidget(toolBar, false);
+    titlebar()->setCustomWidget(toolBar, Qt::AlignVCenter, false);
     titlebar()->setAutoHideOnFullscreen(true);
     titlebar()->setSeparatorVisible(true);
     titlebar()->setFixedHeight(40);
@@ -776,6 +778,7 @@ void Window::popupSettingsDialog()
     dialog->widgetFactory()->registerWidget("fontcombobox", Settings::createFontComBoBoxHandle);
     dialog->setProperty("_d_dtk_theme", "dark");
     dialog->setProperty("_d_QSSFilename", "DSettingsDialog");
+    DThemeManager::instance()->registerWidget(dialog);
 
     dialog->updateSettings(m_settings->settings);
     m_settings->dtkThemeWorkaround(dialog, "dlight");
@@ -1255,9 +1258,9 @@ void Window::loadTheme(const QString &path)
 
     bool isDark = (QColor(backgroundColor).lightness() < 128);
     if (isDark) {
-        Dtk::Gui::DGuiApplicationHelper::instance()->setPaletteType(Dtk::Gui::DGuiApplicationHelper::DarkType);
+        DThemeManager::instance()->setTheme("dark");
     } else {
-        Dtk::Gui::DGuiApplicationHelper::instance()->setPaletteType(Dtk::Gui::DGuiApplicationHelper::LightType);
+        DThemeManager::instance()->setTheme("light");
     }
 
     changeTitlebarBackground(tabbarStartColor, tabbarEndColor);

@@ -7,7 +7,7 @@ Build-Depends:
  cmake,
  pkg-config,
  libdtk6core-dev,
- libdtk6widget-dev,
+ libdtk2widget6-dev,
  qt6-base-dev,
  libpolkit-qt6-1-dev,
  libkf6syntaxhighlighting-dev,

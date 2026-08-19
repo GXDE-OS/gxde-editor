@@ -25,7 +25,6 @@
 
 #include <QPainterPath>
 #include <QDebug>
-#include <QIcon>
 
 FindBar::FindBar(QWidget *parent)
     : QWidget(parent)
@@ -40,7 +39,7 @@ FindBar::FindBar(QWidget *parent)
     m_editLine = new LineBar();
     m_findNextButton = new QPushButton(tr("Next"));
     m_findPrevButton = new QPushButton(tr("Previous"));
-    m_closeButton = new QPushButton();
+    m_closeButton = new DImageButton();
     m_closeButton->setFixedSize(16, 16);
 
     m_layout->addWidget(m_findLabel);
@@ -62,7 +61,7 @@ FindBar::FindBar(QWidget *parent)
     connect(m_findNextButton, &QPushButton::clicked, this, &FindBar::findNext, Qt::QueuedConnection);
     connect(m_findPrevButton, &QPushButton::clicked, this, &FindBar::findPrev, Qt::QueuedConnection);
 
-    connect(m_closeButton, &QPushButton::clicked, this, &FindBar::findCancel, Qt::QueuedConnection);
+    connect(m_closeButton, &DImageButton::clicked, this, &FindBar::findCancel, Qt::QueuedConnection);
 }
 
 bool FindBar::isFocus()
@@ -73,15 +72,15 @@ bool FindBar::isFocus()
 void FindBar::focus()
 {
     m_editLine->setFocus();
-    m_editLine->lineEdit()->selectAll();
+    m_editLine->selectAll();
 }
 
 void FindBar::activeInput(QString text, QString file, int row, int column, int scrollOffset)
 {
     // Try fill keyword with select text.
     m_editLine->clear();
-    m_editLine->lineEdit()->insert(text);
-    m_editLine->lineEdit()->selectAll();
+    m_editLine->insert(text);
+    m_editLine->selectAll();
 
     // Show.
     QWidget::show();
@@ -144,13 +143,15 @@ void FindBar::setBackground(QString color)
     if (QColor(m_backgroundColor).lightness() < 128) {
         m_findLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#AAAAAA"));
 
-        m_closeButton->setIcon(QIcon(Utils::getQrcPath("bar_close_normal_dark.svg")));
-        m_closeButton->setStyleSheet("QPushButton { border: none; }");
+        m_closeButton->setNormalPic(Utils::getQrcPath("bar_close_normal_dark.svg"));
+        m_closeButton->setHoverPic(Utils::getQrcPath("bar_close_hover_dark.svg"));
+        m_closeButton->setPressPic(Utils::getQrcPath("bar_close_press_dark.svg"));
     } else {
         m_findLabel->setStyleSheet(QString("QLabel { background-color: %1; color: %2; }").arg(color).arg("#000000"));
 
-        m_closeButton->setIcon(QIcon(Utils::getQrcPath("bar_close_normal_light.svg")));
-        m_closeButton->setStyleSheet("QPushButton { border: none; }");
+        m_closeButton->setNormalPic(Utils::getQrcPath("bar_close_normal_light.svg"));
+        m_closeButton->setHoverPic(Utils::getQrcPath("bar_close_hover_light.svg"));
+        m_closeButton->setPressPic(Utils::getQrcPath("bar_close_press_light.svg"));
     }
 
     update();
