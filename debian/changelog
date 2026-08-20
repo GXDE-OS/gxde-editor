@@ -1,8 +1,5 @@
-gxde-editor (2.0.4) UNRELEASED; urgency=medium
+gxde-editor (2.0.3) UNRELEASED; urgency=medium
 
-  * 新增 Markdown 双栏编辑与实时预览，支持 Ctrl+Shift+M 切换
-  * Markdown 预览改用 QTextDocument 渲染，移除 QWebEngine 构建依赖
-  * 优化预览区默认字号与编辑/预览分栏边界
   * 新增 Markdown 预览功能
   * 初步实现预览框同步
   * 修复 root 无法正常打开文件编辑器的问题，恢复沙箱机制
@@ -17,7 +14,7 @@ gxde-editor (2.0.4) UNRELEASED; urgency=medium
   * 完善翻译
   * 修复在某些情况下回不到前台的问题
 
- -- shenmo <shenmo@spark-app.store>  Thu, 20 Aug 2026 22:37:07 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Thu, 20 Aug 2026 14:19:57 +0800
 
 gxde-editor (1.0-1) unstable; urgency=medium
 
