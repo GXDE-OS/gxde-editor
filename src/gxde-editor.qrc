@@ -292,5 +292,8 @@
         <file>syntax/yaml.xml</file>
         <file>syntax/zonnon.xml</file>
         <file>syntax/zsh.xml</file>
+        <file>markdown/marked.min.js</file>
+        <file>markdown/github-markdown.css</file>
+        <file>markdown/github-markdown-dark.css</file>
     </qresource>
 </RCC>

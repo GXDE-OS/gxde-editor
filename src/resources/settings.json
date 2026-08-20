@@ -184,12 +184,6 @@
                             "name": "Print",
                             "type": "shortcut",
                             "default":  "Ctrl+P"
-                        },
-                        {
-                            "key": "togglemarkdownpreview",
-                            "name": "Toggle markdown preview",
-                            "type": "shortcut",
-                            "default":  "Ctrl+Shift+M"
                         }
                     ]
                 },
@@ -611,12 +605,6 @@
                             "hide" : true,
                             "reset" : false,
                             "default":  "Ctrl+P"
-                        },
-                        {
-                            "key": "togglemarkdownpreview",
-                            "hide" : true,
-                            "reset" : false,
-                            "default":  "Ctrl+Shift+M"
                         }
                     ]
                 },
@@ -1063,12 +1051,6 @@
                             "hide" : true,
                             "reset" : false,
                             "default":  "Ctrl+Shift+P"
-                        },
-                        {
-                            "key": "togglemarkdownpreview",
-                            "hide" : true,
-                            "reset" : false,
-                            "default":  "Ctrl+Shift+M"
                         }
                     ]
                 },
@@ -1515,12 +1497,6 @@
                             "hide" : true,
                             "reset" : false,
                             "default":  "Ctrl+P"
-                        },
-                        {
-                            "key": "togglemarkdownpreview",
-                            "hide" : true,
-                            "reset" : false,
-                            "default":  "Ctrl+Shift+M"
                         }
                     ]
                 },

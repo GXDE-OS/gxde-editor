@@ -20,9 +20,11 @@
 #include "widgets/toast.h"
 #include "fileloadthread.h"
 #include "editwrapper.h"
-#include "markdownpreview.h"
 #include "syntaxutils.h"
 #include "utils.h"
+#ifdef USE_WEBENGINE
+#include "widgets/markdownpreviewwidget.h"
+#endif
 #include <unistd.h>
 
 #include <QCoreApplication>
@@ -31,7 +33,6 @@
 #include <QScrollBar>
 #include <QScroller>
 #include <QDebug>
-#include <QSplitter>
 #include <QTimer>
 #include <QDir>
 
@@ -41,6 +42,7 @@ DCORE_USE_NAMESPACE
 
 EditWrapper::EditWrapper(QWidget *parent)
     : QWidget(parent),
+      m_layout(new QHBoxLayout),
       m_textEdit(new DTextEdit),
       m_bottomBar(new BottomBar(this)),
       m_textCodec(QTextCodec::codecForName("UTF-8")),
@@ -52,47 +54,34 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_pendingLoadTimer = new QTimer(this);
     m_pendingLoadTimer->setInterval(0);
 
-    // 编辑器容器：行号区 + 文本编辑区，保持原有布局。
-    QWidget *editorContainer = new QWidget(this);
-    QHBoxLayout *editorLayout = new QHBoxLayout(editorContainer);
-    editorLayout->setContentsMargins(0, 0, 0, 0);
-    editorLayout->setSpacing(0);
-    editorLayout->addWidget(m_textEdit->lineNumberArea);
-    editorLayout->addWidget(m_textEdit);
+#ifdef USE_WEBENGINE
+    // 判断是否支持 Markdown 预览，如果支持则显示
+    if (MarkdownPreviewWidget::isSupport()) {
+        m_markdownPreview = new MarkdownPreviewWidget();
+    }
+#endif
+
+    // Init layout and widgets.
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->setSpacing(0);
+    m_layout->addWidget(m_textEdit->lineNumberArea);
+    m_layout->addWidget(m_textEdit);
+#ifdef USE_WEBENGINE
+    // 加载 Markdown 预览框
+    if (m_markdownPreview) {
+        m_layout->addWidget(m_markdownPreview);
+        m_markdownPreview->setVisible(false);
+        m_markdownPreview->setSourceEditor(NULL);
+        m_layout->setStretch(1, 1);
+        m_layout->setStretch(2, 1);
+    }
+#endif
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
     m_textEdit->setWrapper(this);
 
-    // 编辑区与 Markdown 预览分栏，默认只显示编辑区。
-    m_editSplitter = new QSplitter(Qt::Horizontal, this);
-    m_editSplitter->setObjectName("EditSplitter");
-    m_editSplitter->setChildrenCollapsible(false);
-    m_editSplitter->setHandleWidth(6);
-    // 让编辑区与预览区之间的分隔手柄可见，深/浅色主题下都使用调色板角色自适应。
-    m_editSplitter->setStyleSheet(QStringLiteral(
-        "QSplitter::handle { background: palette(mid); }"
-        "QSplitter::handle:hover { background: palette(highlight); }"
-        "QSplitter::handle:pressed { background: palette(dark); }"));
-    m_editSplitter->addWidget(editorContainer);
-    m_editSplitter->setStretchFactor(0, 1);
-
-    // Qt < 6.5 构建下预览不可用（QTextDocument::setMarkdown 需要 Qt >= 6.5）。
-    if (MarkdownPreview::isSupported()) {
-        m_markdownPreview = new MarkdownPreview(this);
-        m_markdownPreview->setVisible(false);
-        m_editSplitter->addWidget(m_markdownPreview);
-        m_editSplitter->setStretchFactor(1, 1);
-
-        // 编辑内容变化时实时刷新预览。
-        connect(m_textEdit, &DTextEdit::textChanged, this, [this] {
-            if (m_markdownPreview != nullptr && m_markdownPreview->isVisible()) {
-                m_markdownPreview->updatePreview(m_textEdit->toPlainText());
-            }
-        });
-    }
-
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(m_editSplitter);
+    mainLayout->addLayout(m_layout);
     mainLayout->addWidget(m_bottomBar);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -206,34 +195,6 @@ void EditWrapper::updatePath(const QString &file)
 
     m_textEdit->filepath = file;
     detectEndOfLine();
-
-    // Markdown 文件打开时自动显示可视化预览。
-    if (m_markdownPreview != nullptr) {
-        setMarkdownPreviewVisible(MarkdownPreview::isMarkdownFile(file));
-    }
-}
-
-void EditWrapper::setMarkdownPreviewVisible(bool visible)
-{
-    if (m_markdownPreview == nullptr) {
-        return;
-    }
-
-    m_markdownPreview->setVisible(visible);
-    if (visible) {
-        m_markdownPreview->updatePreview(m_textEdit->toPlainText());
-
-        // 初次显示时编辑区与预览区各占一半。
-        if (m_editSplitter != nullptr && m_editSplitter->width() > 0) {
-            const int total = m_editSplitter->width();
-            m_editSplitter->setSizes({total / 2, total - total / 2});
-        }
-    }
-}
-
-bool EditWrapper::isMarkdownPreviewVisible() const
-{
-    return m_markdownPreview != nullptr && m_markdownPreview->isVisible();
 }
 
 void EditWrapper::refresh()
@@ -393,12 +354,22 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
 
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
+#ifdef USE_WEBENGINE
+    if (m_markdownPreview) {
+        m_markdownPreview->setVisible(name == "Markdown");
+        m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
+    }
+#endif
     m_bottomBar->setHightlightName(name);
 }
 
 void EditWrapper::setDarkTheme(bool enabled)
 {
-    Q_UNUSED(enabled)
+#ifdef USE_WEBENGINE
+    if (m_markdownPreview) {
+        m_markdownPreview->setDarkTheme(enabled);
+    }
+#endif
 }
 
 void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString &content)

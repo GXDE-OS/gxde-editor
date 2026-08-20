@@ -25,12 +25,13 @@
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
 #include <QTextCodec>
+#ifdef USE_WEBENGINE
+#include "widgets/markdownpreviewwidget.h"
+#endif
 
 #include <QVBoxLayout>
 #include <QWidget>
 
-class MarkdownPreview;
-class QSplitter;
 class EditWrapper : public QWidget
 {
     Q_OBJECT
@@ -72,10 +73,6 @@ public:
     void initToastPosition();
     void setDarkTheme(bool enabled);
 
-    // Markdown 可视化预览开关（Qt < 6.5 构建下预览不可用，调用无效果）
-    void setMarkdownPreviewVisible(bool visible);
-    bool isMarkdownPreviewVisible() const;
-
 signals:
     void requestSaveAs();
 
@@ -92,12 +89,13 @@ protected:
     void resizeEvent(QResizeEvent *);
 
 private:
+    QHBoxLayout *m_layout;
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
-    MarkdownPreview *m_markdownPreview = nullptr;
-    // 编辑区与 Markdown 预览的分栏容器
-    QSplitter *m_editSplitter = nullptr;
+#ifdef USE_WEBENGINE
+    MarkdownPreviewWidget *m_markdownPreview = nullptr;
+#endif
 
     EndOfLineMode m_endOfLineMode;
     bool m_isLoadFinished;

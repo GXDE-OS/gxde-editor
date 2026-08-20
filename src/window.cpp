@@ -22,7 +22,6 @@
 
 #include "window.h"
 #include "toolbar.h"
-#include "markdownpreview.h"
 #include <DAnchors>
 #include <dthememanager.h>
 #include <DToast>
@@ -186,11 +185,6 @@ void Window::initTitlebar()
     QAction *saveAction(new QAction(tr("Save"), this));
     QAction *saveAsAction(new QAction(tr("Save as"), this));
     QAction *printAction(new QAction(tr("Print"), this));
-    QAction *markdownPreviewAction(new QAction(tr("Markdown preview"), this));
-    markdownPreviewAction->setObjectName("MarkdownPreview");
-    markdownPreviewAction->setCheckable(true);
-    markdownPreviewAction->setEnabled(false);
-    m_markdownPreviewAction = markdownPreviewAction;
     QAction *switchThemeAction(new QAction(tr("Switch theme"), this));
     QAction *settingAction(new QAction(tr("Settings"), this));
     QAction *findAction(new QAction(QApplication::translate("DTextEdit", "Find"), this));
@@ -205,7 +199,6 @@ void Window::initTitlebar()
     m_menu->addAction(saveAction);
     m_menu->addAction(saveAsAction);
     m_menu->addAction(printAction);
-    m_menu->addAction(markdownPreviewAction);
     m_menu->addAction(switchThemeAction);
     m_menu->addSeparator();
     m_menu->addAction(settingAction);
@@ -247,7 +240,6 @@ void Window::initTitlebar()
     connect(saveAction, &QAction::triggered, this, &Window::saveFile);
     connect(saveAsAction, &QAction::triggered, this, &Window::saveAsFile);
     connect(printAction, &QAction::triggered, this, &Window::popupPrintDialog);
-    connect(markdownPreviewAction, &QAction::triggered, this, &Window::toggleMarkdownPreview);
     connect(settingAction, &QAction::triggered, this, &Window::popupSettingsDialog);
     connect(switchThemeAction, &QAction::triggered, this, &Window::popupThemePanel);
 }
@@ -288,7 +280,6 @@ void Window::addTab(const QString &filepath, bool activeTab)
             m_wrappers[filepath] = m_wrappers.take(curPath);
             m_wrappers[filepath]->updatePath(filepath);
             m_wrappers[filepath]->openFile(filepath);
-            updateMarkdownPreviewActionState();
 
             return;
         } else {
@@ -678,9 +669,6 @@ bool Window::saveAsFile()
         m_wrappers.insert(newFilePath, wrapper);
 
         wrapper->textEditor()->loadHighlighter();
-
-        // 另存为可能改变文件类型，刷新 Markdown 预览开关状态。
-        updateMarkdownPreviewActionState();
     } else {
         return false;
     }
@@ -838,32 +826,6 @@ void Window::toggleFullscreen()
     }  else {
         showFullScreen();
     }
-}
-
-void Window::toggleMarkdownPreview()
-{
-    EditWrapper *wrapper = currentWrapper();
-    if (wrapper == nullptr || !MarkdownPreview::isSupported()
-            || !MarkdownPreview::isMarkdownFile(wrapper->filePath())) {
-        return;
-    }
-
-    wrapper->setMarkdownPreviewVisible(!wrapper->isMarkdownPreviewVisible());
-    updateMarkdownPreviewActionState();
-}
-
-void Window::updateMarkdownPreviewActionState()
-{
-    if (m_markdownPreviewAction == nullptr) {
-        return;
-    }
-
-    EditWrapper *wrapper = currentWrapper();
-    const bool isMarkdown = (wrapper != nullptr) && MarkdownPreview::isSupported()
-            && MarkdownPreview::isMarkdownFile(wrapper->filePath());
-
-    m_markdownPreviewAction->setEnabled(isMarkdown);
-    m_markdownPreviewAction->setChecked(isMarkdown && wrapper->isMarkdownPreviewVisible());
 }
 
 void Window::remberPositionSave()
@@ -1148,9 +1110,6 @@ void Window::handleCurrentChanged(const int &index)
         wrapper->textEditor()->setFocus();
         m_editorWidget->setCurrentWidget(wrapper);
     }
-
-    // 同步 Markdown 预览菜单项状态（可用性 + 勾选状态）。
-    updateMarkdownPreviewActionState();
 }
 
 void Window::handleJumpLineBarExit()
@@ -1546,8 +1505,6 @@ void Window::keyPressEvent(QKeyEvent *e)
         displayShortcuts();
     } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "window", "print")) {
         popupPrintDialog();
-    } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "window", "togglemarkdownpreview")) {
-        toggleMarkdownPreview();
     } else if (e->key() == Qt::Key_F5) {
         currentWrapper()->refresh();
     } else {
