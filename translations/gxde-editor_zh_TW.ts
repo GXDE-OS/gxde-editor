@@ -17,6 +17,21 @@
         <source>Characters %1</source>
         <translation>字元數 %1</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="53" />
+        <source>Edit</source>
+        <translation>編輯</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="54" />
+        <source>Read</source>
+        <translation>閱讀</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="55" />
+        <source>Live Preview</source>
+        <translation>即時預覽</translation>
+    </message>
 </context>
 <context>
     <name>DTextEdit</name>
@@ -108,6 +123,26 @@
         <translation>說文字</translation>
     </message>
     <message>
+        <location filename="../src/dtextedit.cpp" line="150" />
+        <source>View Mode</source>
+        <translation>檢視模式</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="151" />
+        <source>Edit</source>
+        <translation>編輯</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="152" />
+        <source>Read</source>
+        <translation>閱讀</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="153" />
+        <source>Live Preview</source>
+        <translation>即時預覽</translation>
+    </message>
+    <message>
         <location filename="../src/dtextedit.cpp" line="147" />
         <source>Change Case</source>
         <translation>變更大小寫</translation>
@@ -171,6 +206,11 @@
         <location filename="../src/editwrapper.cpp" line="345" />
         <source>R/O</source>
         <translation>唯讀</translation>
+    </message>
+    <message>
+        <location filename="../src/editwrapper.cpp" line="485" />
+        <source>View Mode</source>
+        <translation>檢視模式</translation>
     </message>
 </context>
 <context>

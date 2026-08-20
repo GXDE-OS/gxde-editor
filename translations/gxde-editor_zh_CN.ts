@@ -18,6 +18,21 @@
         <source>Characters %1</source>
         <translation>字符数 %1</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="53"/>
+        <source>Edit</source>
+        <translation>编辑</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="54"/>
+        <source>Read</source>
+        <translation>阅读</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="55"/>
+        <source>Live Preview</source>
+        <translation>实时预览</translation>
+    </message>
 </context>
 <context>
     <name>DTextEdit</name>
@@ -109,6 +124,26 @@
         <translation>朗读文本</translation>
     </message>
     <message>
+        <location filename="../src/dtextedit.cpp" line="150"/>
+        <source>View Mode</source>
+        <translation>视图模式</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="151"/>
+        <source>Edit</source>
+        <translation>编辑</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="152"/>
+        <source>Read</source>
+        <translation>阅读</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="153"/>
+        <source>Live Preview</source>
+        <translation>实时预览</translation>
+    </message>
+    <message>
         <location filename="../src/dtextedit.cpp" line="147"/>
         <source>Change Case</source>
         <translation>切换大小写</translation>
@@ -172,6 +207,11 @@
         <location filename="../src/editwrapper.cpp" line="345"/>
         <source>R/O</source>
         <translation>只读</translation>
+    </message>
+    <message>
+        <location filename="../src/editwrapper.cpp" line="485"/>
+        <source>View Mode</source>
+        <translation>视图模式</translation>
     </message>
 </context>
 <context>
