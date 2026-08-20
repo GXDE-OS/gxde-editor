@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QLabel>
 #include "ddropdownmenu.h"
+#include "../markdownlogic.h"
 
 class EditWrapper;
 class BottomBar : public QWidget
@@ -39,6 +40,8 @@ public:
     void setCursorStatus(const QString &text);
     void setHighlightMenu(QMenu *menu);
     void setHightlightName(const QString &name);
+    void setViewMode(ViewMode mode);
+    void setMarkdownAvailable(bool available);
     void setPalette(const QPalette &palette);
 
 private:
@@ -47,6 +50,9 @@ private:
 protected:
     void paintEvent(QPaintEvent *);
 
+signals:
+    void viewModeRequested(ViewMode mode);
+
 private:
     EditWrapper *m_wrapper;
     QLabel *m_positionLabel;
@@ -54,6 +60,10 @@ private:
     QLabel *m_cursorStatus;
     DDropdownMenu *m_encodeMenu;
     DDropdownMenu *m_highlightMenu;
+    DDropdownMenu *m_viewModeMenu;
+    QAction *m_editViewAction;
+    QAction *m_readViewAction;
+    QAction *m_livePreviewAction;
     QString m_rowStr;
     QString m_columnStr;
     QString m_chrCountStr;

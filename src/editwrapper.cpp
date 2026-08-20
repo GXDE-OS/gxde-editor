@@ -35,6 +35,10 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDir>
+#include <QFileInfo>
+#include <QMenu>
+#ifdef USE_WEBENGINE
+#endif
 
 #include "drecentmanager.h"
 
@@ -43,6 +47,9 @@ DCORE_USE_NAMESPACE
 EditWrapper::EditWrapper(QWidget *parent)
     : QWidget(parent),
       m_layout(new QHBoxLayout),
+      m_viewStack(new QStackedWidget(this)),
+      m_editPage(new QWidget(m_viewStack)),
+      m_readPage(new QWidget(m_viewStack)),
       m_textEdit(new DTextEdit),
       m_bottomBar(new BottomBar(this)),
       m_textCodec(QTextCodec::codecForName("UTF-8")),
@@ -54,34 +61,25 @@ EditWrapper::EditWrapper(QWidget *parent)
     m_pendingLoadTimer = new QTimer(this);
     m_pendingLoadTimer->setInterval(0);
 
-#ifdef USE_WEBENGINE
-    // 判断是否支持 Markdown 预览，如果支持则显示
-    if (MarkdownPreviewWidget::isSupport()) {
-        m_markdownPreview = new MarkdownPreviewWidget();
-    }
-#endif
-
     // Init layout and widgets.
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
     m_layout->addWidget(m_textEdit->lineNumberArea);
     m_layout->addWidget(m_textEdit);
-#ifdef USE_WEBENGINE
-    // 加载 Markdown 预览框
-    if (m_markdownPreview) {
-        m_layout->addWidget(m_markdownPreview);
-        m_markdownPreview->setVisible(false);
-        m_markdownPreview->setSourceEditor(NULL);
-        m_layout->setStretch(1, 1);
-        m_layout->setStretch(2, 1);
-    }
-#endif
+    m_editPage->setLayout(m_layout);
+    m_viewStack->addWidget(m_editPage);
+
+    QVBoxLayout *readLayout = new QVBoxLayout(m_readPage);
+    readLayout->setContentsMargins(0, 0, 0, 0);
+    readLayout->setSpacing(0);
+    m_viewStack->addWidget(m_readPage);
+
 
     m_bottomBar->setHighlightMenu(m_textEdit->getHighlightMenu());
     m_textEdit->setWrapper(this);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(m_layout);
+    mainLayout->addWidget(m_viewStack);
     mainLayout->addWidget(m_bottomBar);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -92,6 +90,17 @@ EditWrapper::EditWrapper(QWidget *parent)
 
     connect(m_textEdit, &DTextEdit::cursorModeChanged, this, &EditWrapper::handleCursorModeChanged);
     connect(m_textEdit, &DTextEdit::hightlightChanged, this, &EditWrapper::handleHightlightChanged);
+    connect(m_bottomBar, &BottomBar::viewModeRequested, this, &EditWrapper::setViewMode);
+    connect(m_textEdit, &DTextEdit::viewModeRequested, this, &EditWrapper::setViewMode);
+    connect(this, &EditWrapper::viewModeChanged, m_bottomBar, &BottomBar::setViewMode);
+    connect(this, &EditWrapper::viewModeChanged, this, [this](ViewMode mode) {
+        m_textEdit->updateViewModeActions(mode, m_isMarkdown && previewAvailable());
+    });
+    connect(this, &EditWrapper::markdownAvailabilityChanged,
+            m_bottomBar, &BottomBar::setMarkdownAvailable);
+    connect(this, &EditWrapper::markdownAvailabilityChanged, this, [this](bool available) {
+        m_textEdit->updateViewModeActions(m_viewMode, available);
+    });
     connect(m_toast, &Toast::reloadBtnClicked, this, &EditWrapper::refresh);
     connect(m_toast, &Toast::closeBtnClicked, this, [=] {
         QFileInfo fi(filePath());
@@ -102,6 +111,7 @@ EditWrapper::EditWrapper(QWidget *parent)
     connect(m_pendingLoadTimer, &QTimer::timeout, this, &EditWrapper::appendPendingTextLoadChunk);
 
     setDarkTheme(DThemeManager::instance()->theme() == "dark");
+    emit markdownAvailabilityChanged(false);
 }
 
 EditWrapper::~EditWrapper()
@@ -194,6 +204,10 @@ void EditWrapper::updatePath(const QString &file)
     m_modified = fi.lastModified();
 
     m_textEdit->filepath = file;
+#ifdef USE_WEBENGINE
+    if (m_markdownPreview)
+        m_markdownPreview->setDocumentPath(file);
+#endif
     detectEndOfLine();
 }
 
@@ -354,21 +368,26 @@ void EditWrapper::handleCursorModeChanged(DTextEdit::CursorMode mode)
 
 void EditWrapper::handleHightlightChanged(const QString &name)
 {
-#ifdef USE_WEBENGINE
-    if (m_markdownPreview) {
-        m_markdownPreview->setVisible(name == "Markdown");
-        m_markdownPreview->setSourceEditor(name == "Markdown" ? qobject_cast<QTextEdit *>(m_textEdit) : NULL);
-    }
-#endif
+    updateMarkdownRecognition(filePath(), name);
     m_bottomBar->setHightlightName(name);
 }
 
 void EditWrapper::setDarkTheme(bool enabled)
 {
+    m_darkTheme = enabled;
 #ifdef USE_WEBENGINE
     if (m_markdownPreview) {
         m_markdownPreview->setDarkTheme(enabled);
     }
+#endif
+}
+
+void EditWrapper::applyMarkdownTheme(const QVariantMap &themeMap)
+{
+    m_markdownTheme = themeMap;
+#ifdef USE_WEBENGINE
+    if (m_markdownPreview)
+        m_markdownPreview->applyTheme(themeMap);
 #endif
 }
 
@@ -402,7 +421,8 @@ void EditWrapper::handleFileLoadFinished(const QByteArray &encode, const QString
     m_textEdit->setPlainText(content);
     m_textEdit->setModified(false);
     m_textEdit->moveToStart();
-    QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
+    finishFileLoadViewSetup();
+    QTimer::singleShot(1000, this, [=] { m_textEdit->loadHighlighter(); });
 }
 
 void EditWrapper::appendPendingTextLoadChunk()
@@ -428,11 +448,183 @@ void EditWrapper::finishPendingTextLoad()
     m_textEdit->setModified(false);
     m_textEdit->moveToStart();
     m_isLoadFinished = true;
+    finishFileLoadViewSetup();
 
     m_pendingLoadContent.clear();
     m_pendingLoadOffset = 0;
 
-    QTimer::singleShot(100, this, [=] { m_textEdit->loadHighlighter(); });
+    QTimer::singleShot(1000, this, [=] { m_textEdit->loadHighlighter(); });
+}
+
+bool EditWrapper::previewAvailable() const
+{
+#ifdef USE_WEBENGINE
+    return MarkdownPreviewWidget::isSupport();
+#else
+    return false;
+#endif
+}
+
+void EditWrapper::ensureMarkdownPreviewCreated()
+{
+#ifdef USE_WEBENGINE
+    if (m_markdownPreview || !previewAvailable())
+        return;
+
+    m_markdownPreview = new MarkdownPreviewWidget(m_readPage);
+    m_markdownPreview->setMinimumWidth(200);
+    m_markdownPreview->setDarkTheme(m_darkTheme);
+    m_markdownPreview->applyTheme(m_markdownTheme);
+    m_markdownPreview->setDocumentPath(filePath());
+    if (m_readPage->layout())
+        m_readPage->layout()->addWidget(m_markdownPreview);
+
+    connect(m_markdownPreview, &MarkdownPreviewWidget::contextMenuRequested,
+            this, [this](const QPoint &globalPosition) {
+        QMenu menu;
+        QMenu *viewMenu = menu.addMenu(tr("View Mode"));
+        viewMenu->addActions(m_textEdit->viewModeActions());
+        menu.exec(globalPosition);
+    });
+#endif
+}
+
+
+void EditWrapper::ensureLiveSplitterCreated()
+{
+    if (m_liveSplitter)
+        return;
+    m_liveSplitter = new QSplitter(Qt::Horizontal, m_viewStack);
+    m_liveSplitter->setChildrenCollapsible(false);
+    m_viewStack->addWidget(m_liveSplitter);
+}
+
+void EditWrapper::attachPreviewTo(QWidget *container)
+{
+#ifdef USE_WEBENGINE
+    if (!m_markdownPreview || !container)
+        return;
+
+    if (QSplitter *splitter = qobject_cast<QSplitter *>(container))
+        splitter->insertWidget(1, m_markdownPreview);
+    else if (container->layout())
+        container->layout()->addWidget(m_markdownPreview);
+    m_markdownPreview->show();
+#else
+    Q_UNUSED(container)
+#endif
+}
+
+bool EditWrapper::setViewMode(ViewMode mode)
+{
+    const bool hasPreview = previewAvailable();
+    if (!ViewModeFsm::canSwitchTo(mode, m_isMarkdown, hasPreview))
+        return false;
+
+    const bool readOnlyText = ViewModeFsm::isReadOnlyTextMode(mode, m_isMarkdown, hasPreview);
+    m_viewMode = mode;
+
+    if (readOnlyText) {
+        if (!m_textEdit->readOnlyMode()) {
+            m_textEdit->setReadOnlyMode(true);
+            m_readOnlyByViewMode = true;
+        }
+#ifdef USE_WEBENGINE
+        if (m_markdownPreview)
+            m_markdownPreview->setSourceEditor(nullptr);
+#endif
+        if (m_editPage->parentWidget() != m_viewStack) {
+            m_viewStack->insertWidget(0, m_editPage);
+            m_editPage->show();
+        }
+        m_viewStack->setCurrentWidget(m_editPage);
+        emit viewModeChanged(m_viewMode);
+        return true;
+    }
+
+    if (m_readOnlyByViewMode) {
+        m_textEdit->setReadOnlyMode(false);
+        m_readOnlyByViewMode = false;
+    }
+
+    if (mode == ViewMode::Edit) {
+#ifdef USE_WEBENGINE
+        if (m_markdownPreview)
+            m_markdownPreview->setSourceEditor(nullptr);
+#endif
+        if (m_editPage->parentWidget() != m_viewStack) {
+            m_viewStack->insertWidget(0, m_editPage);
+            m_editPage->show();
+        }
+        m_viewStack->setCurrentWidget(m_editPage);
+    } else {
+        ensureMarkdownPreviewCreated();
+#ifdef USE_WEBENGINE
+        m_markdownPreview->setDocumentPath(filePath());
+        m_markdownPreview->setReadMode(mode == ViewMode::ReadView);
+        // Delay WebEngine initialization until window is fully shown
+        // to avoid DTK platform plugin crash on focus change
+        QTimer::singleShot(1000, this, [this]() {
+            if (m_markdownPreview && m_textEdit)
+                m_markdownPreview->setSourceEditor(m_textEdit);
+        });
+
+        if (mode == ViewMode::ReadView) {
+            if (m_markdownPreview->parentWidget() != m_readPage)
+                attachPreviewTo(m_readPage);
+            m_viewStack->setCurrentWidget(m_readPage);
+        } else {
+            ensureLiveSplitterCreated();
+            if (m_editPage->parentWidget() != m_liveSplitter) {
+                m_liveSplitter->insertWidget(0, m_editPage);
+                m_editPage->show();
+            }
+            if (m_markdownPreview->parentWidget() != m_liveSplitter)
+                attachPreviewTo(m_liveSplitter);
+            m_liveSplitter->setStretchFactor(0, 1);
+            m_liveSplitter->setStretchFactor(1, 1);
+            m_viewStack->setCurrentWidget(m_liveSplitter);
+            const int width = qMax(m_liveSplitter->width(), 400);
+            m_liveSplitter->setSizes({width / 2, width / 2});
+        }
+#endif
+    }
+
+    emit viewModeChanged(m_viewMode);
+    return true;
+}
+
+void EditWrapper::updateMarkdownRecognition(const QString &fileName, const QString &definitionName)
+{
+    const bool wasMarkdown = m_isMarkdown;
+    m_isMarkdown = MarkdownLogic::isMarkdown(fileName, definitionName);
+
+    if (m_isMarkdown != wasMarkdown)
+        emit markdownAvailabilityChanged(m_isMarkdown && previewAvailable());
+
+    if (!m_isMarkdown) {
+        const ViewMode fallback = ViewModeFsm::fallbackWhenMarkdownLost(m_viewMode);
+        if (fallback != m_viewMode) {
+            setViewMode(fallback);
+            return;
+        }
+    } else if (!wasMarkdown) {
+        const ViewMode elevated = ViewModeFsm::elevateWhenMarkdownGained(
+            m_viewMode, previewAvailable());
+        if (elevated != m_viewMode) {
+            setViewMode(elevated);
+            return;
+        }
+    }
+
+    if (m_isMarkdown != wasMarkdown && m_viewMode == ViewMode::ReadView)
+        setViewMode(ViewMode::ReadView);
+}
+
+void EditWrapper::finishFileLoadViewSetup()
+{
+    updateMarkdownRecognition(filePath(), QString());
+    setViewMode(ViewModeFsm::resolveDefaultMode(m_isMarkdown, previewAvailable()));
 }
 
 void EditWrapper::resizeEvent(QResizeEvent *e)

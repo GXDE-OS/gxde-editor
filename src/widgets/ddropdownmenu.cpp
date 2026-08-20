@@ -24,7 +24,7 @@
 
 DDropdownMenu::DDropdownMenu(QWidget *parent)
     : QFrame(parent),
-      m_menu(new QMenu),
+      m_menu(new QMenu(this)),
       m_text(new QLabel("undefined")),
       m_arrowLabel(new QLabel)
 {
@@ -50,13 +50,15 @@ DDropdownMenu::DDropdownMenu(QWidget *parent)
     });
 
     connect(this, &DDropdownMenu::requestContextMenu, this, [=] {
-        QPoint center = this->mapToGlobal(this->rect().center());
-        int menuHeight = m_menu->sizeHint().height();
-        int menuWidth = m_menu->sizeHint().width();
-        center.setY(center.y() - menuHeight - this->rect().height() / 2);
-        center.setX(center.x() - menuWidth / 2);
-        m_menu->move(center);
-        m_menu->exec();
+        const QSize menuSize = m_menu->sizeHint();
+        const QPoint buttonTopCenter = mapToGlobal(QPoint(width() / 2, 0));
+        const QPoint popupPosition(buttonTopCenter.x() - menuSize.width() / 2,
+                                   buttonTopCenter.y() - menuSize.height());
+
+        // On Wayland a client cannot position a popup by moving its top-level
+        // window before it is mapped. Pass the anchor to QMenu so Qt can create
+        // the xdg_popup at the requested edge of the bottom bar.
+        m_menu->exec(popupPosition);
     });
 }
 
@@ -127,11 +129,16 @@ void DDropdownMenu::setText(const QString &text)
 
 void DDropdownMenu::setMenu(QMenu *menu)
 {
+    if (menu == m_menu)
+        return;
+
     if (m_menu) {
         delete m_menu;
     }
 
     m_menu = menu;
+    if (m_menu)
+        m_menu->setParent(this, m_menu->windowFlags());
 }
 
 void DDropdownMenu::setTheme(const QString &theme)

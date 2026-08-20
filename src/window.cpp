@@ -368,6 +368,7 @@ void Window::addTabWithWrapper(EditWrapper *wrapper, const QString &filepath, co
 
     showNewEditor(wrapper);
     wrapper->textEditor()->setThemeWithPath(m_themePath);
+    wrapper->applyMarkdownTheme(Utils::getThemeMapFromPath(m_themePath));
 }
 
 void Window::closeTab()
@@ -444,6 +445,7 @@ EditWrapper* Window::createEditor()
     bool wordWrap = m_settings->settings->option("base.font.wordwrap")->value().toBool();
 
     wrapper->textEditor()->setThemeWithPath(m_themePath);
+    wrapper->applyMarkdownTheme(Utils::getThemeMapFromPath(m_themePath));
     wrapper->textEditor()->setSettings(m_settings);
     wrapper->textEditor()->setTabSpaceNumber(m_settings->settings->option("advance.editor.tabspacenumber")->value().toInt());
     wrapper->textEditor()->setFontFamily(m_settings->settings->option("base.font.family")->value().toString());
@@ -662,6 +664,8 @@ bool Window::saveAsFile()
 
         wrapper->setTextCodec(encode);
         wrapper->updatePath(newFilePath);
+        wrapper->updateMarkdownRecognition(newFilePath,
+                                           wrapper->textEditor()->syntaxDefinitionName());
         wrapper->setEndOfLineMode(eol);
         wrapper->saveFile();
 
@@ -1268,6 +1272,7 @@ void Window::loadTheme(const QString &path)
     for (EditWrapper *wrapper : m_wrappers.values()) {
         wrapper->textEditor()->setThemeWithPath(path);
         wrapper->setDarkTheme(isDark);
+        wrapper->applyMarkdownTheme(jsonMap);
     }
 
     // set background.

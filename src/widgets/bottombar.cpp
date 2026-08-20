@@ -33,6 +33,7 @@ BottomBar::BottomBar(QWidget *parent)
       m_cursorStatus(new QLabel),
       m_encodeMenu(new DDropdownMenu),
       m_highlightMenu(new DDropdownMenu),
+      m_viewModeMenu(new DDropdownMenu),
       m_rowStr(tr("Row")),
       m_columnStr(tr("Column")),
       m_chrCountStr(tr("Characters %1"))
@@ -49,8 +50,13 @@ BottomBar::BottomBar(QWidget *parent)
     m_encodeMenu->addActions(Utils::getEncodeList());
     m_encodeMenu->setCurrentText("UTF-8");
     m_highlightMenu->setCurrentTextOnly(qApp->translate("DTextEdit", "None"));
+    m_editViewAction = m_viewModeMenu->addAction(tr("Edit"));
+    m_readViewAction = m_viewModeMenu->addAction(tr("Read"));
+    m_livePreviewAction = m_viewModeMenu->addAction(tr("Live Preview"));
+    m_viewModeMenu->setCurrentAction(m_editViewAction);
 
     layout->addStretch();
+    layout->addWidget(m_viewModeMenu);
     layout->addWidget(m_cursorStatus);
     layout->addWidget(m_encodeMenu);
     layout->addWidget(m_highlightMenu);
@@ -58,6 +64,14 @@ BottomBar::BottomBar(QWidget *parent)
     setFixedHeight(32);
 
     connect(m_encodeMenu, &DDropdownMenu::currentTextChanged, this, &BottomBar::handleEncodeChanged);
+    connect(m_viewModeMenu, &DDropdownMenu::triggered, this, [this](QAction *action) {
+        if (action == m_editViewAction)
+            emit viewModeRequested(ViewMode::Edit);
+        else if (action == m_readViewAction)
+            emit viewModeRequested(ViewMode::ReadView);
+        else if (action == m_livePreviewAction)
+            emit viewModeRequested(ViewMode::LivePreview);
+    });
 }
 
 BottomBar::~BottomBar()
@@ -95,6 +109,21 @@ void BottomBar::setHightlightName(const QString &name)
     m_highlightMenu->setCurrentTextOnly(name);
 }
 
+void BottomBar::setViewMode(ViewMode mode)
+{
+    if (mode == ViewMode::Edit)
+        m_viewModeMenu->setCurrentAction(m_editViewAction);
+    else if (mode == ViewMode::ReadView)
+        m_viewModeMenu->setCurrentAction(m_readViewAction);
+    else
+        m_viewModeMenu->setCurrentAction(m_livePreviewAction);
+}
+
+void BottomBar::setMarkdownAvailable(bool available)
+{
+    m_livePreviewAction->setEnabled(available);
+}
+
 void BottomBar::setPalette(const QPalette &palette)
 {
     m_positionLabel->setStyleSheet(QString("QLabel { color: %1; margin-right: 10px; }").
@@ -105,6 +134,7 @@ void BottomBar::setPalette(const QPalette &palette)
     QString theme = (palette.color(QPalette::Window).lightness() < 128) ? "dark" : "light";
     m_encodeMenu->setTheme(theme);
     m_highlightMenu->setTheme(theme);
+    m_viewModeMenu->setTheme(theme);
 
     QWidget::setPalette(palette);
 }

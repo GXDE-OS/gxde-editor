@@ -24,12 +24,16 @@
 #include "dtextedit.h"
 #include "widgets/bottombar.h"
 #include "widgets/toast.h"
+#include "markdownlogic.h"
 #include <QTextCodec>
+#include <QVariantMap>
 #ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
 #endif
 
 #include <QVBoxLayout>
+#include <QStackedWidget>
+#include <QSplitter>
 #include <QWidget>
 
 class EditWrapper : public QWidget
@@ -72,9 +76,16 @@ public:
     void checkForReload();
     void initToastPosition();
     void setDarkTheme(bool enabled);
+    void applyMarkdownTheme(const QVariantMap &themeMap);
+    bool setViewMode(ViewMode mode);
+    ViewMode viewMode() const { return m_viewMode; }
+    bool isMarkdownFile() const { return m_isMarkdown; }
+    void updateMarkdownRecognition(const QString &fileName, const QString &definitionName);
 
 signals:
     void requestSaveAs();
+    void viewModeChanged(ViewMode mode);
+    void markdownAvailabilityChanged(bool available);
 
 private:
     void detectEndOfLine();
@@ -84,12 +95,21 @@ private:
     void handleHightlightChanged(const QString &name);
     void handleFileLoadFinished(const QByteArray &encode, const QString &content);
     void setTextCodec(QTextCodec *codec, bool reload = false);
+    bool previewAvailable() const;
+    void ensureMarkdownPreviewCreated();
+    void ensureLiveSplitterCreated();
+    void attachPreviewTo(QWidget *container);
+    void finishFileLoadViewSetup();
 
 protected:
     void resizeEvent(QResizeEvent *);
 
 private:
     QHBoxLayout *m_layout;
+    QStackedWidget *m_viewStack;
+    QWidget *m_editPage;
+    QWidget *m_readPage;
+    QSplitter *m_liveSplitter = nullptr;
     DTextEdit *m_textEdit;
     BottomBar *m_bottomBar;
     QTextCodec *m_textCodec;
@@ -106,6 +126,11 @@ private:
     QString m_pendingLoadContent;
     int m_pendingLoadOffset = 0;
     QTimer *m_pendingLoadTimer = nullptr;
+    ViewMode m_viewMode = ViewMode::Edit;
+    bool m_isMarkdown = false;
+    bool m_readOnlyByViewMode = false;
+    bool m_darkTheme = false;
+    QVariantMap m_markdownTheme;
 };
 
 #endif

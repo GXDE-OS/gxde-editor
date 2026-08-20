@@ -44,8 +44,22 @@ DTK_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {
-    // Init DTK.
-    DApplication::loadDXcbPlugin();
+    // Use the native Wayland QPA in a Wayland session. Loading the DXcb
+    // plugin unconditionally makes the editor an XWayland client even when
+    // WAYLAND_DISPLAY is available, which breaks window-handle recreation
+    // when QWebEngineView starts.
+    const QByteArray requestedPlatform = qgetenv("QT_QPA_PLATFORM");
+    const bool waylandSession = requestedPlatform.startsWith("wayland")
+        || (requestedPlatform.isEmpty()
+            && (qgetenv("XDG_SESSION_TYPE") == "wayland"
+                || !qgetenv("WAYLAND_DISPLAY").isEmpty()));
+
+    if (waylandSession) {
+        if (requestedPlatform.isEmpty())
+            qputenv("QT_QPA_PLATFORM", "wayland");
+    } else {
+        DApplication::loadDXcbPlugin();
+    }
 
     const char *descriptionText = QT_TRANSLATE_NOOP("MainWindow",
                                                     "GXDE Editor is a desktop text editor that supports common text editing features.");

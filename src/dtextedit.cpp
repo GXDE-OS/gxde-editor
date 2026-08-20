@@ -147,6 +147,18 @@ DTextEdit::DTextEdit(QWidget *parent)
     m_openInFileManagerAction = new QAction(tr("Display in file manager"), this);
     m_toggleCommentAction = new QAction(tr("Toggle comment"), this);
     m_speakText = new QAction(tr("Speak text"), this);
+    m_viewModeMenu = new QMenu(tr("View Mode"), this);
+    m_editViewAction = m_viewModeMenu->addAction(tr("Edit"));
+    m_readViewAction = m_viewModeMenu->addAction(tr("Read"));
+    m_livePreviewAction = m_viewModeMenu->addAction(tr("Live Preview"));
+
+    QActionGroup *viewModeGroup = new QActionGroup(this);
+    viewModeGroup->setExclusive(true);
+    for (QAction *action : viewModeActions()) {
+        action->setCheckable(true);
+        viewModeGroup->addAction(action);
+    }
+    m_editViewAction->setChecked(true);
 
     connect(m_rightMenu, &QMenu::aboutToHide, this, &DTextEdit::removeHighlightWordUnderCursor);
     connect(m_undoAction, &QAction::triggered, this, &DTextEdit::undo);
@@ -166,6 +178,15 @@ DTextEdit::DTextEdit(QWidget *parent)
     connect(m_openInFileManagerAction, &QAction::triggered, this, &DTextEdit::clickOpenInFileManagerAction);
     connect(m_toggleCommentAction, &QAction::triggered, this, &DTextEdit::toggleComment);
     connect(m_speakText, &QAction::triggered, this, &DTextEdit::toggleSpeakText);
+    connect(m_editViewAction, &QAction::triggered, this, [this] {
+        emit viewModeRequested(ViewMode::Edit);
+    });
+    connect(m_readViewAction, &QAction::triggered, this, [this] {
+        emit viewModeRequested(ViewMode::ReadView);
+    });
+    connect(m_livePreviewAction, &QAction::triggered, this, [this] {
+        emit viewModeRequested(ViewMode::LivePreview);
+    });
 
     // Init convert case sub menu.
     m_haveWordUnderCursor = false;
@@ -269,6 +290,11 @@ DTextEdit::DTextEdit(QWidget *parent)
 void DTextEdit::setWrapper(EditWrapper *w)
 {
     m_wrapper = w;
+}
+
+QString DTextEdit::syntaxDefinitionName() const
+{
+    return m_highlighter->definition().name();
 }
 
 int DTextEdit::lineNumberAreaWidth()
@@ -2329,6 +2355,25 @@ void DTextEdit::toggleReadOnlyMode()
     }
 }
 
+void DTextEdit::setReadOnlyMode(bool enabled)
+{
+    if (m_readOnlyMode != enabled)
+        toggleReadOnlyMode();
+}
+
+QList<QAction *> DTextEdit::viewModeActions() const
+{
+    return {m_editViewAction, m_readViewAction, m_livePreviewAction};
+}
+
+void DTextEdit::updateViewModeActions(ViewMode mode, bool markdownAvailable)
+{
+    m_editViewAction->setChecked(mode == ViewMode::Edit);
+    m_readViewAction->setChecked(mode == ViewMode::ReadView);
+    m_livePreviewAction->setChecked(mode == ViewMode::LivePreview);
+    m_livePreviewAction->setEnabled(markdownAvailable);
+}
+
 void DTextEdit::toggleComment()
 {
     const auto def = m_highlighter->definition();
@@ -2837,6 +2882,7 @@ void DTextEdit::contextMenuEvent(QContextMenuEvent *event)
     }
 
     m_rightMenu->addSeparator();
+    m_rightMenu->addMenu(m_viewModeMenu);
     if (m_readOnlyMode) {
         m_rightMenu->addAction(m_disableReadOnlyModeAction);
     } else {

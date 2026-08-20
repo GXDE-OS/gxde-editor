@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QDesktopServices>
 #include <QProcessEnvironment>
+#include <QVariantMap>
 
 // 用于实现调用浏览器打开超链接
 class QWebChannel;
@@ -36,7 +37,8 @@ public:
 protected:
     bool acceptNavigationRequest(const QUrl &url, NavigationType type, bool isMainFrame) override {
         if (type == NavigationTypeLinkClicked) {
-            QDesktopServices::openUrl(url);
+            if (url.scheme() == QStringLiteral("http") || url.scheme() == QStringLiteral("https"))
+                QDesktopServices::openUrl(url);
             return false;
         }
         return QWebEnginePage::acceptNavigationRequest(url, type, isMainFrame);
@@ -49,14 +51,22 @@ public:
     explicit MarkdownPreviewWidget(QWidget* parent = nullptr);
     void setSourceEditor(QTextEdit* editor);
     void setDarkTheme(bool enabled);
+    void applyTheme(const QVariantMap &themeMap);
+    void setDocumentPath(const QString &path);
+    void setReadMode(bool enabled);
+    void refreshNow();
 
     static bool isSupport();
 
     void syncPreviewToEditor(double ratio);
 
+signals:
+    void contextMenuRequested(const QPoint &globalPosition);
+
 private slots:
     void scheduleUpdate();
     void performUpdate();
+    void handleUpdateTimeout();
 
     void syncEditorToPreview();
     void pollPreviewScroll();
@@ -76,6 +86,11 @@ private:
     QTimer* m_scrollSyncTimer = nullptr;
     bool m_syncing = false;
     bool m_darkMode = false;
+    bool m_readMode = false;
+    bool m_updatePending = false;
+    QString m_documentPath;
+    QColor m_backgroundColor;
+    QColor m_foregroundColor;
     double m_lastScrollRatio = 0.0;
     double m_lastPreviewRatio = 0.0;
     int m_loadGeneration = 0;
