@@ -65,6 +65,11 @@ Window::Window(DMainWindow *parent)
       m_menu(new QMenu),
       m_titlebarStyleSheet(titlebar()->styleSheet())
 {
+    const QString platformName = QGuiApplication::platformName();
+    if (platformName == QLatin1String("xcb") || platformName == QLatin1String("dxcb")) {
+        setWindowFlag(Qt::FramelessWindowHint, true);
+    }
+
     m_blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first()).filePath("blank-files");
     m_themePath = m_settings->settings->option("advance.editor.theme")->value().toString();
     m_rootSaveDBus = new DBusDaemon::dbus("com.deepin.editor.daemon", "/", QDBusConnection::systemBus(), this);
