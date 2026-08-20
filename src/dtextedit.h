@@ -28,6 +28,7 @@
 #include "linenumberarea.h"
 
 #include "settings.h"
+#include "markdownlogic.h"
 #include <QAction>
 #include <QMenu>
 #include <QPaintEvent>
@@ -144,6 +145,7 @@ public:
     void setThemeWithPath(const QString &path);
     void setTheme(const KSyntaxHighlighting::Theme &theme, const QString &path);
     void loadHighlighter();
+    QString syntaxDefinitionName() const;
     void beginBulkLoad();
     void endBulkLoad();
 
@@ -170,6 +172,10 @@ public:
     QString getWordAtCursor();
 
     void toggleReadOnlyMode();
+    bool readOnlyMode() const { return m_readOnlyMode; }
+    void setReadOnlyMode(bool enabled);
+    QList<QAction *> viewModeActions() const;
+    void updateViewModeActions(ViewMode mode, bool markdownAvailable);
     void toggleComment();
 
     void toggleSpeakText();
@@ -193,6 +199,7 @@ signals:
     void popupNotify(QString notify);
     void click();
     void pressEsc();
+    void viewModeRequested(ViewMode mode);
 
 public slots:
     void highlightCurrentLine();
@@ -284,6 +291,10 @@ private:
     QAction *m_openInFileManagerAction;
     QAction *m_toggleCommentAction;
     QAction *m_speakText;
+    QMenu *m_viewModeMenu;
+    QAction *m_editViewAction;
+    QAction *m_readViewAction;
+    QAction *m_livePreviewAction;
 
     QMenu *m_convertCaseMenu;
     QAction *m_upcaseAction;

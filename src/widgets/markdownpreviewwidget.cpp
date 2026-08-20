@@ -1,7 +1,9 @@
 // MarkdownPreviewWidget.cpp
 #ifdef USE_WEBENGINE
 #include "markdownpreviewwidget.h"
+#include "../markdownlogic.h"
 #include <QScrollBar>
+#include <QTimer>
 #include <QFile>
 #include <QWebEngineSettings>
 #include <QUrl>
@@ -11,6 +13,7 @@
 #include <QJsonArray>
 #include <QtMath>
 #include <QWebChannel>
+#include <QFileInfo>
 
 // 使用GitHub风格的Markdown样式
 const QString STYLE_LIGHT = R"(
@@ -53,7 +56,6 @@ void MarkdownPreviewBridge::syncPreviewToEditor(double ratio)
         m_widget->syncPreviewToEditor(ratio);
     }
 }
-
 MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     : QWidget(parent)
 {
@@ -69,6 +71,7 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
 
     m_webView->setPage(m_webPage);
     m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessRemoteUrls, true);
+    m_webView->settings()->setAttribute(QWebEngineSettings::WebAttribute::LocalContentCanAccessFileUrls, true);
     m_webView->page()->setBackgroundColor(Qt::transparent);
 
     layout->addWidget(m_webView);
@@ -77,7 +80,8 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
 
     m_updateTimer = new QTimer(this);
     m_updateTimer->setSingleShot(true);
-    connect(m_updateTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::performUpdate);
+    m_updateTimer->setInterval(300);
+    connect(m_updateTimer, &QTimer::timeout, this, &MarkdownPreviewWidget::handleUpdateTimeout);
 
     // 定时轮询预览区滚动位置，用于预览 -> 编辑器的同步
     m_scrollSyncTimer = new QTimer(this);
@@ -87,8 +91,11 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     // 页面加载完成后恢复滚动比例并开始监听预览区滚动
     connect(m_webView, &QWebEngineView::loadFinished,
             this, &MarkdownPreviewWidget::onPreviewLoadFinished);
+    m_webView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_webView, &QWidget::customContextMenuRequested, this, [this](const QPoint &position) {
+        emit contextMenuRequested(m_webView->mapToGlobal(position));
+    });
 }
-
 bool MarkdownPreviewWidget::isSupport()
 {
     // 只要编译期启用了 WebEngine，就启用 Markdown 预览。
@@ -98,8 +105,10 @@ bool MarkdownPreviewWidget::isSupport()
 
 void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor)
 {
-    if (m_sourceEditor == editor)
+    if (m_sourceEditor == editor) {
+        refreshNow();
         return;
+    }
 
     if (m_sourceEditor) {
         disconnect(m_sourceEditor, &QTextEdit::textChanged,
@@ -118,6 +127,8 @@ void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor)
         m_scrollSyncTimer->stop();
 
     if (!m_sourceEditor) {
+        m_updateTimer->stop();
+        m_updatePending = false;
         m_webView->setHtml(QString());
         return;
     }
@@ -127,8 +138,40 @@ void MarkdownPreviewWidget::setSourceEditor(QTextEdit* editor)
     connect(m_sourceEditor->verticalScrollBar(), &QScrollBar::valueChanged,
             this, &MarkdownPreviewWidget::syncEditorToPreview);
 
-    // 初始化内容，页面加载完成后会恢复滚动位置
-    m_webView->setHtml(generateHtml(m_sourceEditor->toPlainText()), QUrl("qrc:/"));
+    QScrollBar *scrollBar = m_sourceEditor->verticalScrollBar();
+    m_lastScrollRatio = ScrollSync::ratioFromScrollBar(
+        scrollBar->value(), scrollBar->minimum(), scrollBar->maximum());
+    m_lastPreviewRatio = m_lastScrollRatio;
+
+    refreshNow();
+}
+
+void MarkdownPreviewWidget::setDocumentPath(const QString &path)
+{
+    if (m_documentPath == path)
+        return;
+    m_documentPath = path;
+    if (m_sourceEditor)
+        scheduleUpdate();
+}
+
+void MarkdownPreviewWidget::setReadMode(bool enabled)
+{
+    if (m_readMode == enabled)
+        return;
+    m_readMode = enabled;
+    if (m_sourceEditor)
+        refreshNow();
+}
+
+void MarkdownPreviewWidget::refreshNow()
+{
+    if (!m_sourceEditor)
+        return;
+    m_updatePending = false;
+    performUpdate();
+    if (!m_updateTimer->isActive())
+        m_updateTimer->start();
 }
 
 void MarkdownPreviewWidget::syncEditorToPreview()
@@ -177,9 +220,12 @@ void MarkdownPreviewWidget::pollPreviewScroll()
 
     const int generation = m_loadGeneration;
     m_webView->page()->runJavaScript(
-        "var e = document.documentElement;"
-        "var h = e.scrollHeight - e.clientHeight;"
-        "h > 0 ? (window.scrollY || e.scrollTop || 0) / h : 0;",
+        "(() => {"
+        "const e = document.scrollingElement || document.documentElement || document.body;"
+        "if (!e) return 0;"
+        "const h = e.scrollHeight - e.clientHeight;"
+        "return h > 0 ? (window.scrollY || e.scrollTop || 0) / h : 0;"
+        "})()",
         [this, generation](const QVariant &result) {
             if (generation != m_loadGeneration || !m_sourceEditor || m_syncing)
                 return;
@@ -212,9 +258,12 @@ void MarkdownPreviewWidget::onPreviewLoadFinished(bool ok)
     const double ratio = m_lastScrollRatio;
     const int generation = m_loadGeneration;
     m_webView->page()->runJavaScript(
-        QString("var e = document.documentElement;"
-                "var h = e.scrollHeight - e.clientHeight;"
-                "window.scrollTo(0, %1 * (h > 0 ? h : 0));").arg(ratio),
+        QString("(() => {"
+                "const e = document.scrollingElement || document.documentElement || document.body;"
+                "if (!e) return;"
+                "const h = e.scrollHeight - e.clientHeight;"
+                "window.scrollTo(0, %1 * (h > 0 ? h : 0));"
+                "})()").arg(ratio),
         [this, ratio, generation](const QVariant &) {
             if (generation != m_loadGeneration)
                 return;
@@ -227,15 +276,28 @@ void MarkdownPreviewWidget::onPreviewLoadFinished(bool ok)
 
 void MarkdownPreviewWidget::scheduleUpdate()
 {
-    // 记录当前预览比例，内容刷新后尽量维持阅读位置
     m_lastScrollRatio = m_lastPreviewRatio;
-    m_updateTimer->start(200); // 200ms防抖
+    m_updatePending = true;
+    if (!m_updateTimer->isActive()) {
+        performUpdate();
+        m_updateTimer->start();
+    }
+}
+
+void MarkdownPreviewWidget::handleUpdateTimeout()
+{
+    if (!m_updatePending)
+        return;
+    performUpdate();
+    m_updateTimer->start();
 }
 
 void MarkdownPreviewWidget::performUpdate()
 {
     if (!m_sourceEditor)
         return;
+
+    m_updatePending = false;
 
     // 刷新期间暂停轮询，避免在页面重新加载过程中误同步
     if (m_scrollSyncTimer)
@@ -250,9 +312,15 @@ void MarkdownPreviewWidget::performUpdate()
 
 QString MarkdownPreviewWidget::generateHtml(const QString& markdown)
 {
+    QString renderMarkdown = markdown;
+    if (!m_documentPath.isEmpty()) {
+        renderMarkdown = MarkdownLogic::resolveImagePaths(
+            markdown, QFileInfo(m_documentPath).absolutePath());
+    }
+
     // 使用 QJsonDocument 正确序列化字符串
     QJsonArray a;
-    a.append(QJsonValue(markdown));
+    a.append(QJsonValue(renderMarkdown));
     QJsonDocument doc(a); // 转换为 JSON 对象
 
     QString escapedMarkdown = QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
@@ -261,6 +329,61 @@ QString MarkdownPreviewWidget::generateHtml(const QString& markdown)
     if (escapedMarkdown.startsWith('[') && escapedMarkdown.endsWith(']')) {
         escapedMarkdown = escapedMarkdown.mid(2, escapedMarkdown.length() - 4);
     }
+
+    const QString maxWidth = m_readMode ? QStringLiteral("800px") : QStringLiteral("none");
+    const QString margin = m_readMode ? QStringLiteral("0 auto") : QStringLiteral("0");
+    const QString padding = m_readMode ? QStringLiteral("45px") : QStringLiteral("24px");
+    const QString layoutStyle = QStringLiteral(
+        "<style>.markdown-body { max-width: %1; margin: %2; padding: %3; }</style>")
+                                    .arg(maxWidth, margin, padding);
+    QString paletteStyle;
+    if (m_backgroundColor.isValid() && m_foregroundColor.isValid()) {
+        const QColor codeBackground = m_backgroundColor.lightness() < 128
+            ? m_backgroundColor.lighter(115) : m_backgroundColor.darker(105);
+        paletteStyle = QStringLiteral(
+            "<style>html, body, .markdown-body { background-color: %1; color: %2; }"
+            ".markdown-body pre, .markdown-body code { background-color: %3; color: %2; }</style>")
+                           .arg(m_backgroundColor.name(), m_foregroundColor.name(),
+                                codeBackground.name());
+    }
+
+    const QString scrollThumb = m_darkMode
+        ? QStringLiteral("rgba(255, 255, 255, 0.30)")
+        : QStringLiteral("rgba(72, 72, 72, 0.32)");
+    const QString scrollThumbHover = m_darkMode
+        ? QStringLiteral("rgba(255, 255, 255, 0.46)")
+        : QStringLiteral("rgba(72, 72, 72, 0.48)");
+    const QString scrollbarStyle = QStringLiteral(R"(
+        <style>
+          *::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+          }
+          *::-webkit-scrollbar-track,
+          *::-webkit-scrollbar-corner {
+            background: transparent;
+          }
+          *::-webkit-scrollbar-thumb {
+            min-height: 32px;
+            background-color: transparent;
+            background-clip: content-box;
+            border: 3px solid transparent;
+            border-radius: 5px;
+          }
+          html.dtk-scrollbar-active::-webkit-scrollbar-thumb {
+            background-color: %1;
+          }
+          html.dtk-scrollbar-hover::-webkit-scrollbar-thumb {
+            background-color: %2;
+            border-width: 1px;
+          }
+          *::-webkit-scrollbar-button {
+            display: none;
+            width: 0;
+            height: 0;
+          }
+        </style>
+    )").arg(scrollThumb, scrollThumbHover);
 
     return QString(R"(
         <!DOCTYPE html>
@@ -289,25 +412,69 @@ QString MarkdownPreviewWidget::generateHtml(const QString& markdown)
                 new QWebChannel(qt.webChannelTransport, function(channel) {
                     const bridge = channel.objects.markdownPreview;
                     if (!bridge) return;
+
+                    let scrollbarHideTimer = 0;
+                    const showScrollbar = function(hovered) {
+                        document.documentElement.classList.add('dtk-scrollbar-active');
+                        document.documentElement.classList.toggle('dtk-scrollbar-hover', hovered);
+                        window.clearTimeout(scrollbarHideTimer);
+                        if (!hovered) {
+                            scrollbarHideTimer = window.setTimeout(function() {
+                                document.documentElement.classList.remove('dtk-scrollbar-active');
+                            }, 1000);
+                        }
+                    };
+
                     window.addEventListener('scroll', function() {
-                        const e = document.documentElement;
+                        showScrollbar(false);
+                        const e = document.scrollingElement || document.documentElement || document.body;
+                        if (!e) return;
                         const h = e.scrollHeight - e.clientHeight;
                         if (h > 0) {
                             bridge.syncPreviewToEditor((window.scrollY || e.scrollTop || 0) / h);
                         }
-                    });
+                    }, { passive: true });
+                    window.addEventListener('pointermove', function(event) {
+                        const atScrollbar = event.clientX >= document.documentElement.clientWidth - 12;
+                        if (atScrollbar) showScrollbar(true);
+                        else if (document.documentElement.classList.contains('dtk-scrollbar-hover'))
+                            showScrollbar(false);
+                    }, { passive: true });
+                    window.addEventListener('pointerleave', function() {
+                        showScrollbar(false);
+                    }, { passive: true });
                 });
             </script>
         </body>
         </html>
-    )").arg(m_darkMode ? STYLE_DARK : STYLE_LIGHT)
+    )").arg((m_darkMode ? STYLE_DARK : STYLE_LIGHT)
+                 + layoutStyle + paletteStyle + scrollbarStyle)
       .arg(escapedMarkdown); // 直接插入已转义内容
 }
 
 void MarkdownPreviewWidget::setDarkTheme(bool enabled)
 {
+    if (m_darkMode == enabled)
+        return;
     m_darkMode = enabled;
-    scheduleUpdate();
+    if (m_sourceEditor)
+        refreshNow();
+}
+
+void MarkdownPreviewWidget::applyTheme(const QVariantMap &themeMap)
+{
+    const QVariantMap editorColors = themeMap.value(QStringLiteral("editor-colors")).toMap();
+    const QVariantMap textStyles = themeMap.value(QStringLiteral("text-styles")).toMap();
+    const QVariantMap normalStyle = textStyles.value(QStringLiteral("Normal")).toMap();
+    const QColor background(editorColors.value(QStringLiteral("background-color")).toString());
+    const QColor foreground(normalStyle.value(QStringLiteral("text-color")).toString());
+    if (m_backgroundColor == background && m_foregroundColor == foreground)
+        return;
+
+    m_backgroundColor = background;
+    m_foregroundColor = foreground;
+    if (m_sourceEditor)
+        refreshNow();
 }
 
 void MarkdownPreviewWidget::setPreviewScrollRatio(double ratio)
@@ -317,9 +484,12 @@ void MarkdownPreviewWidget::setPreviewScrollRatio(double ratio)
 
     m_lastPreviewRatio = ratio;
     m_webView->page()->runJavaScript(
-        QString("var e = document.documentElement;"
-                "var h = e.scrollHeight - e.clientHeight;"
-                "window.scrollTo(0, %1 * (h > 0 ? h : 0));").arg(ratio)
+        QString("(() => {"
+                "const e = document.scrollingElement || document.documentElement || document.body;"
+                "if (!e) return;"
+                "const h = e.scrollHeight - e.clientHeight;"
+                "window.scrollTo(0, %1 * (h > 0 ? h : 0));"
+                "})()").arg(ratio)
     );
 }
 

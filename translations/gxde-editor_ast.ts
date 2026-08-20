@@ -3,6 +3,21 @@
 <context>
     <name>BottomBar</name>
     <message>
+        <location filename="../src/widgets/bottombar.cpp" line="53" />
+        <source>Edit</source>
+        <translation>Editar</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="54" />
+        <source>Read</source>
+        <translation>Lleer</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="55" />
+        <source>Live Preview</source>
+        <translation>Previsualización en direuto</translation>
+    </message>
+    <message>
         <location filename="../src/widgets/bottombar.cpp" line="36" />
         <source>Row</source>
         <translation>Fila</translation>
@@ -20,6 +35,26 @@
 </context>
 <context>
     <name>DTextEdit</name>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="150" />
+        <source>View Mode</source>
+        <translation>Mou de vista</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="151" />
+        <source>Edit</source>
+        <translation>Editar</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="152" />
+        <source>Read</source>
+        <translation>Lleer</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="153" />
+        <source>Live Preview</source>
+        <translation>Previsualización en direuto</translation>
+    </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="105" />
         <source>Undo</source>
@@ -141,6 +176,11 @@
 </context>
 <context>
     <name>EditWrapper</name>
+    <message>
+        <location filename="../src/editwrapper.cpp" line="485" />
+        <source>View Mode</source>
+        <translation>Mou de vista</translation>
+    </message>
     <message>
         <location filename="../src/editwrapper.cpp" line="259" />
         <source>File has changed on disk. Reload?</source>

@@ -221,6 +221,9 @@ WaylandActivator::~WaylandActivator()
     if (m_registry) {
         wl_registry_destroy(m_registry);
     }
+    if (m_display) {
+        wl_display_disconnect(m_display);
+    }
 }
 
 void WaylandActivator::bind()
@@ -241,12 +244,19 @@ void WaylandActivator::bind()
         wl_registry_destroy(m_registry);
         m_registry = nullptr;
     }
-
-    auto *waylandApp = qApp->nativeInterface<QNativeInterface::QWaylandApplication>();
-    if (!waylandApp) {
-        return;
+    if (m_display) {
+        wl_display_disconnect(m_display);
+        m_display = nullptr;
     }
-    m_display = waylandApp->display();
+
+    // kywc_toplevel objects are server-created (their IDs live in the
+    // compositor half of the Wayland object map).  Keeping them on Qt's
+    // shared display but on libwayland's default event queue can collide
+    // with a server ID reused by Qt's clipboard queue before a queued
+    // toplevel.closed event has run.  Use an independent connection: this
+    // protocol identifies our windows by PID and does not need Qt's
+    // wl_surface objects.
+    m_display = wl_display_connect(nullptr);
     if (!m_display) {
         return;
     }
@@ -264,12 +274,10 @@ void WaylandActivator::bind()
 
 bool WaylandActivator::activateOwnWindow()
 {
-    if (!m_initialized) {
-        bind();
-    }
-    if (m_ownToplevels.isEmpty()) {
-        bind();
-    }
+    // Re-enumerate on demand.  No event-loop integration is needed for this
+    // short-lived auxiliary connection, and newly created windows are always
+    // included in the activation request.
+    bind();
     if (!m_initialized || m_ownToplevels.isEmpty()) {
         return false;
     }

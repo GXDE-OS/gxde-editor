@@ -3,6 +3,21 @@
 <context>
     <name>BottomBar</name>
     <message>
+        <location filename="../src/widgets/bottombar.cpp" line="53" />
+        <source>Edit</source>
+        <translation>संपादित करें</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="54" />
+        <source>Read</source>
+        <translation>पढ़ें</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="55" />
+        <source>Live Preview</source>
+        <translation>लाइव पूर्वावलोकन</translation>
+    </message>
+    <message>
         <location filename="../src/widgets/bottombar.cpp" line="36" />
         <source>Row</source>
         <translation>पंक्ति</translation>
@@ -20,6 +35,26 @@
 </context>
 <context>
     <name>DTextEdit</name>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="150" />
+        <source>View Mode</source>
+        <translation>दृश्य मोड</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="151" />
+        <source>Edit</source>
+        <translation>संपादित करें</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="152" />
+        <source>Read</source>
+        <translation>पढ़ें</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="153" />
+        <source>Live Preview</source>
+        <translation>लाइव पूर्वावलोकन</translation>
+    </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="108" />
         <source>Undo</source>
@@ -149,6 +184,11 @@
 </context>
 <context>
     <name>EditWrapper</name>
+    <message>
+        <location filename="../src/editwrapper.cpp" line="485" />
+        <source>View Mode</source>
+        <translation>दृश्य मोड</translation>
+    </message>
     <message>
         <location filename="../src/editwrapper.cpp" line="293" />
         <source>File has changed on disk. Reload?</source>

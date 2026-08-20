@@ -1,3 +1,9 @@
+gxde-editor (2.0.4) UNRELEASED; urgency=medium
+
+  * 修复Markdown预览功能崩溃的问题
+
+ -- CharOfString <root@charofstring.cc>  Thu, 20 Aug 2026 18:08:22 +0800
+
 gxde-editor (2.0.3) UNRELEASED; urgency=medium
 
   * 新增 Markdown 预览功能
