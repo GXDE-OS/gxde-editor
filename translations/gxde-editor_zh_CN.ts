@@ -402,6 +402,11 @@
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="54"/>
+        <source>Toggle markdown preview</source>
+        <translation>切换 Markdown 预览</translation>
+    </message>
+    <message>
+        <location filename="../src/settingsdialog.cpp" line="55"/>
         <source>Editor</source>
         <translation>编辑</translation>
     </message>
@@ -747,7 +752,12 @@
         <translation>打印</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="184"/>
+        <location filename="../src/window.cpp" line="189"/>
+        <source>Markdown preview</source>
+        <translation>Markdown 预览</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="190"/>
         <source>Switch theme</source>
         <translation>切换主题</translation>
     </message>

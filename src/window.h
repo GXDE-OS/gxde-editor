@@ -40,6 +40,7 @@
 
 DWIDGET_USE_NAMESPACE
 
+class QAction;
 class Window : public DMainWindow
 {
     Q_OBJECT
@@ -84,6 +85,8 @@ public:
     void popupThemePanel();
 
     void toggleFullscreen();
+    // Markdown 可视化预览开关（仅当前文件为 markdown 时可用）
+    void toggleMarkdownPreview();
 
     void remberPositionSave();
     void remberPositionRestore();
@@ -142,6 +145,8 @@ private:
     void handleFocusWindowChanged(QWindow *w);
     void updateThemePanelGeomerty();
     void checkTabbarForReload();
+    // 刷新 Markdown 预览开关的可用性与勾选状态
+    void updateMarkdownPreviewActionState();
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -167,6 +172,8 @@ private:
     QMap<QString, EditWrapper *> m_wrappers;
 
     QMenu *m_menu;
+    // Markdown 预览开关菜单项，状态随当前标签页同步
+    QAction *m_markdownPreviewAction = nullptr;
 
     QStringList m_closeFileHistory;
 

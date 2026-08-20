@@ -50,11 +50,6 @@ find_package(Dtk6Core REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(KF6Codecs REQUIRED)
 
-# 尝试查找WebEngine模块
-find_package(Qt6WebEngineCore QUIET)
-find_package(Qt6WebEngineWidgets QUIET)
-find_package(Qt6WebChannel QUIET)
-
 include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 # Tell CMake to create the executable
@@ -83,20 +78,6 @@ target_link_libraries(gxde-editor
     KF6::SyntaxHighlighting
 )
 
-# 判断 Qt6WebEngine 模块是否存在
-if(Qt6WebEngineCore_FOUND AND Qt6WebEngineWidgets_FOUND AND Qt6WebChannel_FOUND)
-    # 添加模块链接和宏定义
-    target_link_libraries(gxde-editor
-        Qt6::WebEngineCore
-        Qt6::WebEngineWidgets
-        Qt6::WebChannel
-    )
-    target_compile_definitions(gxde-editor
-        PRIVATE
-        USE_WEBENGINE
-    )
-endif()
-
 set(CMAKE_INSTALL_PREFIX /usr)
 
 add_subdirectory("gxedit")
@@ -117,6 +98,18 @@ if (BUILD_TESTING)
         KF6::SyntaxHighlighting
     )
     add_test(NAME gxde-editor-tests COMMAND gxde-editor-tests)
+
+    add_executable(gxde-editor-markdownpreview-tests
+        tests/markdownpreview_test.cpp
+        src/markdownpreview.cpp
+    )
+    target_link_libraries(gxde-editor-markdownpreview-tests
+        Qt6::Core
+        Qt6::Test
+        Qt6::Widgets
+    )
+    add_test(NAME gxde-editor-markdownpreview-tests COMMAND gxde-editor-markdownpreview-tests)
+    set_tests_properties(gxde-editor-markdownpreview-tests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 endif ()
 
 # Install qm files
