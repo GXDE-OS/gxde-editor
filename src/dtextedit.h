@@ -249,6 +249,10 @@ private:
     void startDeferredSyntaxHighlight(const KSyntaxHighlighting::Definition &definition);
     void stopDeferredSyntaxHighlight();
 
+    // Tab-sensitive formats (Makefile and friends) must be indented with a
+    // real TAB character, spaces are rejected by their parser.
+    bool useRealTabForIndent() const;
+
 private:
     EditWrapper *m_wrapper;
     QPropertyAnimation *m_scrollAnimation;

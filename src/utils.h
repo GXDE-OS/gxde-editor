@@ -55,6 +55,9 @@ public:
     static QVariantMap getThemeMapFromPath(const QString &filepath);
     static bool isMimeTypeSupport(const QString &filepath);
     static bool isDraftFile(const QString &filepath);
+    // Whether the file format treats a TAB character as part of its syntax,
+    // so indentation must not be replaced with spaces (Makefile for example).
+    static bool isTabSensitiveFile(const QString &filepath);
     static void toast(const QString &message, QWidget* parent = nullptr);
     static const QStringList getEncodeList();
     static QPixmap renderSVG(const QString &filePath, const QSize &size);

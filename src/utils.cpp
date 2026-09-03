@@ -569,6 +569,38 @@ bool Utils::isMimeTypeSupport(const QString &filepath)
     return false;
 }
 
+bool Utils::isTabSensitiveFile(const QString &filepath)
+{
+    const QString fileName = QFileInfo(filepath).fileName();
+
+    if (fileName.isEmpty()) {
+        return false;
+    }
+
+    // Makefiles require a real TAB character at the beginning of every
+    // recipe line, using spaces there is a syntax error.
+    static const QStringList tabSensitiveNames {
+        "Makefile", "makefile", "GNUmakefile", "BSDmakefile",
+        "Makefile.am", "Makefile.in", "Kbuild"
+    };
+
+    for (const QString &name : tabSensitiveNames) {
+        if (fileName.compare(name, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+
+    // Variants such as Makefile.debug, Makefile.release, makefile.local ...
+    if (fileName.startsWith("makefile", Qt::CaseInsensitive)) {
+        return true;
+    }
+
+    // Fragments included by a Makefile share the same restriction.
+    static const QStringList tabSensitiveSuffixes { "mk", "mak", "make" };
+
+    return tabSensitiveSuffixes.contains(QFileInfo(fileName).suffix(), Qt::CaseInsensitive);
+}
+
 bool Utils::isDraftFile(const QString &filepath)
 {
     QString draftDir = QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first())

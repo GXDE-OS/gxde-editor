@@ -1085,6 +1085,17 @@ void DTextEdit::escape()
     tryUnsetMark();
 }
 
+bool DTextEdit::useRealTabForIndent() const
+{
+    if (Utils::isTabSensitiveFile(filepath)) {
+        return true;
+    }
+
+    // The user may have picked the Makefile highlighter by hand for a file
+    // whose name does not look like a Makefile.
+    return syntaxDefinitionName().contains("Makefile", Qt::CaseInsensitive);
+}
+
 void DTextEdit::indentText()
 {
     // Stop mark if mark is set.
@@ -1092,6 +1103,7 @@ void DTextEdit::indentText()
     hideCursorBlink();
 
     QTextCursor cursor = textCursor();
+    const bool useRealTab = useRealTabForIndent();
 
     if (cursor.hasSelection()) {
         QTextBlock block = document()->findBlock(cursor.selectionStart());
@@ -1100,9 +1112,8 @@ void DTextEdit::indentText()
         cursor.beginEditBlock();
 
         while (block != end) {
-            QString speaces(m_tabSpaceNumber, ' ');
             cursor.setPosition(block.position());
-            cursor.insertText(speaces);
+            cursor.insertText(useRealTab ? "\t" : QString(m_tabSpaceNumber, ' '));
             block = block.next();
         }
 
@@ -1110,9 +1121,13 @@ void DTextEdit::indentText()
     } else {
         cursor.beginEditBlock();
 
-        int indent = m_tabSpaceNumber - (cursor.positionInBlock() % m_tabSpaceNumber);
-        QString spaces(indent, ' ');
-        cursor.insertText(spaces);
+        if (useRealTab) {
+            cursor.insertText("\t");
+        } else {
+            // Align the cursor to the next tab stop.
+            int indent = m_tabSpaceNumber - (cursor.positionInBlock() % m_tabSpaceNumber);
+            cursor.insertText(QString(indent, ' '));
+        }
 
         cursor.endEditBlock();
     }
