@@ -1,19 +1,39 @@
 :root {
-  --gxde-editor-bg: #ffffff;
-  --gxde-editor-fg: #1f2328;
-  --gxde-editor-muted: #59636e;
-  --gxde-editor-border: #d1d9e0;
-  --gxde-editor-quote-bar: #d1d9e0;
-  --gxde-editor-code-bg: #f6f8fa;
-  --gxde-editor-selection: #b6d7ff;
-  --gxde-editor-caret: #0969da;
-  --gxde-editor-link: #0969da;
+  --gxde-editor-bg: #f7f9ff;
+  --gxde-editor-fg: #181c20;
+  --gxde-editor-caret: #2e628c;
   --gxde-editor-font-family: -apple-system, "Noto Sans CJK SC", "Source Han Sans SC",
     "Microsoft YaHei", sans-serif;
-  --gxde-editor-mono-family: "Noto Sans Mono CJK SC", "DejaVu Sans Mono", Consolas, monospace;
   --gxde-editor-font-size: 16px;
   --gxde-editor-line-height: 1.7;
   --gxde-editor-padding: 32px;
+}
+
+.milkdown {
+  --crepe-color-background: #f7f9ff; /* background */
+  --crepe-color-on-background: #181c20; /* onBackground */
+  --crepe-color-surface: #f1f4f9; /* surfaceContainerLow */
+  --crepe-color-surface-low: #eceef3; /* surfaceContainer */
+  --crepe-color-on-surface: #181c20; /* onSurface */
+  --crepe-color-on-surface-variant: #42474e; /* onSurfaceVariant */
+  --crepe-color-outline: #72777f; /* outline */
+  --crepe-color-primary: #2e628c; /* primary */
+  --crepe-color-secondary: #d5e4f6; /* secondaryContainer */
+  --crepe-color-on-secondary: #3a4857; /* onSecondaryContainer */
+  --crepe-color-inverse: #2d3135; /* inverseSurface */
+  --crepe-color-on-inverse: #eef1f6; /* inverseOnSurface */
+  --crepe-color-inline-code: #ba1a1a; /* error */
+  --crepe-color-error: #ba1a1a; /* error */
+  --crepe-color-hover: #e6e8ee; /* surfaceContainerHigh */
+  --crepe-color-selected: #e0e2e8; /* surfaceContainerHighest */
+  --crepe-color-inline-area: #dee3eb; /* surfaceVariant */
+  --crepe-base-font-size: var(--gxde-editor-font-size);
+  --crepe-font-default: 'Open Sans', Arial, Helvetica, sans-serif,
+    'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei';
+  --crepe-font-title: Georgia, Cambria, 'Times New Roman', Times, serif,
+    'Noto Serif CJK SC', 'Source Han Serif SC';
+  --crepe-font-code: Fira Code, Menlo, Monaco, 'Courier New', Courier, monospace,
+    'Noto Sans Mono CJK SC';
 }
 
 html,
@@ -43,130 +63,8 @@ body {
   caret-color: var(--gxde-editor-caret);
 }
 
-.gxde-milkdown-content ::selection {
-  background: var(--gxde-editor-selection);
-}
-
-/* 标题 */
-.gxde-milkdown-content h1,
-.gxde-milkdown-content h2,
-.gxde-milkdown-content h3,
-.gxde-milkdown-content h4,
-.gxde-milkdown-content h5,
-.gxde-milkdown-content h6 {
-  margin: 1.4em 0 0.6em;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.gxde-milkdown-content h1 {
-  font-size: 2em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--gxde-editor-border);
-}
-
-.gxde-milkdown-content h2 {
-  font-size: 1.5em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--gxde-editor-border);
-}
-
-.gxde-milkdown-content h3 {
-  font-size: 1.25em;
-}
-
-.gxde-milkdown-content h4 {
-  font-size: 1em;
-}
-
-.gxde-milkdown-content h5 {
-  font-size: 0.875em;
-}
-
-.gxde-milkdown-content h6 {
-  font-size: 0.85em;
-  color: var(--gxde-editor-muted);
-}
-
 .gxde-milkdown-content > :first-child {
   margin-top: 0;
-}
-
-/* 段落与行内元素 */
-.gxde-milkdown-content p {
-  margin: 0 0 1em;
-}
-
-.gxde-milkdown-content a {
-  color: var(--gxde-editor-link);
-  text-decoration: none;
-}
-
-.gxde-milkdown-content a:hover {
-  text-decoration: underline;
-}
-
-.gxde-milkdown-content strong {
-  font-weight: 600;
-}
-
-.gxde-milkdown-content code {
-  padding: 0.2em 0.4em;
-  border-radius: 6px;
-  background: var(--gxde-editor-code-bg);
-  font-family: var(--gxde-editor-mono-family);
-  font-size: 0.9em;
-}
-
-.gxde-milkdown-content hr {
-  height: 1px;
-  margin: 1.6em 0;
-  border: 0;
-  background: var(--gxde-editor-border);
-}
-
-.gxde-milkdown-content blockquote {
-  margin: 0 0 1em;
-  padding: 0 1em;
-  color: var(--gxde-editor-muted);
-  border-left: 0.25em solid var(--gxde-editor-quote-bar);
-}
-
-.gxde-milkdown-content ul,
-.gxde-milkdown-content ol {
-  margin: 0 0 1em;
-  padding-left: 2em;
-}
-
-.gxde-milkdown-content li {
-  margin: 0.25em 0;
-}
-
-.gxde-milkdown-content li > p {
-  margin: 0;
-}
-
-.gxde-milkdown-content li[data-checked] {
-  list-style: none;
-  margin-left: -1.4em;
-}
-
-.gxde-milkdown-content li[data-checked] input[type='checkbox'] {
-  margin-right: 0.5em;
-}
-
-.gxde-milkdown-content pre {
-  margin: 0 0 1em;
-  padding: 1em;
-  overflow-x: auto;
-  border-radius: 6px;
-  background: var(--gxde-editor-code-bg);
-}
-
-.gxde-milkdown-content pre code {
-  padding: 0;
-  background: none;
-  font-size: 0.875em;
 }
 
 .gxde-milkdown-content table {
@@ -176,45 +74,6 @@ body {
   width: 100%;
 }
 
-.gxde-milkdown-content th,
-.gxde-milkdown-content td {
-  padding: 6px 13px;
-  border: 1px solid var(--gxde-editor-border);
-  vertical-align: top;
-  overflow-wrap: break-word;
-}
-
-.gxde-milkdown-content th {
-  font-weight: 600;
-}
-
 .gxde-milkdown-content img {
   max-width: 100%;
-}
-
-.milkdown {
-  --crepe-color-background: var(--gxde-editor-bg);
-  --crepe-color-on-background: var(--gxde-editor-fg);
-  --crepe-color-surface: var(--gxde-editor-bg);
-  --crepe-color-surface-low: var(--gxde-editor-code-bg);
-  --crepe-color-on-surface: var(--gxde-editor-fg);
-  --crepe-color-on-surface-variant: var(--gxde-editor-muted);
-  --crepe-color-outline: var(--gxde-editor-border);
-  --crepe-color-primary: var(--gxde-editor-link);
-  --crepe-color-secondary: var(--gxde-editor-selection);
-  --crepe-color-on-secondary: var(--gxde-editor-fg);
-  --crepe-color-inverse: var(--gxde-editor-fg);
-  --crepe-color-on-inverse: var(--gxde-editor-bg);
-  --crepe-color-inline-code: #ba1a1a;
-  --crepe-color-hover: var(--gxde-editor-code-bg);
-  --crepe-color-selected: var(--gxde-editor-selection);
-  --crepe-color-inline-area: var(--gxde-editor-code-bg);
-
-  --crepe-base-font-size: var(--gxde-editor-font-size);
-  --crepe-font-default: var(--gxde-editor-font-family);
-  --crepe-font-title: var(--gxde-editor-font-family);
-  --crepe-font-code: var(--gxde-editor-mono-family);
-
-  --crepe-shadow-1: 0 1px 3px 1px rgb(0 0 0 / 15%), 0 1px 2px 0 rgb(0 0 0 / 30%);
-  --crepe-shadow-2: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px 0 rgb(0 0 0 / 30%);
 }

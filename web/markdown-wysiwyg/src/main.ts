@@ -20,6 +20,7 @@ import '@milkdown/crepe/theme/common/placeholder.css'
 import '@milkdown/crepe/theme/common/table.css'
 import '@milkdown/crepe/theme/common/toolbar.css'
 import '@milkdown/crepe/theme/common/top-bar.css'
+import '@milkdown/crepe/theme/classic.css'
 import {
   editorViewCtx,
   editorViewOptionsCtx,
