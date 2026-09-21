@@ -22,12 +22,21 @@ import '@milkdown/crepe/theme/common/toolbar.css'
 import '@milkdown/crepe/theme/common/top-bar.css'
 import '@milkdown/crepe/theme/classic.css'
 import {
+  commandsCtx,
   editorViewCtx,
   editorViewOptionsCtx,
+  nodeViewCtx,
   parserCtx,
 } from '@milkdown/kit/core'
+import type { Ctx } from '@milkdown/kit/ctx'
+import {
+  addBlockTypeCommand,
+  clearTextInCurrentBlockCommand,
+  selectTextNearPosCommand,
+} from '@milkdown/kit/preset/commonmark'
+import { createTable } from '@milkdown/kit/preset/gfm'
 import type { Node as ProseNode } from '@milkdown/kit/prose/model'
-import type { NodeView } from '@milkdown/kit/prose/view'
+import type { NodeView, NodeViewConstructor } from '@milkdown/kit/prose/view'
 import '@milkdown/kit/prose/view/style/prosemirror.css'
 import '@milkdown/kit/prose/gapcursor/style/gapcursor.css'
 import {
@@ -36,6 +45,7 @@ import {
   notifyMarkdownLoaded,
   notifyReady,
 } from './bridge'
+import { showTableSizePicker } from './table-picker'
 import './style.css'
 
 /** 暴露给 Qt（QWebEnginePage::runJavaScript）的接口。 */
@@ -174,6 +184,67 @@ function applyBaseUrl(url: string): void {
   base.href = url
 }
 
+/**
+ * 表格图标，取自 Crepe 顶部工具栏自带的那个，只去掉了外面那层 <clipPath>：
+ * 它裁的是一整个 24×24 视口，纯属冗余，而两个入口各插一份会让它的 id 撞车。
+ */
+const TABLE_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">' +
+  '<path d="M20 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H20C21.1 21 22 20.1 22 19V5' +
+  'C22 3.9 21.1 3 20 3ZM20 5V8H5V5H20ZM15 19H10V10H15V19ZM5 10H8V19H5V10ZM17 19V10H20V19H17Z"/></svg>'
+
+/**
+ * 按给定行列数插入表格。
+ *
+ * 步骤照抄 Crepe 内置那套（见 crepe 的 block-edit / top-bar 里 table 项的 onRun），
+ * 只有落光标那一步不一样，理由写在下面。
+ */
+function insertTable(ctx: Ctx, rows: number, cols: number, fromSlashMenu: boolean): void {
+  const commands = ctx.get(commandsCtx)
+  if (fromSlashMenu) {
+    commands.call(clearTextInCurrentBlockCommand.key)
+  }
+
+  // 位置必须等清完 `/table` 再取。清文本那步会缩短当前段落，之后所有位置都往前挪，
+  // 开面板时记下的那个已经作废了 —— 它是用来给面板定位的，不是用来插的。
+  const { from } = ctx.get(editorViewCtx).state.selection
+  commands.call(addBlockTypeCommand.key, {
+    nodeType: createTable(ctx, rows, cols),
+  })
+
+  // 光标往表里走一格。
+  //
+  // 这里跟 Crepe 内置的不一样：它用原来的 `from`，而那个位置在光标位于非空段落时会
+  // 解析回**表格前面那个段落**里，于是从顶部工具栏插完表，光标还停在上面的段落，
+  // 得手动点进表格才能打字。斜杠菜单那条路因为光标所在是空段落、整段被表格顶掉，
+  // 才碰巧没事 —— 也就是说两个入口的行为本来就不一致。
+  //
+  // `from + 1` 落在表格上、而不是任何文本块内部，TextSelection.near 便会自己往下钻到
+  // 第一个单元格。表格起于哪里取决于光标当时在哪种块里，三种都实跑过：
+  //   空段落（斜杠菜单）—— 整段被表格顶掉，表格起于 `from - 1`，`from + 1` 是它的内容
+  //   段末（顶栏）      —— 表格接在段落之后、另补一个空段落，起于 `from + 1`
+  //   段中（顶栏）      —— 段落被劈成两半、表格夹在中间，仍起于 `from + 1`
+  // 三种落点 `from + 1` 都还没走出表格。
+  commands.call(selectTextNearPosCommand.key, { pos: from + 1 })
+  ctx.get(editorViewCtx).focus()
+}
+
+/**
+ * 问尺寸，问到了再插。
+ *
+ * 面板的位置在这里就取好：`coordsAtPos` 返回的正是视口坐标，直接拿来定位。
+ * 但插入位置不在这里定 —— 见 insertTable 里的说明。
+ */
+function requestTableSize(ctx: Ctx, fromSlashMenu: boolean): void {
+  const view = ctx.get(editorViewCtx)
+  const { from } = view.state.selection
+  // 挂到 .milkdown 上：--crepe-* 那组变量声明在那儿，挂到 document.body 上取不到。
+  const mount = view.dom.parentElement ?? document.body
+  showTableSizePicker(view.coordsAtPos(from), mount, (rows, cols) => {
+    insertTable(ctx, rows, cols, fromSlashMenu)
+  })
+}
+
 function exposeApi(): void {
   window.gxdeEditor = {
     load(markdown) {
@@ -201,11 +272,38 @@ async function main(): Promise<void> {
     defaultValue: '',
   })
     // 块左侧的手柄：拖拽排序，点开有删除/复制。它同时提供输入 `/` 的块类型菜单。
-    .addFeature(blockEdit)
+    .addFeature(blockEdit, {
+      // 内置的 Table 项写死插 3×3，而且只开放 label/icon、没有 onRun 可配，先关掉，
+      // 再在 buildMenu 里往同一个分组补一个会问尺寸的。分组一定在：它由上面这个
+      // advancedGroup 非 null 决定，正是我们给的值。
+      advancedGroup: { table: null },
+      buildMenu: (builder) => {
+        builder.getGroup('advanced').addItem('table', {
+          label: 'Table',
+          icon: TABLE_ICON,
+          onRun: (ctx) => requestTableSize(ctx, true),
+        })
+      },
+    })
     // 选中文字后浮出的格式化工具栏。
     .addFeature(toolbar)
     // 常驻顶部的工具栏。它不在 defaultFeatures 里，Crepe 默认是关的，得显式加。
-    .addFeature(topBar)
+    .addFeature(topBar, {
+      // 顶部工具栏那个表格按钮也写死 3×3，而且没有开关可关（只取决于 table 特性
+      // 挂没挂），只能从 insert 分组里把它摘掉再换一个。insert 分组是无条件建的。
+      buildTopBar: (builder) => {
+        const insert = builder.getGroup('insert')
+        const at = insert.group.items.findIndex((item) => item.key === 'table')
+        if (at >= 0) {
+          insert.group.items.splice(at, 1)
+        }
+        insert.addItem('table', {
+          icon: TABLE_ICON,
+          active: () => false,
+          onRun: (ctx) => requestTableSize(ctx, false),
+        })
+      },
+    })
     .addFeature(linkTooltip)
     .addFeature(table)
     .addFeature(listItem)
@@ -219,8 +317,8 @@ async function main(): Promise<void> {
     // alt 文字吃掉是大事。不挂它，图片仍按 commonmark 的 image 节点渲染成普通 <img>，
     // alt/title 原样保留。
 
-  // 两处定制得补回去：Crepe 构造时用 ctx.set 整个替换了 editorViewOptionsCtx，
-  // 我们原来挂在这儿的 class 和 html 节点渲染一并被冲掉了。
+  // Crepe 构造时用 ctx.set 整个替换了 editorViewOptionsCtx，原来挂在这儿的 class
+  // 被冲掉了，得补回去。
   crepe.editor.config((ctx) => {
     ctx.update(editorViewOptionsCtx, (prev) => ({
       ...prev,
@@ -229,11 +327,20 @@ async function main(): Promise<void> {
         class: 'gxde-milkdown-content',
         spellcheck: 'false',
       },
-      nodeViews: {
-        ...prev.nodeViews,
-        html: (node) => new HtmlNodeView(node),
-      },
     }))
+
+    // html 节点视图走 nodeViewCtx，不能塞进上面那个 editorViewOptionsCtx.nodeViews。
+    //
+    // core 建 EditorView 时写的是 `new EditorView(el, { nodeViews, markViews, ...options })`，
+    // `...options` 展开在后面，于是 options 里只要有一个 nodeViews 键，就会把由
+    // nodeViewCtx（也就是 $view 注册的地方）归拢出来的那一整份顶掉。Crepe 的表格
+    // 节点视图正在那一份里：它负责给表格套上 .milkdown-table-block 这层外壳，而表格
+    // 的边框和内边距规则全都限定在这层外壳下（见 crepe 的 common/table.css），
+    // 外壳没了，表格就是一副没框的样子。所以往 nodeViewCtx 里追加，跟 $view 同路。
+    ctx.update(nodeViewCtx, (prev): [string, NodeViewConstructor][] => [
+      ...prev,
+      ['html', (node: ProseNode) => new HtmlNodeView(node)],
+    ])
   })
 
   // 注意：listener 插件对 markdownUpdated 做了 200ms 防抖

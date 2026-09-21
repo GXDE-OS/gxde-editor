@@ -1664,9 +1664,7 @@ img.ProseMirror-separator {
 
 .ProseMirror-focused .ProseMirror-gapcursor {
   display: block;
-}
-
-:root {
+}:root {
   --gxde-editor-bg: #f7f9ff;
   --gxde-editor-fg: #181c20;
   --gxde-editor-caret: #2e628c;
@@ -1695,11 +1693,6 @@ img.ProseMirror-separator {
   --crepe-color-hover: #e6e8ee; /* surfaceContainerHigh */
   --crepe-color-selected: #e0e2e8; /* surfaceContainerHighest */
   --crepe-color-inline-area: #dee3eb; /* surfaceVariant */
-
-  /*
-   * classic 的字体栈没有中文回退，中文只能落到 fontconfig 的默认值上，跟拉丁字形
-   * 对不齐。拉丁部分保持 classic 原样，后面补上中文字族。
-   */
   --crepe-base-font-size: var(--gxde-editor-font-size);
   --crepe-font-default: 'Open Sans', Arial, Helvetica, sans-serif,
     'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei';
@@ -1749,4 +1742,109 @@ body {
 
 .gxde-milkdown-content img {
   max-width: 100%;
+}
+
+/* 插入表格前的行列数面板。取值方式照搬 Crepe 自己的浮层（斜杠菜单、表格手柄）：
+   surface 底 + 12px 圆角 + --crepe-shadow-1，输入区用它的行内代码那套
+   color-mix(inline-area, transparent 40%)。z-index 取 30，高过斜杠菜单的 10
+   和表格手柄的 20 —— 面板是从斜杠菜单里点出来的，得压在它上面。
+
+   选择器一律带上 .milkdown 前缀，为的是压过 Crepe 的 reset：那里有一条
+   `.milkdown { button, input { background: none } }`，编译出来是 `.milkdown button`，
+   比单个类名高一级，会把 `.gxde-table-picker-confirm` 的 background 直接吃掉 ——
+   按钮就成了白字配透明底。带上前缀是 (0,2,0)，重新压回去，也顺带说明了
+   这块样式的前提：面板挂在 .milkdown 里面。 */
+.milkdown .gxde-table-picker {
+  position: fixed;
+  z-index: 30;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  font-family: var(--crepe-font-default);
+  font-size: calc(var(--crepe-base-font-size, 16px) * 0.875);
+  color: var(--crepe-color-on-surface);
+  background: var(--crepe-color-surface);
+  border-radius: 12px;
+  box-shadow: var(--crepe-shadow-1);
+}
+
+.milkdown .gxde-table-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.milkdown .gxde-table-picker-label {
+  color: var(--crepe-color-on-surface-variant);
+}
+
+.milkdown .gxde-table-picker-stepper {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--crepe-color-inline-area), transparent 40%);
+}
+
+.milkdown .gxde-table-picker-step {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1429em;
+  line-height: 1;
+  color: var(--crepe-color-on-surface-variant);
+  background: transparent;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-step:hover {
+  background: var(--crepe-color-hover);
+}
+
+.milkdown .gxde-table-picker-step:active {
+  background: var(--crepe-color-selected);
+}
+
+.milkdown .gxde-table-picker-input {
+  width: 36px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  font: inherit;
+  text-align: center;
+  color: var(--crepe-color-on-surface);
+  background: transparent;
+  /* 数字框自带的上下箭头又窄又难点，尺寸靠两侧按钮和手动输入就够了。 */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.milkdown .gxde-table-picker-input::-webkit-outer-spin-button,
+.milkdown .gxde-table-picker-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.milkdown .gxde-table-picker-confirm {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  /* 实心 primary。底色上的文字 M3 里叫 onPrimary，浅色方案恒为 #FFFFFF，
+     Crepe 没有导出这个角色（它只把 primary 当图标前景色用），只能写死。 */
+  color: #fff;
+  background: var(--crepe-color-primary);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-confirm:hover {
+  box-shadow: var(--crepe-shadow-1);
 }

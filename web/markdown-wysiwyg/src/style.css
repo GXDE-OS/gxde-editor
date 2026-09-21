@@ -77,3 +77,95 @@ body {
 .gxde-milkdown-content img {
   max-width: 100%;
 }
+
+.milkdown .gxde-table-picker {
+  position: fixed;
+  z-index: 30;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  font-family: var(--crepe-font-default);
+  font-size: calc(var(--crepe-base-font-size, 16px) * 0.875);
+  color: var(--crepe-color-on-surface);
+  background: var(--crepe-color-surface);
+  border-radius: 12px;
+  box-shadow: var(--crepe-shadow-1);
+}
+
+.milkdown .gxde-table-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.milkdown .gxde-table-picker-label {
+  color: var(--crepe-color-on-surface-variant);
+}
+
+.milkdown .gxde-table-picker-stepper {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--crepe-color-inline-area), transparent 40%);
+}
+
+.milkdown .gxde-table-picker-step {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1429em;
+  line-height: 1;
+  color: var(--crepe-color-on-surface-variant);
+  background: transparent;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-step:hover {
+  background: var(--crepe-color-hover);
+}
+
+.milkdown .gxde-table-picker-step:active {
+  background: var(--crepe-color-selected);
+}
+
+.milkdown .gxde-table-picker-input {
+  width: 36px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  font: inherit;
+  text-align: center;
+  color: var(--crepe-color-on-surface);
+  background: transparent;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.milkdown .gxde-table-picker-input::-webkit-outer-spin-button,
+.milkdown .gxde-table-picker-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.milkdown .gxde-table-picker-confirm {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--crepe-color-primary);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-confirm:hover {
+  box-shadow: var(--crepe-shadow-1);
+}
