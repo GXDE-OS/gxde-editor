@@ -1,3 +1,10 @@
+gxde-editor (2.0.6) UNRELEASED; urgency=medium
+
+  * 新增Markdown可见即所得编辑模式
+  * 修复了设置窗口黑底黑字看不清字的问题
+
+ -- CharOfString <root@charofstring.cc>  Mon, 21 Sep 2026 15:24:10 +0800
+
 gxde-editor (2.0.5) UNRELEASED; urgency=medium
 
   [ CharOfString ]
