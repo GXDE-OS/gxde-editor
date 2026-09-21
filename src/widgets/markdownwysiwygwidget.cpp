@@ -19,6 +19,7 @@
 
 #ifdef USE_WEBENGINE
 #include "markdownwysiwygwidget.h"
+#include "wysiwygtranslations.h"
 
 #include <QDebug>
 #include <QDir>
@@ -32,6 +33,8 @@
 #include <QWebChannel>
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
 #include <QWebEngineUrlScheme>
 
 namespace {
@@ -167,6 +170,17 @@ MarkdownWysiwygWidget::MarkdownWysiwygWidget(QWidget *parent)
                 << QString::fromLatin1(kEditorPageUrl);
         }
     });
+
+    // 页面文案得在页面自己的脚本之前落地 —— 编辑器是在脚本里一次性建起来的，
+    // 晚一步就只能重建编辑器才换得掉。DocumentCreation 正好卡在那个点之前。
+    // 世界必须是主世界：隔离世界里的 window 跟页面不是同一个，注进去读不到。
+    QWebEngineScript locale;
+    locale.setName(QStringLiteral("gxde-editor-locale"));
+    locale.setInjectionPoint(QWebEngineScript::DocumentCreation);
+    locale.setWorldId(QWebEngineScript::MainWorld);
+    locale.setRunsOnSubFrames(false);
+    locale.setSourceCode(markdownWysiwygLocaleScript());
+    m_webView->page()->scripts().insert(locale);
 
     m_webView->setUrl(QUrl(QString::fromLatin1(kEditorPageUrl)));
 }

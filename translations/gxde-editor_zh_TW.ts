@@ -36,7 +36,7 @@
     <message>
         <location filename="../src/widgets/bottombar.cpp" line="56"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>所見即所得</translation>
     </message>
 </context>
 <context>
@@ -151,7 +151,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="154"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>所見即所得</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="197"/>
@@ -270,6 +270,187 @@
         <location filename="../src/main.cpp" line="85"/>
         <source>GXDE Editor</source>
         <translation>GXDE 編輯器</translation>
+    </message>
+</context>
+<context>
+    <name>MarkdownWysiwyg</name>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="44"/>
+        <source>Type / to insert</source>
+        <extracomment>空文档里的占位提示，提示用户输入斜杠唤起块类型菜单</extracomment>
+        <translation>輸入 / 插入內容</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="47"/>
+        <source>Text</source>
+        <extracomment>斜杠菜单（输入 / 唤起）里的分组名</extracomment>
+        <translation>正文</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="48"/>
+        <source>List</source>
+        <translation>清單</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="49"/>
+        <source>Advanced</source>
+        <translation>進階</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="52"/>
+        <source>Heading 1</source>
+        <extracomment>斜杠菜单里的块类型名，同时也是顶部工具栏标题下拉里的选项名</extracomment>
+        <translation>一級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="53"/>
+        <source>Heading 2</source>
+        <translation>二級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="54"/>
+        <source>Heading 3</source>
+        <translation>三級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="55"/>
+        <source>Heading 4</source>
+        <translation>四級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="56"/>
+        <source>Heading 5</source>
+        <translation>五級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="57"/>
+        <source>Heading 6</source>
+        <translation>六級標題</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="58"/>
+        <source>Quote</source>
+        <translation>引用</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="59"/>
+        <source>Divider</source>
+        <translation>分隔線</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="60"/>
+        <source>Bullet List</source>
+        <translation>無序清單</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="61"/>
+        <source>Ordered List</source>
+        <translation>有序清單</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="62"/>
+        <source>Task List</source>
+        <translation>工作清單</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="64"/>
+        <source>Code</source>
+        <extracomment>斜杠菜单里的代码块，不是&quot;复制&quot;那个 Copy</extracomment>
+        <translation>程式碼區塊</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="65"/>
+        <source>Table</source>
+        <translation>表格</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="68"/>
+        <source>Paragraph</source>
+        <extracomment>顶部工具栏标题下拉里的正文选项</extracomment>
+        <translation>正文</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="71"/>
+        <source>Bold</source>
+        <extracomment>选中文字后浮出的工具栏按钮的悬停提示</extracomment>
+        <translation>粗體</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="72"/>
+        <source>Italic</source>
+        <translation>斜體</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="73"/>
+        <source>Strikethrough</source>
+        <translation>刪除線</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="74"/>
+        <source>Inline code</source>
+        <translation>行內程式碼</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="75"/>
+        <source>Link</source>
+        <translation>連結</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="78"/>
+        <source>Search language</source>
+        <extracomment>代码块工具栏：语言搜索框的占位</extracomment>
+        <translation>搜尋語言</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="80"/>
+        <source>No result</source>
+        <extracomment>代码块工具栏：语言搜索没有结果时的提示</extracomment>
+        <translation>沒有符合的語言</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="82"/>
+        <source>Copy</source>
+        <extracomment>代码块工具栏：复制按钮</extracomment>
+        <translation>複製</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="85"/>
+        <source>Paste link...</source>
+        <extracomment>链接浮层里输入地址的占位</extracomment>
+        <translation>貼上連結…</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="88"/>
+        <source>Insert Table</source>
+        <extracomment>插入表格前的尺寸面板</extracomment>
+        <translation>插入表格</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="89"/>
+        <source>Rows</source>
+        <translation>行數</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="90"/>
+        <source>Columns</source>
+        <translation>欄數</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="91"/>
+        <source>Confirm</source>
+        <translation>確定</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="93"/>
+        <source>Decrease %1</source>
+        <extracomment>表格尺寸面板上&quot;减一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
+        <translation>減少%1</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/wysiwygtranslations.cpp" line="95"/>
+        <source>Increase %1</source>
+        <extracomment>表格尺寸面板上&quot;加一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
+        <translation>增加%1</translation>
     </message>
 </context>
 <context>

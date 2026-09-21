@@ -48,6 +48,7 @@ import {
   notifyMarkdownLoaded,
   notifyReady,
 } from './bridge'
+import { applyDocumentLocale, t } from './i18n'
 import { showTableSizePicker } from './table-picker'
 import './style.css'
 
@@ -290,6 +291,8 @@ const CODE_HIGHLIGHT = syntaxHighlighting(HighlightStyle.define([
 ]))
 
 async function main(): Promise<void> {
+  applyDocumentLocale()
+
   // 先连通道再建编辑器：宿主可能在收到 ready 之后立刻调用 gxdeEditor。
   await connectHost()
 
@@ -300,22 +303,64 @@ async function main(): Promise<void> {
   })
     // 块左侧的手柄：拖拽排序，点开有删除/复制。它同时提供输入 `/` 的块类型菜单。
     .addFeature(blockEdit, {
+      // 斜杠菜单里的分组名和每一项都是纯文字，Crepe 只给英文默认值，逐条换掉。
+      // 只写 label 不写 icon 是有意的：icon 缺省时 Crepe 用自己的图标，
+      // 类型上是 DeepPartial，允许这么给。
+      textGroup: {
+        label: t('Text'),
+        text: { label: t('Text') },
+        h1: { label: t('Heading 1') },
+        h2: { label: t('Heading 2') },
+        h3: { label: t('Heading 3') },
+        h4: { label: t('Heading 4') },
+        h5: { label: t('Heading 5') },
+        h6: { label: t('Heading 6') },
+        quote: { label: t('Quote') },
+        divider: { label: t('Divider') },
+      },
+      listGroup: {
+        label: t('List'),
+        bulletList: { label: t('Bullet List') },
+        orderedList: { label: t('Ordered List') },
+        taskList: { label: t('Task List') },
+      },
       // 内置的 Table 项写死插 3×3，而且只开放 label/icon、没有 onRun 可配，先关掉，
       // 再在 buildMenu 里往同一个分组补一个会问尺寸的。分组一定在：它由上面这个
       // advancedGroup 非 null 决定，正是我们给的值。
-      advancedGroup: { table: null },
+      advancedGroup: {
+        label: t('Advanced'),
+        codeBlock: { label: t('Code') },
+        table: null,
+      },
       buildMenu: (builder) => {
         builder.getGroup('advanced').addItem('table', {
-          label: 'Table',
+          label: t('Table'),
           icon: TABLE_ICON,
           onRun: (ctx) => requestTableSize(ctx, true),
         })
       },
     })
-    // 选中文字后浮出的格式化工具栏。
-    .addFeature(toolbar)
+    // 选中文字后浮出的格式化工具栏。按钮上只有图标，label 是悬停提示，
+    // 同时也是无障碍名字，一样得跟着界面语言走。
+    .addFeature(toolbar, {
+      boldLabel: t('Bold'),
+      italicLabel: t('Italic'),
+      strikethroughLabel: t('Strikethrough'),
+      codeLabel: t('Inline code'),
+      linkLabel: t('Link'),
+    })
     // 常驻顶部的工具栏。它不在 defaultFeatures 里，Crepe 默认是关的，得显式加。
     .addFeature(topBar, {
+      // 标题下拉里那几项是纯文字，是顶部工具栏上唯一直接显示文字的地方。
+      headingOptions: [
+        { label: t('Paragraph'), level: null },
+        { label: t('Heading 1'), level: 1 },
+        { label: t('Heading 2'), level: 2 },
+        { label: t('Heading 3'), level: 3 },
+        { label: t('Heading 4'), level: 4 },
+        { label: t('Heading 5'), level: 5 },
+        { label: t('Heading 6'), level: 6 },
+      ],
       // 顶部工具栏那个表格按钮也写死 3×3，而且没有开关可关（只取决于 table 特性
       // 挂没挂），只能从 insert 分组里把它摘掉再换一个。insert 分组是无条件建的。
       buildTopBar: (builder) => {
@@ -331,7 +376,9 @@ async function main(): Promise<void> {
         })
       },
     })
-    .addFeature(linkTooltip)
+    .addFeature(linkTooltip, {
+      inputPlaceholder: t('Paste link...'),
+    })
     .addFeature(table)
     .addFeature(listItem)
     .addFeature(cursor)
@@ -340,8 +387,12 @@ async function main(): Promise<void> {
       // inlineDynamicImports 内联进 editor.js，产物仍是单文件、离线可用。
       languages,
       theme: CODE_HIGHLIGHT,
+      // 代码块工具栏上的三处文字：语言搜索框的占位、搜不到时的提示、复制按钮。
+      searchPlaceholder: t('Search language'),
+      noResultText: t('No result'),
+      copyText: t('Copy'),
     })
-    .addFeature(placeholder, { text: '输入 / 插入内容' })
+    .addFeature(placeholder, { text: t('Type / to insert') })
     // 这里故意不挂 imageBlock。它的 schema 把图片的 alt 当成自己的缩放比例存储槽：
     // 解析时 `ratio = Number(node.alt || 1)`，序列化时把比例 toFixed(2) 写回 alt。
     // 于是 ![架构图](x.png "图注") 存一次就变成 ![1.00](x.png "图注")，alt 直接没了 ——

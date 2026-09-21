@@ -8,6 +8,8 @@
  * 定位用 position: fixed 加 caret 的视口坐标：一个静态锚点的弹层，不值得为它引入定位库。
  */
 
+import { t, t1 } from './i18n'
+
 export interface TableSizeAnchor {
   left: number
   top: number
@@ -47,7 +49,7 @@ function buildStepper(label: string): { root: HTMLElement; input: HTMLInputEleme
   minus.type = 'button'
   minus.className = 'gxde-table-picker-step'
   minus.textContent = '−'
-  minus.setAttribute('aria-label', `减少${label}`)
+  minus.setAttribute('aria-label', t1('Decrease %1', label))
 
   const input = document.createElement('input')
   input.type = 'number'
@@ -61,7 +63,7 @@ function buildStepper(label: string): { root: HTMLElement; input: HTMLInputEleme
   plus.type = 'button'
   plus.className = 'gxde-table-picker-step'
   plus.textContent = '+'
-  plus.setAttribute('aria-label', `增加${label}`)
+  plus.setAttribute('aria-label', t1('Increase %1', label))
 
   const step = (delta: number) => {
     input.value = String(clampSize(Number(input.value) + delta))
@@ -115,16 +117,16 @@ export function showTableSizePicker(
   const panel = document.createElement('div')
   panel.className = 'gxde-table-picker'
   panel.setAttribute('role', 'dialog')
-  panel.setAttribute('aria-label', '插入表格')
+  panel.setAttribute('aria-label', t('Insert Table'))
 
-  const rows = buildStepper('行数')
-  const cols = buildStepper('列数')
-  panel.append(buildRow('行数', rows.root), buildRow('列数', cols.root))
+  const rows = buildStepper(t('Rows'))
+  const cols = buildStepper(t('Columns'))
+  panel.append(buildRow(t('Rows'), rows.root), buildRow(t('Columns'), cols.root))
 
   const confirm = document.createElement('button')
   confirm.type = 'button'
   confirm.className = 'gxde-table-picker-confirm'
-  confirm.textContent = '确定'
+  confirm.textContent = t('Confirm')
   panel.append(confirm)
 
   const close = () => {
