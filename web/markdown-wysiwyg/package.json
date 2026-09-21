@@ -1,0 +1,21 @@
+{
+  "name": "gxde-editor-markdown-wysiwyg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "gxde-editor 的 Markdown 所见即所得编辑器（Milkdown），构建产物输出到 src/markdown/wysiwyg 并打包进 Qt 资源",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@milkdown/kit": "^7.22.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.11"
+  }
+}

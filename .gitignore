@@ -12,3 +12,5 @@ build/
 *.txt.user
 
 .vscode/*
+
+web/markdown-wysiwyg/node_modules/*
