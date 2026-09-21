@@ -2,8 +2,21 @@
   --gxde-editor-bg: #f7f9ff;
   --gxde-editor-fg: #181c20;
   --gxde-editor-caret: #2e628c;
-  --gxde-editor-font-family: -apple-system, "Noto Sans CJK SC", "Source Han Sans SC",
-    "Microsoft YaHei", sans-serif;
+  /* 全篇唯一的一套字体：标题、正文、各处面板都从这一个变量取。
+     'Noto Sans CJK SC' 排头，是因为它自带西文（Source Sans），西文和汉字都从
+     它出，笔画风格就是一套 —— 这正是之前缺的：Crepe 原来那个栈里一个中文字体
+     都没有，中文是落到通用族 sans-serif 上由 fontconfig 现找的（本机给的是更纱
+     黑体），标题那边就更明显：西文走 Georgia 衬线、中文走更纱黑体，一行里两种
+     风格。
+     通用族必须留在最末尾。它总能解析成一个真实字体，排在前面的话后面的字一个
+     都轮不到 —— 之前那版就是把中文字体补在 sans-serif 后面，等于没补。
+     后面几个只在 Noto 缺席时才轮到；删除 'Source Han Sans SC'（跟 Noto Sans
+     CJK 是同一套设计的改名版）和 'Microsoft YaHei'（Windows 字体，且它一接手
+     中英文就又分家了）。 */
+  --gxde-editor-font-family: 'Noto Sans CJK SC', 'Open Sans', Arial, Helvetica,
+    sans-serif;
+  --gxde-editor-mono-family: 'Noto Sans Mono CJK SC', 'Fira Code', Menlo, Monaco,
+    'Courier New', Courier, monospace;
   --gxde-editor-font-size: 16px;
   --gxde-editor-line-height: 1.7;
   --gxde-editor-padding: 32px;
@@ -28,12 +41,11 @@
   --crepe-color-selected: #e0e2e8; /* surfaceContainerHighest */
   --crepe-color-inline-area: #dee3eb; /* surfaceVariant */
   --crepe-base-font-size: var(--gxde-editor-font-size);
-  --crepe-font-default: 'Open Sans', Arial, Helvetica, sans-serif,
-    'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei';
-  --crepe-font-title: Georgia, Cambria, 'Times New Roman', Times, serif,
-    'Noto Serif CJK SC', 'Source Han Serif SC';
-  --crepe-font-code: Fira Code, Menlo, Monaco, 'Courier New', Courier, monospace,
-    'Noto Sans Mono CJK SC';
+  /* 标题跟正文共用一套 —— 层级只靠字号拉开，不再有衬线/黑体之分。
+     Crepe 原本给的是 Georgia 那串衬线，且里面没有中文字体。 */
+  --crepe-font-default: var(--gxde-editor-font-family);
+  --crepe-font-title: var(--gxde-editor-font-family);
+  --crepe-font-code: var(--gxde-editor-mono-family);
   --gxde-code-keyword: #7b3fa0; /* 关键字：紫，与 primary 同档明度 */
   --gxde-code-string: #2e6b3f; /* 字符串：绿 */
   --gxde-code-number: #a1521b; /* 数字/字面量：橙 */
@@ -86,6 +98,25 @@ body {
 
 .gxde-milkdown-content img {
   max-width: 100%;
+}
+
+/* 标题字重。
+   Crepe 的 reset 给 h1–h6 定的是 font-weight: 400（见 common/reset.css），那套
+   是配衬线标题的：衬线在大字号下自带分量，400 也立得住。现在标题跟正文共用一套
+   无衬线，两边同字重就只剩大小之分，层级会塌，所以补回一档。
+   选择器必须跟 Crepe 那条一模一样。它在 reset.css 里是嵌在 .milkdown 下面的
+   （reset.css 用了原生 CSS 嵌套），编译出来是 `.milkdown .ProseMirror h1`，特异度
+   (0,2,1)；写成 `.milkdown h1` 只有 (0,1,1)，低一级，会被它压住 —— 之前就是这么
+   写的，实测 h1 的计算字重仍是 400。同为 (0,2,1) 之后靠本文件排在打包结果后面取胜。
+   本机的 Noto Sans CJK SC 只有 Regular/Bold 两档，600 会匹配到 Bold，是真实字重，
+   不会触发合成加粗。 */
+.milkdown .ProseMirror h1,
+.milkdown .ProseMirror h2,
+.milkdown .ProseMirror h3,
+.milkdown .ProseMirror h4,
+.milkdown .ProseMirror h5,
+.milkdown .ProseMirror h6 {
+  font-weight: 600;
 }
 
 .milkdown .gxde-table-picker {
@@ -180,6 +211,13 @@ body {
   box-shadow: var(--crepe-shadow-1);
 }
 
+/* 代码块的语法高亮。
+   类名由 main.ts 里的 HighlightStyle 指定（tok-keyword 等），色值取上面那组
+   --gxde-code-*。Crepe 自己的 code-mirror.css 只画了代码块的骨架，没有任何
+   token 配色，所以这一组是必需的，不是覆盖。
+   选择器带 .milkdown 前缀，理由同上面的面板：压过 Crepe 的 reset，变量也正好
+   作用在这个子树里。 */
+.milkdown .tok-keyword {
   color: var(--gxde-code-keyword);
   font-weight: 600;
 }

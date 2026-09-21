@@ -1668,8 +1668,10 @@ img.ProseMirror-separator {
   --gxde-editor-bg: #f7f9ff;
   --gxde-editor-fg: #181c20;
   --gxde-editor-caret: #2e628c;
-  --gxde-editor-font-family: -apple-system, "Noto Sans CJK SC", "Source Han Sans SC",
-    "Microsoft YaHei", sans-serif;
+  --gxde-editor-font-family: 'Noto Sans CJK SC', 'Open Sans', Arial, Helvetica,
+    sans-serif;
+  --gxde-editor-mono-family: 'Noto Sans Mono CJK SC', 'Fira Code', Menlo, Monaco,
+    'Courier New', Courier, monospace;
   --gxde-editor-font-size: 16px;
   --gxde-editor-line-height: 1.7;
   --gxde-editor-padding: 32px;
@@ -1694,18 +1696,9 @@ img.ProseMirror-separator {
   --crepe-color-selected: #e0e2e8; /* surfaceContainerHighest */
   --crepe-color-inline-area: #dee3eb; /* surfaceVariant */
   --crepe-base-font-size: var(--gxde-editor-font-size);
-  --crepe-font-default: 'Open Sans', Arial, Helvetica, sans-serif,
-    'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei';
-  --crepe-font-title: Georgia, Cambria, 'Times New Roman', Times, serif,
-    'Noto Serif CJK SC', 'Source Han Serif SC';
-  --crepe-font-code: Fira Code, Menlo, Monaco, 'Courier New', Courier, monospace,
-    'Noto Sans Mono CJK SC';
-
-  /* 代码块的语法配色。
-     底色是 --crepe-color-surface（#f1f4f9，见 Crepe 的 code-mirror.css），
-     下面这些色值都在这个浅底上取过对比度。
-     Material 那套方案本身只有蓝灰一族，铺不满语法需要的色相，所以绿/橙/紫
-     是按同一个明度档补的，跟 primary #2e628c 摆在一起不打架。 */
+  --crepe-font-default: var(--gxde-editor-font-family);
+  --crepe-font-title: var(--gxde-editor-font-family);
+  --crepe-font-code: var(--gxde-editor-mono-family);
   --gxde-code-keyword: #7b3fa0; /* 关键字：紫，与 primary 同档明度 */
   --gxde-code-string: #2e6b3f; /* 字符串：绿 */
   --gxde-code-number: #a1521b; /* 数字/字面量：橙 */
@@ -1758,6 +1751,15 @@ body {
 
 .gxde-milkdown-content img {
   max-width: 100%;
+}
+
+.milkdown .ProseMirror h1,
+.milkdown .ProseMirror h2,
+.milkdown .ProseMirror h3,
+.milkdown .ProseMirror h4,
+.milkdown .ProseMirror h5,
+.milkdown .ProseMirror h6 {
+  font-weight: 600;
 }
 
 .milkdown .gxde-table-picker {
