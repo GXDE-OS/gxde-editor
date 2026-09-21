@@ -13,12 +13,18 @@ import { history } from '@milkdown/kit/plugin/history'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { commonmark } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
-import { connectHost, notifyMarkdownChanged, notifyReady } from './bridge'
+import '@milkdown/kit/prose/view/style/prosemirror.css'
+import '@milkdown/kit/prose/gapcursor/style/gapcursor.css'
+import {
+  connectHost,
+  notifyMarkdownChanged,
+  notifyMarkdownLoaded,
+  notifyReady,
+} from './bridge'
 import './style.css'
 
 /** 暴露给 Qt（QWebEnginePage::runJavaScript）的接口。 */
 interface GxdeEditorApi {
-  /** 用宿主的 Markdown 覆盖当前文档，不会回传 markdownChanged。 */
   load(markdown: string): void
   /** 取回当前文档序列化后的 Markdown。 */
   getMarkdown(): string
@@ -41,8 +47,6 @@ if (!root) {
 
 // 只读状态放在模块级变量里，ProseMirror 每次刷新 DOM 时重新求值。
 let readOnly = false
-// 宿主写入内容期间为 true，避免把这次变更当成用户编辑回传出去。
-let applyingHostContent = false
 
 let editor: Editor | null = null
 
@@ -76,6 +80,17 @@ function writeMarkdown(markdown: string): void {
   })
 }
 
+/**
+ * 回传规范化后的基线。
+ *
+ * 必须在 dispatch 之后同步取：这时 state 已经是新文档了，不必等 listener 的防抖。
+ * 宿主拿这个基线（而不是它自己写进来的原文）来判断内容有没有被改过，就不会被
+ * Markdown 往返的规范化（`-` → `*`、表格对齐等）误判成用户编辑。
+ */
+function reportBaseline(): void {
+  notifyMarkdownLoaded(readMarkdown())
+}
+
 function applyReadOnly(value: boolean): void {
   readOnly = value
   requireEditor().action((ctx) => {
@@ -86,12 +101,8 @@ function applyReadOnly(value: boolean): void {
 function exposeApi(): void {
   window.gxdeEditor = {
     load(markdown) {
-      applyingHostContent = true
-      try {
-        writeMarkdown(markdown)
-      } finally {
-        applyingHostContent = false
-      }
+      writeMarkdown(markdown)
+      reportBaseline()
     },
     getMarkdown: readMarkdown,
     setReadOnly: applyReadOnly,
@@ -120,8 +131,13 @@ async function main(): Promise<void> {
         },
       }))
 
+      // 注意：listener 插件对 markdownUpdated 做了 200ms 防抖
+      //（见 @milkdown/plugin-listener 里的 debounce(..., 200)），所以这里收到的事件
+      // 不一定对应用户操作 —— 载入文档后 ProseMirror 的收尾事务同样会走到这里。
+      // 是不是"用户改过"由宿主按内容判断（对比 markdownLoaded 给出的基线），
+      // 这里只负责如实上报。
       ctx.get(listenerCtx).markdownUpdated((_ctx, markdown, prevMarkdown) => {
-        if (applyingHostContent || markdown === prevMarkdown) {
+        if (markdown === prevMarkdown) {
           return
         }
         notifyMarkdownChanged(markdown)

@@ -1,6 +1,6 @@
 /*
- * 颜色与字体全部走 CSS 自定义属性，Qt 侧通过注入一段样式覆盖这些变量即可跟随
- * 编辑器主题（见 MarkdownWysiwygWidget::applyTheme）。
+ * 颜色与字体走 CSS 自定义属性，宿主只要覆盖这些变量就能跟随编辑器主题，
+ * 不需要重新构建产物。
  */
 :root {
   --gxde-editor-bg: #ffffff;
@@ -176,18 +176,22 @@ body {
   font-size: 0.875em;
 }
 
-/* 表格 */
+/* 表格。
+   不能用 display:block 做横向滚动——那会破坏表格的布局模型，
+   正在编辑的单元格宽度会跟着内容跳。固定列宽更稳。 */
 .gxde-milkdown-content table {
   margin: 0 0 1em;
   border-collapse: collapse;
-  display: block;
-  overflow-x: auto;
+  table-layout: fixed;
+  width: 100%;
 }
 
 .gxde-milkdown-content th,
 .gxde-milkdown-content td {
   padding: 6px 13px;
   border: 1px solid var(--gxde-editor-border);
+  vertical-align: top;
+  overflow-wrap: break-word;
 }
 
 .gxde-milkdown-content th {

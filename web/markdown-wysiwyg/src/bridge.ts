@@ -13,6 +13,12 @@
 export interface HostBridge {
   /** 编辑器就绪，可以接收内容了。 */
   ready(): void
+  /**
+   * 宿主写入后的规范化结果，作为"未被编辑"的基线。
+   * 因为 Markdown 往返不保证逐字一致（列表符号、表格对齐都会被重排），
+   * 宿主必须拿这个基线而不是自己写进去的原文去判断内容有没有被改过。
+   */
+  markdownLoaded(markdown: string): void
   /** 文档内容发生变化（参数为序列化后的 Markdown）。 */
   markdownChanged(markdown: string): void
 }
@@ -92,4 +98,5 @@ function emit<K extends keyof HostBridge>(method: K, ...args: Parameters<HostBri
 }
 
 export const notifyReady = (): void => emit('ready')
+export const notifyMarkdownLoaded = (markdown: string): void => emit('markdownLoaded', markdown)
 export const notifyMarkdownChanged = (markdown: string): void => emit('markdownChanged', markdown)

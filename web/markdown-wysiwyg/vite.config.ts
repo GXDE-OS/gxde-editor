@@ -13,6 +13,10 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'es2020',
     assetsDir: 'assets',
+    // 产物是入库的，要能直接读，所以 CSS 不压缩。
+    // JS 保持压缩：那里几乎全是 Milkdown/ProseMirror 的 vendor 代码，
+    // 解开也不会有人读，反而让仓库和二进制凭空胖一圈。
+    cssMinify: false,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/editor.js',
