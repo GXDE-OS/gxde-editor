@@ -10,6 +10,7 @@ class MarkdownLogicTest : public QObject
 private slots:
     void recognizesMarkdown();
     void appliesViewModeTransitions();
+    void gatesWysiwygLikeLivePreview();
     void resolvesRelativeImagePaths();
     void clampsScrollRatios();
 };
@@ -30,6 +31,24 @@ void MarkdownLogicTest::appliesViewModeTransitions()
     QCOMPARE(ViewModeFsm::fallbackWhenMarkdownLost(ViewMode::LivePreview), ViewMode::Edit);
     QCOMPARE(ViewModeFsm::elevateWhenMarkdownGained(ViewMode::Edit, true), ViewMode::LivePreview);
     QVERIFY(ViewModeFsm::isReadOnlyTextMode(ViewMode::ReadView, true, false));
+}
+
+// 所见即所得和实时预览都基于 WebEngine，可用条件应当完全一致；
+// 但它本身是编辑器，所以不属于只读文本模式。
+void MarkdownLogicTest::gatesWysiwygLikeLivePreview()
+{
+    QVERIFY(ViewModeFsm::canSwitchTo(ViewMode::Wysiwyg, true, true));
+    QVERIFY(!ViewModeFsm::canSwitchTo(ViewMode::Wysiwyg, false, true));
+    QVERIFY(!ViewModeFsm::canSwitchTo(ViewMode::Wysiwyg, true, false));
+    QCOMPARE(ViewModeFsm::fallbackWhenMarkdownLost(ViewMode::Wysiwyg), ViewMode::Edit);
+    QCOMPARE(ViewModeFsm::elevateWhenMarkdownGained(ViewMode::Wysiwyg, true),
+             ViewMode::Wysiwyg);
+    QVERIFY(!ViewModeFsm::isReadOnlyTextMode(ViewMode::Wysiwyg, true, true));
+
+    QVERIFY(ViewModeFsm::needsMarkdown(ViewMode::LivePreview));
+    QVERIFY(ViewModeFsm::needsMarkdown(ViewMode::Wysiwyg));
+    QVERIFY(!ViewModeFsm::needsMarkdown(ViewMode::Edit));
+    QVERIFY(!ViewModeFsm::needsMarkdown(ViewMode::ReadView));
 }
 
 void MarkdownLogicTest::resolvesRelativeImagePaths()

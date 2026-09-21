@@ -521,6 +521,9 @@ bool EditWrapper::setViewMode(ViewMode mode)
     if (!ViewModeFsm::canSwitchTo(mode, m_isMarkdown, hasPreview))
         return false;
 
+    if (mode == ViewMode::Wysiwyg)
+        return false;
+
     const bool readOnlyText = ViewModeFsm::isReadOnlyTextMode(mode, m_isMarkdown, hasPreview);
     m_viewMode = mode;
 
