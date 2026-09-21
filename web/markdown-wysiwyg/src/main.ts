@@ -13,6 +13,8 @@ import { history } from '@milkdown/kit/plugin/history'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { commonmark } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
+import type { Node as ProseNode } from '@milkdown/kit/prose/model'
+import type { NodeView } from '@milkdown/kit/prose/view'
 import '@milkdown/kit/prose/view/style/prosemirror.css'
 import '@milkdown/kit/prose/gapcursor/style/gapcursor.css'
 import {
@@ -30,6 +32,14 @@ interface GxdeEditorApi {
   getMarkdown(): string
   /** 切换只读；只读时页面仍可滚动与选择。 */
   setReadOnly(value: boolean): void
+  /**
+   * 指定相对 URL 的基准目录（文档所在目录），必须在 load() 之前调用。
+   *
+   * 页面自身是从 gxde-md://editor/ 加载的，markdown 里的相对图片路径在它底下
+   * 只会解析到编辑器资源那儿去，那儿并没有图。把基准指到文档目录，相对路径
+   * 才落在磁盘上真正的位置。
+   */
+  setBaseUrl(url: string): void
   /** 让编辑区获得焦点。 */
   focus(): void
 }
@@ -91,6 +101,69 @@ function reportBaseline(): void {
   notifyMarkdownLoaded(readMarkdown())
 }
 
+/**
+ * 原生 HTML 在编辑器里按它本来的意思渲染。
+ *
+ * Milkdown 的 html 节点默认是把 HTML 源码当纯文本塞进一个 <span>
+ * （见 preset-commonmark 里 htmlSchema 的 toDOM），于是 README 里
+ * <img src="…"> 这类在线徽章全成了一行行源码文字，图片一张都看不见。
+ * 这里自己接管渲染：把源码解析成真正的 DOM 插进来。
+ *
+ * 节点本身仍是不可编辑的原子节点，写回 Markdown 走的还是 node.attrs.value，
+ * 所以文件里的一个字节都不会被这段渲染动到。
+ */
+class HtmlNodeView implements NodeView {
+  readonly dom: HTMLElement
+
+  constructor(node: ProseNode) {
+    this.dom = document.createElement('span')
+    this.dom.className = 'gxde-html-node'
+    this.dom.setAttribute('data-type', 'html')
+    this.renderValue(node)
+  }
+
+  private renderValue(node: ProseNode): void {
+    const parsed = new DOMParser().parseFromString(
+      String(node.attrs.value ?? ''),
+      'text/html',
+    )
+    // parseFromString 出来的脚本不会跑，但 appendChild 插进去的会 —— 得先摘掉。
+    for (const script of Array.from(parsed.body.querySelectorAll('script'))) {
+      script.remove()
+    }
+
+    this.dom.replaceChildren(...Array.from(parsed.body.childNodes))
+  }
+
+  update(node: ProseNode): boolean {
+    if (node.type.name !== 'html') {
+      return false
+    }
+    this.renderValue(node)
+    return true
+  }
+
+  /** 里面的 DOM 是我们自己画的，别让 ProseMirror 当成用户改动去重绘。 */
+  ignoreMutation(): boolean {
+    return true
+  }
+}
+
+/**
+ * 改写页面的 <base>，从而改变相对 URL 的解析基准。
+ *
+ * 只对之后解析的 URL 生效：已经挂到 DOM 上的 <img> 不会自己重算，
+ * 所以宿主得在 load()（也就是重画文档）之前调用它。
+ */
+function applyBaseUrl(url: string): void {
+  let base = document.head.querySelector('base')
+  if (!base) {
+    base = document.createElement('base')
+    document.head.insertBefore(base, document.head.firstChild)
+  }
+  base.href = url
+}
+
 function applyReadOnly(value: boolean): void {
   readOnly = value
   requireEditor().action((ctx) => {
@@ -106,6 +179,7 @@ function exposeApi(): void {
     },
     getMarkdown: readMarkdown,
     setReadOnly: applyReadOnly,
+    setBaseUrl: applyBaseUrl,
     focus() {
       requireEditor().action((ctx) => ctx.get(editorViewCtx).focus())
     },
@@ -128,6 +202,10 @@ async function main(): Promise<void> {
           ...prev.attributes,
           class: 'gxde-milkdown-content',
           spellcheck: 'false',
+        },
+        nodeViews: {
+          ...prev.nodeViews,
+          html: (node) => new HtmlNodeView(node),
         },
       }))
 

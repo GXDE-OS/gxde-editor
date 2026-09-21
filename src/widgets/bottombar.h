@@ -64,6 +64,7 @@ private:
     QAction *m_editViewAction;
     QAction *m_readViewAction;
     QAction *m_livePreviewAction;
+    QAction *m_wysiwygAction;
     QString m_rowStr;
     QString m_columnStr;
     QString m_chrCountStr;

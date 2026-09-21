@@ -5,9 +5,33 @@ import { defineConfig } from 'vite'
 // 文件名固定（不带 hash），这样每次重新构建都不需要改动 .qrc。
 const outDir = fileURLToPath(new URL('../../src/markdown/wysiwyg', import.meta.url))
 
+/**
+ * 把产物里的 /assets/… 改写成 gxde-md://editor/assets/…。
+ *
+ * 页面由 Qt 侧的自定义 scheme 加载，而页面里还会插一个指向文档目录的 <base>，
+ * 用来把 markdown 中的相对图片路径引到磁盘上。资源必须是绝对 URL，否则会被
+ * 那个 <base> 一并带偏。Vite 的 base 选项不接受带 scheme 的值（会被规范化掉），
+ * 所以只能在这里事后改。
+ */
+const schemeAssetBase = 'gxde-md://editor'
+
+const rewriteAssetUrls = {
+  name: 'gxde-editor-rewrite-asset-urls',
+  apply: 'build' as const,
+  transformIndexHtml: {
+    order: 'post' as const,
+    handler(html: string) {
+      return html.replace(
+        /(src|href)="\/assets\//g,
+        `$1="${schemeAssetBase}/assets/`,
+      )
+    },
+  },
+}
+
 export default defineConfig({
-  // 页面通过 qrc:/markdown/wysiwyg/index.html 加载，资源必须用相对路径。
-  base: './',
+  base: '/',
+  plugins: [rewriteAssetUrls],
   build: {
     outDir,
     emptyOutDir: true,

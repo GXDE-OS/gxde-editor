@@ -25,6 +25,9 @@
 #include "utils.h"
 #include "window.h"
 #include "urlinfo.h"
+#ifdef USE_WEBENGINE
+#include "widgets/markdownwysiwygwidget.h"
+#endif
 
 #include <DApplication>
 #include <DMainWindow>
@@ -44,6 +47,12 @@ DTK_USE_NAMESPACE
 
 int main(int argc, char *argv[])
 {
+#ifdef USE_WEBENGINE
+    // 必须赶在 DApplication 构造之前，QWebEngineUrlScheme::registerScheme()
+    // 之后再注册就晚了。
+    registerMarkdownWysiwygUrlScheme();
+#endif
+
     // Use the native Wayland QPA in a Wayland session. Loading the DXcb
     // plugin unconditionally makes the editor an XWayland client even when
     // WAYLAND_DISPLAY is available, which breaks window-handle recreation

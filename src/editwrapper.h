@@ -29,6 +29,7 @@
 #include <QVariantMap>
 #ifdef USE_WEBENGINE
 #include "widgets/markdownpreviewwidget.h"
+#include "widgets/markdownwysiwygwidget.h"
 #endif
 
 #include <QVBoxLayout>
@@ -100,6 +101,9 @@ private:
     void ensureLiveSplitterCreated();
     void attachPreviewTo(QWidget *container);
     void finishFileLoadViewSetup();
+    bool wysiwygAvailable() const;
+    void ensureWysiwygCreated();
+    void handleWysiwygEdited(const QString &markdown);
 
 protected:
     void resizeEvent(QResizeEvent *);
@@ -115,6 +119,8 @@ private:
     QTextCodec *m_textCodec;
 #ifdef USE_WEBENGINE
     MarkdownPreviewWidget *m_markdownPreview = nullptr;
+    MarkdownWysiwygWidget *m_wysiwyg = nullptr;
+    QWidget *m_wysiwygPage = nullptr;
 #endif
 
     EndOfLineMode m_endOfLineMode;

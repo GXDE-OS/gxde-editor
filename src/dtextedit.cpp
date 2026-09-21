@@ -151,6 +151,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     m_editViewAction = m_viewModeMenu->addAction(tr("Edit"));
     m_readViewAction = m_viewModeMenu->addAction(tr("Read"));
     m_livePreviewAction = m_viewModeMenu->addAction(tr("Live Preview"));
+    m_wysiwygAction = m_viewModeMenu->addAction(tr("WYSIWYG"));
 
     QActionGroup *viewModeGroup = new QActionGroup(this);
     viewModeGroup->setExclusive(true);
@@ -186,6 +187,9 @@ DTextEdit::DTextEdit(QWidget *parent)
     });
     connect(m_livePreviewAction, &QAction::triggered, this, [this] {
         emit viewModeRequested(ViewMode::LivePreview);
+    });
+    connect(m_wysiwygAction, &QAction::triggered, this, [this] {
+        emit viewModeRequested(ViewMode::Wysiwyg);
     });
 
     // Init convert case sub menu.
@@ -2378,7 +2382,7 @@ void DTextEdit::setReadOnlyMode(bool enabled)
 
 QList<QAction *> DTextEdit::viewModeActions() const
 {
-    return {m_editViewAction, m_readViewAction, m_livePreviewAction};
+    return {m_editViewAction, m_readViewAction, m_livePreviewAction, m_wysiwygAction};
 }
 
 void DTextEdit::updateViewModeActions(ViewMode mode, bool markdownAvailable)
@@ -2386,7 +2390,11 @@ void DTextEdit::updateViewModeActions(ViewMode mode, bool markdownAvailable)
     m_editViewAction->setChecked(mode == ViewMode::Edit);
     m_readViewAction->setChecked(mode == ViewMode::ReadView);
     m_livePreviewAction->setChecked(mode == ViewMode::LivePreview);
+    m_wysiwygAction->setChecked(mode == ViewMode::Wysiwyg);
     m_livePreviewAction->setEnabled(markdownAvailable);
+    // 所见即所得是 Markdown 专属的独立视图，非 Markdown 文件里不留一个灰项，直接不显示。
+    m_wysiwygAction->setVisible(markdownAvailable);
+    m_wysiwygAction->setEnabled(markdownAvailable);
 }
 
 void DTextEdit::toggleComment()

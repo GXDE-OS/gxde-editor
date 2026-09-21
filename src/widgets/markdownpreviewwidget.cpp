@@ -307,7 +307,15 @@ void MarkdownPreviewWidget::performUpdate()
     const QString html = generateHtml(content);
 
     ++m_loadGeneration;
-    m_webView->setHtml(html, QUrl("qrc:/"));
+    // 页面得拿文档所在目录当基准。qrc:/ 的页面是不许碰 file:// 子资源的，
+    // Chromium 会直接甩一句 “Not allowed to load local resource” 把图画成空的；
+    // LocalContentCanAccessFileUrls 只管 file:// 页面之间的互访，救不了这里。
+    // 换成文档目录之后，相对路径和 file:// 绝对路径的图片才都过得去。
+    const QUrl baseUrl = m_documentPath.isEmpty()
+        ? QUrl(QStringLiteral("qrc:/"))
+        : QUrl::fromLocalFile(QFileInfo(m_documentPath).absolutePath()
+                              + QLatin1Char('/'));
+    m_webView->setHtml(html, baseUrl);
 }
 
 QString MarkdownPreviewWidget::generateHtml(const QString& markdown)
