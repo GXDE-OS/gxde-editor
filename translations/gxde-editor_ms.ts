@@ -21,7 +21,7 @@
     <message>
         <location filename="../src/widgets/bottombar.cpp" line="56"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>WYSIWYG</translation>
     </message>
     <message>
         <location filename="../src/widgets/bottombar.cpp" line="37"/>
@@ -151,7 +151,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="154"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>WYSIWYG</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="197"/>
@@ -278,179 +278,179 @@
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="44"/>
         <source>Type / to insert</source>
         <extracomment>空文档里的占位提示，提示用户输入斜杠唤起块类型菜单</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Taip / untuk memasukkan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="47"/>
         <source>Text</source>
         <extracomment>斜杠菜单（输入 / 唤起）里的分组名</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Teks</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="48"/>
         <source>List</source>
-        <translation type="unfinished"></translation>
+        <translation>Senarai</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="49"/>
         <source>Advanced</source>
-        <translation type="unfinished">Lanjutan</translation>
+        <translation>Lanjutan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="52"/>
         <source>Heading 1</source>
         <extracomment>斜杠菜单里的块类型名，同时也是顶部工具栏标题下拉里的选项名</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 1</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="53"/>
         <source>Heading 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 2</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="54"/>
         <source>Heading 3</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 3</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="55"/>
         <source>Heading 4</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 4</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="56"/>
         <source>Heading 5</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 5</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="57"/>
         <source>Heading 6</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajuk 6</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="58"/>
         <source>Quote</source>
-        <translation type="unfinished"></translation>
+        <translation>Petikan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="59"/>
         <source>Divider</source>
-        <translation type="unfinished"></translation>
+        <translation>Pembahagi</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="60"/>
         <source>Bullet List</source>
-        <translation type="unfinished"></translation>
+        <translation>Senarai Berbulet</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="61"/>
         <source>Ordered List</source>
-        <translation type="unfinished"></translation>
+        <translation>Senarai Bernombor</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="62"/>
         <source>Task List</source>
-        <translation type="unfinished"></translation>
+        <translation>Senarai Tugasan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="64"/>
         <source>Code</source>
         <extracomment>斜杠菜单里的代码块，不是&quot;复制&quot;那个 Copy</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Blok Kod</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="65"/>
         <source>Table</source>
-        <translation type="unfinished"></translation>
+        <translation>Jadual</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="68"/>
         <source>Paragraph</source>
         <extracomment>顶部工具栏标题下拉里的正文选项</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Perenggan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="71"/>
         <source>Bold</source>
         <extracomment>选中文字后浮出的工具栏按钮的悬停提示</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tebal</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="72"/>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Condong</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="73"/>
         <source>Strikethrough</source>
-        <translation type="unfinished"></translation>
+        <translation>Coret</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="74"/>
         <source>Inline code</source>
-        <translation type="unfinished"></translation>
+        <translation>Kod Sebaris</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="75"/>
         <source>Link</source>
-        <translation type="unfinished"></translation>
+        <translation>Pautan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="78"/>
         <source>Search language</source>
         <extracomment>代码块工具栏：语言搜索框的占位</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Cari bahasa</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="80"/>
         <source>No result</source>
         <extracomment>代码块工具栏：语言搜索没有结果时的提示</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tiada hasil</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="82"/>
         <source>Copy</source>
         <extracomment>代码块工具栏：复制按钮</extracomment>
-        <translation type="unfinished">Salin</translation>
+        <translation>Salin</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="85"/>
         <source>Paste link...</source>
         <extracomment>链接浮层里输入地址的占位</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tampal pautan…</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="88"/>
         <source>Insert Table</source>
         <extracomment>插入表格前的尺寸面板</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Sisipkan Jadual</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="89"/>
         <source>Rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Baris</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="90"/>
         <source>Columns</source>
-        <translation type="unfinished"></translation>
+        <translation>Lajur</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="91"/>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation>Sahkan</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="93"/>
         <source>Decrease %1</source>
         <extracomment>表格尺寸面板上&quot;减一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Kurangkan %1</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="95"/>
         <source>Increase %1</source>
         <extracomment>表格尺寸面板上&quot;加一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tambahkan %1</translation>
     </message>
 </context>
 <context>

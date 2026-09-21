@@ -21,7 +21,7 @@
     <message>
         <location filename="../src/widgets/bottombar.cpp" line="56"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>WYSIWYG</translation>
     </message>
     <message>
         <location filename="../src/widgets/bottombar.cpp" line="37"/>
@@ -151,7 +151,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="154"/>
         <source>WYSIWYG</source>
-        <translation type="unfinished"></translation>
+        <translation>WYSIWYG</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="197"/>
@@ -278,179 +278,179 @@
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="44"/>
         <source>Type / to insert</source>
         <extracomment>空文档里的占位提示，提示用户输入斜杠唤起块类型菜单</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Введите / для вставки</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="47"/>
         <source>Text</source>
         <extracomment>斜杠菜单（输入 / 唤起）里的分组名</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Текст</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="48"/>
         <source>List</source>
-        <translation type="unfinished"></translation>
+        <translation>Список</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="49"/>
         <source>Advanced</source>
-        <translation type="unfinished">Расширенные</translation>
+        <translation>Расширенные</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="52"/>
         <source>Heading 1</source>
         <extracomment>斜杠菜单里的块类型名，同时也是顶部工具栏标题下拉里的选项名</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 1</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="53"/>
         <source>Heading 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 2</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="54"/>
         <source>Heading 3</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 3</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="55"/>
         <source>Heading 4</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 4</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="56"/>
         <source>Heading 5</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 5</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="57"/>
         <source>Heading 6</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок 6</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="58"/>
         <source>Quote</source>
-        <translation type="unfinished"></translation>
+        <translation>Цитата</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="59"/>
         <source>Divider</source>
-        <translation type="unfinished"></translation>
+        <translation>Разделитель</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="60"/>
         <source>Bullet List</source>
-        <translation type="unfinished"></translation>
+        <translation>Маркированный список</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="61"/>
         <source>Ordered List</source>
-        <translation type="unfinished"></translation>
+        <translation>Нумерованный список</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="62"/>
         <source>Task List</source>
-        <translation type="unfinished"></translation>
+        <translation>Список задач</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="64"/>
         <source>Code</source>
         <extracomment>斜杠菜单里的代码块，不是&quot;复制&quot;那个 Copy</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Блок кода</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="65"/>
         <source>Table</source>
-        <translation type="unfinished"></translation>
+        <translation>Таблица</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="68"/>
         <source>Paragraph</source>
         <extracomment>顶部工具栏标题下拉里的正文选项</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Абзац</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="71"/>
         <source>Bold</source>
         <extracomment>选中文字后浮出的工具栏按钮的悬停提示</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Полужирный</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="72"/>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Курсив</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="73"/>
         <source>Strikethrough</source>
-        <translation type="unfinished"></translation>
+        <translation>Зачёркнутый</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="74"/>
         <source>Inline code</source>
-        <translation type="unfinished"></translation>
+        <translation>Встроенный код</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="75"/>
         <source>Link</source>
-        <translation type="unfinished"></translation>
+        <translation>Ссылка</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="78"/>
         <source>Search language</source>
         <extracomment>代码块工具栏：语言搜索框的占位</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Поиск языка</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="80"/>
         <source>No result</source>
         <extracomment>代码块工具栏：语言搜索没有结果时的提示</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Нет результатов</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="82"/>
         <source>Copy</source>
         <extracomment>代码块工具栏：复制按钮</extracomment>
-        <translation type="unfinished">Копировать</translation>
+        <translation>Копировать</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="85"/>
         <source>Paste link...</source>
         <extracomment>链接浮层里输入地址的占位</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Вставьте ссылку…</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="88"/>
         <source>Insert Table</source>
         <extracomment>插入表格前的尺寸面板</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Вставить таблицу</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="89"/>
         <source>Rows</source>
-        <translation type="unfinished"></translation>
+        <translation>Строки</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="90"/>
         <source>Columns</source>
-        <translation type="unfinished"></translation>
+        <translation>Столбцы</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="91"/>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation>Подтвердить</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="93"/>
         <source>Decrease %1</source>
         <extracomment>表格尺寸面板上&quot;减一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Уменьшить %1</translation>
     </message>
     <message>
         <location filename="../src/widgets/wysiwygtranslations.cpp" line="95"/>
         <source>Increase %1</source>
         <extracomment>表格尺寸面板上&quot;加一&quot;按钮的无障碍名字，%1 是&quot;Rows&quot;或&quot;Columns&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Увеличить %1</translation>
     </message>
 </context>
 <context>
