@@ -53,6 +53,7 @@ BottomBar::BottomBar(QWidget *parent)
     m_editViewAction = m_viewModeMenu->addAction(tr("Edit"));
     m_readViewAction = m_viewModeMenu->addAction(tr("Read"));
     m_livePreviewAction = m_viewModeMenu->addAction(tr("Live Preview"));
+    m_wysiwygAction = m_viewModeMenu->addAction(tr("WYSIWYG"));
     m_viewModeMenu->setCurrentAction(m_editViewAction);
 
     layout->addStretch();
@@ -71,6 +72,8 @@ BottomBar::BottomBar(QWidget *parent)
             emit viewModeRequested(ViewMode::ReadView);
         else if (action == m_livePreviewAction)
             emit viewModeRequested(ViewMode::LivePreview);
+        else if (action == m_wysiwygAction)
+            emit viewModeRequested(ViewMode::Wysiwyg);
     });
 }
 
@@ -115,6 +118,8 @@ void BottomBar::setViewMode(ViewMode mode)
         m_viewModeMenu->setCurrentAction(m_editViewAction);
     else if (mode == ViewMode::ReadView)
         m_viewModeMenu->setCurrentAction(m_readViewAction);
+    else if (mode == ViewMode::Wysiwyg)
+        m_viewModeMenu->setCurrentAction(m_wysiwygAction);
     else
         m_viewModeMenu->setCurrentAction(m_livePreviewAction);
 }
@@ -122,6 +127,9 @@ void BottomBar::setViewMode(ViewMode mode)
 void BottomBar::setMarkdownAvailable(bool available)
 {
     m_livePreviewAction->setEnabled(available);
+    // 所见即所得是 Markdown 专属的独立视图，非 Markdown 文件里不留一个灰项，直接不显示。
+    m_wysiwygAction->setVisible(available);
+    m_wysiwygAction->setEnabled(available);
 }
 
 void BottomBar::setPalette(const QPalette &palette)

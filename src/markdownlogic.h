@@ -12,7 +12,8 @@
 enum class ViewMode {
     Edit,
     ReadView,
-    LivePreview
+    LivePreview,
+    Wysiwyg
 };
 
 Q_DECLARE_METATYPE(ViewMode)
@@ -25,16 +26,22 @@ public:
         return isMarkdown && previewAvailable ? ViewMode::LivePreview : ViewMode::Edit;
     }
 
+    // 除 Edit 外的视图都要有 Markdown 内容才能用。
+    static bool needsMarkdown(ViewMode mode)
+    {
+        return mode == ViewMode::LivePreview || mode == ViewMode::Wysiwyg;
+    }
+
     static bool canSwitchTo(ViewMode target, bool isMarkdown, bool previewAvailable)
     {
-        if (target == ViewMode::LivePreview)
+        if (needsMarkdown(target))
             return isMarkdown && previewAvailable;
         return true;
     }
 
     static ViewMode fallbackWhenMarkdownLost(ViewMode current)
     {
-        return current == ViewMode::LivePreview ? ViewMode::Edit : current;
+        return needsMarkdown(current) ? ViewMode::Edit : current;
     }
 
     static ViewMode elevateWhenMarkdownGained(ViewMode current, bool previewAvailable)

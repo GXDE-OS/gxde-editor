@@ -1,0 +1,260 @@
+:root {
+  --gxde-editor-bg: #f7f9ff;
+  --gxde-editor-fg: #181c20;
+  --gxde-editor-caret: #2e628c;
+  /* 全篇唯一的一套字体：标题、正文、各处面板都从这一个变量取。
+     'Noto Sans CJK SC' 排头，是因为它自带西文（Source Sans），西文和汉字都从
+     它出，笔画风格就是一套 —— 这正是之前缺的：Crepe 原来那个栈里一个中文字体
+     都没有，中文是落到通用族 sans-serif 上由 fontconfig 现找的（本机给的是更纱
+     黑体），标题那边就更明显：西文走 Georgia 衬线、中文走更纱黑体，一行里两种
+     风格。
+     通用族必须留在最末尾。它总能解析成一个真实字体，排在前面的话后面的字一个
+     都轮不到 —— 之前那版就是把中文字体补在 sans-serif 后面，等于没补。
+     后面几个只在 Noto 缺席时才轮到；删除 'Source Han Sans SC'（跟 Noto Sans
+     CJK 是同一套设计的改名版）和 'Microsoft YaHei'（Windows 字体，且它一接手
+     中英文就又分家了）。 */
+  --gxde-editor-font-family: 'Noto Sans CJK SC', 'Open Sans', Arial, Helvetica,
+    sans-serif;
+  --gxde-editor-mono-family: 'Noto Sans Mono CJK SC', 'Fira Code', Menlo, Monaco,
+    'Courier New', Courier, monospace;
+  --gxde-editor-font-size: 16px;
+  --gxde-editor-line-height: 1.7;
+  --gxde-editor-padding: 32px;
+}
+
+.milkdown {
+  --crepe-color-background: #f7f9ff; /* background */
+  --crepe-color-on-background: #181c20; /* onBackground */
+  --crepe-color-surface: #f1f4f9; /* surfaceContainerLow */
+  --crepe-color-surface-low: #eceef3; /* surfaceContainer */
+  --crepe-color-on-surface: #181c20; /* onSurface */
+  --crepe-color-on-surface-variant: #42474e; /* onSurfaceVariant */
+  --crepe-color-outline: #72777f; /* outline */
+  --crepe-color-primary: #2e628c; /* primary */
+  --crepe-color-secondary: #d5e4f6; /* secondaryContainer */
+  --crepe-color-on-secondary: #3a4857; /* onSecondaryContainer */
+  --crepe-color-inverse: #2d3135; /* inverseSurface */
+  --crepe-color-on-inverse: #eef1f6; /* inverseOnSurface */
+  --crepe-color-inline-code: #ba1a1a; /* error */
+  --crepe-color-error: #ba1a1a; /* error */
+  --crepe-color-hover: #e6e8ee; /* surfaceContainerHigh */
+  --crepe-color-selected: #e0e2e8; /* surfaceContainerHighest */
+  --crepe-color-inline-area: #dee3eb; /* surfaceVariant */
+  --crepe-base-font-size: var(--gxde-editor-font-size);
+  /* 标题跟正文共用一套 —— 层级只靠字号拉开，不再有衬线/黑体之分。
+     Crepe 原本给的是 Georgia 那串衬线，且里面没有中文字体。 */
+  --crepe-font-default: var(--gxde-editor-font-family);
+  --crepe-font-title: var(--gxde-editor-font-family);
+  --crepe-font-code: var(--gxde-editor-mono-family);
+  --gxde-code-keyword: #7b3fa0; /* 关键字：紫，与 primary 同档明度 */
+  --gxde-code-string: #2e6b3f; /* 字符串：绿 */
+  --gxde-code-number: #a1521b; /* 数字/字面量：橙 */
+  --gxde-code-comment: #72777f; /* 注释：outline，压暗一档 */
+  --gxde-code-function: #2e628c; /* 函数名：primary */
+  --gxde-code-type: #1f5b70; /* 类型/类名：偏青 */
+  --gxde-code-property: #4a5568; /* 属性名 */
+  --gxde-code-variable: #181c20; /* 变量：onSurface，跟正文一致 */
+  --gxde-code-operator: #42474e; /* 运算符/标点：onSurfaceVariant */
+  --gxde-code-meta: #72777f; /* 元信息/预处理指令 */
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--gxde-editor-bg);
+  color: var(--gxde-editor-fg);
+  font-family: var(--gxde-editor-font-family);
+  font-size: var(--gxde-editor-font-size);
+}
+
+.gxde-markdown-editor {
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.gxde-milkdown-content {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: var(--gxde-editor-padding);
+  outline: none;
+  line-height: var(--gxde-editor-line-height);
+  word-wrap: break-word;
+  caret-color: var(--gxde-editor-caret);
+}
+
+.gxde-milkdown-content > :first-child {
+  margin-top: 0;
+}
+
+.gxde-milkdown-content table {
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.gxde-milkdown-content img {
+  max-width: 100%;
+}
+
+/* 标题字重。
+   Crepe 的 reset 给 h1–h6 定的是 font-weight: 400（见 common/reset.css），那套
+   是配衬线标题的：衬线在大字号下自带分量，400 也立得住。现在标题跟正文共用一套
+   无衬线，两边同字重就只剩大小之分，层级会塌，所以补回一档。
+   选择器必须跟 Crepe 那条一模一样。它在 reset.css 里是嵌在 .milkdown 下面的
+   （reset.css 用了原生 CSS 嵌套），编译出来是 `.milkdown .ProseMirror h1`，特异度
+   (0,2,1)；写成 `.milkdown h1` 只有 (0,1,1)，低一级，会被它压住 —— 之前就是这么
+   写的，实测 h1 的计算字重仍是 400。同为 (0,2,1) 之后靠本文件排在打包结果后面取胜。
+   本机的 Noto Sans CJK SC 只有 Regular/Bold 两档，600 会匹配到 Bold，是真实字重，
+   不会触发合成加粗。 */
+.milkdown .ProseMirror h1,
+.milkdown .ProseMirror h2,
+.milkdown .ProseMirror h3,
+.milkdown .ProseMirror h4,
+.milkdown .ProseMirror h5,
+.milkdown .ProseMirror h6 {
+  font-weight: 600;
+}
+
+.milkdown .gxde-table-picker {
+  position: fixed;
+  z-index: 30;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  font-family: var(--crepe-font-default);
+  font-size: calc(var(--crepe-base-font-size, 16px) * 0.875);
+  color: var(--crepe-color-on-surface);
+  background: var(--crepe-color-surface);
+  border-radius: 12px;
+  box-shadow: var(--crepe-shadow-1);
+}
+
+.milkdown .gxde-table-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.milkdown .gxde-table-picker-label {
+  color: var(--crepe-color-on-surface-variant);
+}
+
+.milkdown .gxde-table-picker-stepper {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--crepe-color-inline-area), transparent 40%);
+}
+
+.milkdown .gxde-table-picker-step {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1429em;
+  line-height: 1;
+  color: var(--crepe-color-on-surface-variant);
+  background: transparent;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-step:hover {
+  background: var(--crepe-color-hover);
+}
+
+.milkdown .gxde-table-picker-step:active {
+  background: var(--crepe-color-selected);
+}
+
+.milkdown .gxde-table-picker-input {
+  width: 36px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  font: inherit;
+  text-align: center;
+  color: var(--crepe-color-on-surface);
+  background: transparent;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.milkdown .gxde-table-picker-input::-webkit-outer-spin-button,
+.milkdown .gxde-table-picker-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.milkdown .gxde-table-picker-confirm {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--crepe-color-primary);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.milkdown .gxde-table-picker-confirm:hover {
+  box-shadow: var(--crepe-shadow-1);
+}
+
+/* 代码块的语法高亮。
+   类名由 main.ts 里的 HighlightStyle 指定（tok-keyword 等），色值取上面那组
+   --gxde-code-*。Crepe 自己的 code-mirror.css 只画了代码块的骨架，没有任何
+   token 配色，所以这一组是必需的，不是覆盖。
+   选择器带 .milkdown 前缀，理由同上面的面板：压过 Crepe 的 reset，变量也正好
+   作用在这个子树里。 */
+.milkdown .tok-keyword {
+  color: var(--gxde-code-keyword);
+  font-weight: 600;
+}
+
+.milkdown .tok-string {
+  color: var(--gxde-code-string);
+}
+
+.milkdown .tok-number {
+  color: var(--gxde-code-number);
+}
+
+.milkdown .tok-comment {
+  color: var(--gxde-code-comment);
+  font-style: italic;
+}
+
+.milkdown .tok-function {
+  color: var(--gxde-code-function);
+}
+
+.milkdown .tok-type {
+  color: var(--gxde-code-type);
+}
+
+.milkdown .tok-property {
+  color: var(--gxde-code-property);
+}
+
+.milkdown .tok-variable {
+  color: var(--gxde-code-variable);
+}
+
+.milkdown .tok-operator {
+  color: var(--gxde-code-operator);
+}
+
+.milkdown .tok-meta {
+  color: var(--gxde-code-meta);
+}

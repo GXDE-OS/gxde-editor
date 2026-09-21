@@ -207,6 +207,8 @@ void EditWrapper::updatePath(const QString &file)
 #ifdef USE_WEBENGINE
     if (m_markdownPreview)
         m_markdownPreview->setDocumentPath(file);
+    if (m_wysiwyg)
+        m_wysiwyg->setDocumentPath(file);
 #endif
     detectEndOfLine();
 }
@@ -490,6 +492,61 @@ void EditWrapper::ensureMarkdownPreviewCreated()
 }
 
 
+bool EditWrapper::wysiwygAvailable() const {
+#ifdef USE_WEBENGINE
+    return true;
+#else
+    return false;
+#endif
+}
+
+void EditWrapper::ensureWysiwygCreated() {
+#ifdef USE_WEBENGINE
+    if (m_wysiwyg || !wysiwygAvailable())
+        return;
+
+    m_wysiwygPage = new QWidget(m_viewStack);
+    QVBoxLayout *layout = new QVBoxLayout(m_wysiwygPage);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    m_wysiwyg = new MarkdownWysiwygWidget(m_wysiwygPage);
+    layout->addWidget(m_wysiwyg);
+    m_viewStack->addWidget(m_wysiwygPage);
+
+    connect(m_wysiwyg, &MarkdownWysiwygWidget::markdownEdited,
+            this, &EditWrapper::handleWysiwygEdited);
+
+    connect(m_wysiwyg, &MarkdownWysiwygWidget::contextMenuRequested,
+            this, [this](const QPoint &globalPosition) {
+        QMenu menu;
+        menu.addActions(m_wysiwyg->contextMenuActions());
+        menu.addSeparator();
+        QMenu *viewMenu = menu.addMenu(tr("View Mode"));
+        viewMenu->addActions(m_textEdit->viewModeActions());
+        menu.exec(globalPosition);
+    });
+#endif
+}
+
+void EditWrapper::handleWysiwygEdited(const QString &markdown)
+{
+    if (m_textEdit->toPlainText() == markdown)
+        return;
+
+    const int position = m_textEdit->textCursor().position();
+    const int yoffset = m_textEdit->verticalScrollBar()->value();
+
+    m_textEdit->setPlainText(markdown);
+
+    QTextCursor cursor = m_textEdit->textCursor();
+    cursor.setPosition(qMin(position, m_textEdit->document()->characterCount() - 1));
+    m_textEdit->setTextCursor(cursor);
+    m_textEdit->verticalScrollBar()->setValue(yoffset);
+
+    m_textEdit->setModified(true);
+}
+
 void EditWrapper::ensureLiveSplitterCreated()
 {
     if (m_liveSplitter)
@@ -518,7 +575,8 @@ void EditWrapper::attachPreviewTo(QWidget *container)
 bool EditWrapper::setViewMode(ViewMode mode)
 {
     const bool hasPreview = previewAvailable();
-    if (!ViewModeFsm::canSwitchTo(mode, m_isMarkdown, hasPreview))
+    const bool webEngineReady = (mode == ViewMode::Wysiwyg) ? wysiwygAvailable() : hasPreview;
+    if (!ViewModeFsm::canSwitchTo(mode, m_isMarkdown, webEngineReady))
         return false;
 
     const bool readOnlyText = ViewModeFsm::isReadOnlyTextMode(mode, m_isMarkdown, hasPreview);
@@ -547,7 +605,25 @@ bool EditWrapper::setViewMode(ViewMode mode)
         m_readOnlyByViewMode = false;
     }
 
-    if (mode == ViewMode::Edit) {
+    if (mode == ViewMode::Wysiwyg) {
+#ifdef USE_WEBENGINE
+        ensureWysiwygCreated();
+        if (m_wysiwyg) {
+            if (m_markdownPreview)
+                m_markdownPreview->setSourceEditor(nullptr);
+
+            // 路径要在内容之前：markdown 里的相对图片路径以文档目录为基准。
+            m_wysiwyg->setDocumentPath(filePath());
+
+            const QString text = m_textEdit->toPlainText();
+            if (m_wysiwyg->markdown() != text)
+                m_wysiwyg->setMarkdown(text);
+
+            m_viewStack->setCurrentWidget(m_wysiwygPage);
+            m_wysiwyg->focusEditor();
+        }
+#endif
+    } else if (mode == ViewMode::Edit) {
 #ifdef USE_WEBENGINE
         if (m_markdownPreview)
             m_markdownPreview->setSourceEditor(nullptr);

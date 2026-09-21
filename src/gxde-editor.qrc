@@ -295,5 +295,8 @@
         <file>markdown/marked.min.js</file>
         <file>markdown/github-markdown.css</file>
         <file>markdown/github-markdown-dark.css</file>
+        <file>markdown/wysiwyg/index.html</file>
+        <file>markdown/wysiwyg/assets/editor.js</file>
+        <file>markdown/wysiwyg/assets/editor.css</file>
     </qresource>
 </RCC>
