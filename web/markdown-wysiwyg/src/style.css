@@ -34,6 +34,16 @@
     'Noto Serif CJK SC', 'Source Han Serif SC';
   --crepe-font-code: Fira Code, Menlo, Monaco, 'Courier New', Courier, monospace,
     'Noto Sans Mono CJK SC';
+  --gxde-code-keyword: #7b3fa0; /* 关键字：紫，与 primary 同档明度 */
+  --gxde-code-string: #2e6b3f; /* 字符串：绿 */
+  --gxde-code-number: #a1521b; /* 数字/字面量：橙 */
+  --gxde-code-comment: #72777f; /* 注释：outline，压暗一档 */
+  --gxde-code-function: #2e628c; /* 函数名：primary */
+  --gxde-code-type: #1f5b70; /* 类型/类名：偏青 */
+  --gxde-code-property: #4a5568; /* 属性名 */
+  --gxde-code-variable: #181c20; /* 变量：onSurface，跟正文一致 */
+  --gxde-code-operator: #42474e; /* 运算符/标点：onSurfaceVariant */
+  --gxde-code-meta: #72777f; /* 元信息/预处理指令 */
 }
 
 html,
@@ -168,4 +178,45 @@ body {
 
 .milkdown .gxde-table-picker-confirm:hover {
   box-shadow: var(--crepe-shadow-1);
+}
+
+  color: var(--gxde-code-keyword);
+  font-weight: 600;
+}
+
+.milkdown .tok-string {
+  color: var(--gxde-code-string);
+}
+
+.milkdown .tok-number {
+  color: var(--gxde-code-number);
+}
+
+.milkdown .tok-comment {
+  color: var(--gxde-code-comment);
+  font-style: italic;
+}
+
+.milkdown .tok-function {
+  color: var(--gxde-code-function);
+}
+
+.milkdown .tok-type {
+  color: var(--gxde-code-type);
+}
+
+.milkdown .tok-property {
+  color: var(--gxde-code-property);
+}
+
+.milkdown .tok-variable {
+  color: var(--gxde-code-variable);
+}
+
+.milkdown .tok-operator {
+  color: var(--gxde-code-operator);
+}
+
+.milkdown .tok-meta {
+  color: var(--gxde-code-meta);
 }

@@ -1,3 +1,6 @@
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { languages } from '@codemirror/language-data'
+import { tags } from '@lezer/highlight'
 import { CrepeBuilder } from '@milkdown/crepe/builder'
 import { blockEdit } from '@milkdown/crepe/feature/block-edit'
 import { codeMirror } from '@milkdown/crepe/feature/code-mirror'
@@ -262,6 +265,30 @@ function exposeApi(): void {
   }
 }
 
+const CODE_HIGHLIGHT = syntaxHighlighting(HighlightStyle.define([
+  { tag: tags.keyword, class: 'tok-keyword' },
+  { tag: [tags.controlKeyword, tags.moduleKeyword], class: 'tok-keyword' },
+  { tag: [tags.string, tags.special(tags.string), tags.regexp], class: 'tok-string' },
+  { tag: [tags.number, tags.bool, tags.null, tags.atom], class: 'tok-number' },
+  { tag: [tags.comment, tags.lineComment, tags.blockComment], class: 'tok-comment' },
+  {
+    tag: [
+      tags.function(tags.variableName),
+      tags.function(tags.propertyName),
+      tags.labelName,
+    ],
+    class: 'tok-function',
+  },
+  {
+    tag: [tags.typeName, tags.className, tags.namespace, tags.tagName],
+    class: 'tok-type',
+  },
+  { tag: [tags.propertyName, tags.attributeName], class: 'tok-property' },
+  { tag: [tags.definition(tags.variableName), tags.variableName], class: 'tok-variable' },
+  { tag: [tags.operator, tags.punctuation, tags.bracket], class: 'tok-operator' },
+  { tag: [tags.meta, tags.processingInstruction], class: 'tok-meta' },
+]))
+
 async function main(): Promise<void> {
   // 先连通道再建编辑器：宿主可能在收到 ready 之后立刻调用 gxdeEditor。
   await connectHost()
@@ -308,7 +335,12 @@ async function main(): Promise<void> {
     .addFeature(table)
     .addFeature(listItem)
     .addFeature(cursor)
-    .addFeature(codeMirror)
+    .addFeature(codeMirror, {
+      // 全量语言表，按需加载：每个语言的解析器都是 import()，由 vite 的
+      // inlineDynamicImports 内联进 editor.js，产物仍是单文件、离线可用。
+      languages,
+      theme: CODE_HIGHLIGHT,
+    })
     .addFeature(placeholder, { text: '输入 / 插入内容' })
     // 这里故意不挂 imageBlock。它的 schema 把图片的 alt 当成自己的缩放比例存储槽：
     // 解析时 `ratio = Number(node.alt || 1)`，序列化时把比例 toFixed(2) 写回 alt。

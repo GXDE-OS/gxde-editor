@@ -43,6 +43,7 @@ export default defineConfig({
     cssMinify: false,
     rollupOptions: {
       output: {
+        inlineDynamicImports: true,
         entryFileNames: 'assets/editor.js',
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/editor[extname]',

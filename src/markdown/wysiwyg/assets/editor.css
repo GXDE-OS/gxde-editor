@@ -1700,6 +1700,22 @@ img.ProseMirror-separator {
     'Noto Serif CJK SC', 'Source Han Serif SC';
   --crepe-font-code: Fira Code, Menlo, Monaco, 'Courier New', Courier, monospace,
     'Noto Sans Mono CJK SC';
+
+  /* 代码块的语法配色。
+     底色是 --crepe-color-surface（#f1f4f9，见 Crepe 的 code-mirror.css），
+     下面这些色值都在这个浅底上取过对比度。
+     Material 那套方案本身只有蓝灰一族，铺不满语法需要的色相，所以绿/橙/紫
+     是按同一个明度档补的，跟 primary #2e628c 摆在一起不打架。 */
+  --gxde-code-keyword: #7b3fa0; /* 关键字：紫，与 primary 同档明度 */
+  --gxde-code-string: #2e6b3f; /* 字符串：绿 */
+  --gxde-code-number: #a1521b; /* 数字/字面量：橙 */
+  --gxde-code-comment: #72777f; /* 注释：outline，压暗一档 */
+  --gxde-code-function: #2e628c; /* 函数名：primary */
+  --gxde-code-type: #1f5b70; /* 类型/类名：偏青 */
+  --gxde-code-property: #4a5568; /* 属性名 */
+  --gxde-code-variable: #181c20; /* 变量：onSurface，跟正文一致 */
+  --gxde-code-operator: #42474e; /* 运算符/标点：onSurfaceVariant */
+  --gxde-code-meta: #72777f; /* 元信息/预处理指令 */
 }
 
 html,
@@ -1744,16 +1760,6 @@ body {
   max-width: 100%;
 }
 
-/* 插入表格前的行列数面板。取值方式照搬 Crepe 自己的浮层（斜杠菜单、表格手柄）：
-   surface 底 + 12px 圆角 + --crepe-shadow-1，输入区用它的行内代码那套
-   color-mix(inline-area, transparent 40%)。z-index 取 30，高过斜杠菜单的 10
-   和表格手柄的 20 —— 面板是从斜杠菜单里点出来的，得压在它上面。
-
-   选择器一律带上 .milkdown 前缀，为的是压过 Crepe 的 reset：那里有一条
-   `.milkdown { button, input { background: none } }`，编译出来是 `.milkdown button`，
-   比单个类名高一级，会把 `.gxde-table-picker-confirm` 的 background 直接吃掉 ——
-   按钮就成了白字配透明底。带上前缀是 (0,2,0)，重新压回去，也顺带说明了
-   这块样式的前提：面板挂在 .milkdown 里面。 */
 .milkdown .gxde-table-picker {
   position: fixed;
   z-index: 30;
@@ -1819,7 +1825,6 @@ body {
   text-align: center;
   color: var(--crepe-color-on-surface);
   background: transparent;
-  /* 数字框自带的上下箭头又窄又难点，尺寸靠两侧按钮和手动输入就够了。 */
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -1838,8 +1843,6 @@ body {
   cursor: pointer;
   font: inherit;
   font-weight: 600;
-  /* 实心 primary。底色上的文字 M3 里叫 onPrimary，浅色方案恒为 #FFFFFF，
-     Crepe 没有导出这个角色（它只把 primary 当图标前景色用），只能写死。 */
   color: #fff;
   background: var(--crepe-color-primary);
   transition: box-shadow 0.2s ease-in-out;
@@ -1847,4 +1850,52 @@ body {
 
 .milkdown .gxde-table-picker-confirm:hover {
   box-shadow: var(--crepe-shadow-1);
+}
+
+/* 代码块的语法高亮。
+   类名由 main.ts 里的 HighlightStyle 指定（tok-keyword 等），色值取上面那组
+   --gxde-code-*。Crepe 自己的 code-mirror.css 只画了代码块的骨架，没有任何
+   token 配色，所以这一组是必需的，不是覆盖。
+   选择器带 .milkdown 前缀，理由同上面的面板：压过 Crepe 的 reset，变量也正好
+   作用在这个子树里。 */
+.milkdown .tok-keyword {
+  color: var(--gxde-code-keyword);
+  font-weight: 600;
+}
+
+.milkdown .tok-string {
+  color: var(--gxde-code-string);
+}
+
+.milkdown .tok-number {
+  color: var(--gxde-code-number);
+}
+
+.milkdown .tok-comment {
+  color: var(--gxde-code-comment);
+  font-style: italic;
+}
+
+.milkdown .tok-function {
+  color: var(--gxde-code-function);
+}
+
+.milkdown .tok-type {
+  color: var(--gxde-code-type);
+}
+
+.milkdown .tok-property {
+  color: var(--gxde-code-property);
+}
+
+.milkdown .tok-variable {
+  color: var(--gxde-code-variable);
+}
+
+.milkdown .tok-operator {
+  color: var(--gxde-code-operator);
+}
+
+.milkdown .tok-meta {
+  color: var(--gxde-code-meta);
 }
