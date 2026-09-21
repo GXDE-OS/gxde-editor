@@ -64,17 +64,17 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="133"/>
         <source>Undo</source>
-        <translation>Поправи</translation>
+        <translation>Отмени</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="134"/>
         <source>Redo</source>
-        <translation>Повторение</translation>
+        <translation>Повтори</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="135"/>
         <source>Cut</source>
-        <translation>Премести</translation>
+        <translation>Изрязване</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="136"/>
@@ -84,7 +84,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="137"/>
         <source>Paste</source>
-        <translation>Прилагане</translation>
+        <translation>Поставяне</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="138"/>
@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Режим на изглед</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">Deepin редактор е текстов редактор за настолни компютри, който поддържа основни функции за редактиране на текст.</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin редактор</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin редактор</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Отмени</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Повтори</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Изрязване</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Копиране</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Поставяне</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Избор на всичко</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Пренасяне на текста</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Прозорец</translation>
     </message>
@@ -800,12 +822,12 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="89"/>
         <source>Cut</source>
-        <translation>Премести</translation>
+        <translation>Изрязване</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="90"/>
         <source>Paste</source>
-        <translation>Прилагане</translation>
+        <translation>Поставяне</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="92"/>
@@ -845,12 +867,12 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
-        <translation>Поправи</translation>
+        <translation>Отмени</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
-        <translation>Повторение</translation>
+        <translation>Повтори</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="101"/>
@@ -883,7 +905,7 @@
     <message>
         <location filename="../src/replacebar.cpp" line="42"/>
         <source>Replace</source>
-        <translation>Рамени</translation>
+        <translation>Замяна</translation>
     </message>
     <message>
         <location filename="../src/replacebar.cpp" line="43"/>
@@ -968,8 +990,8 @@
         <translation>Отваряне на файл</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Запази като</translation>
     </message>
@@ -1008,10 +1030,6 @@
         <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>Нямате разрешение да отворите %1</translation>
-    </message>
-    <message>
-        <source>Invalid file: %1</source>
-        <translation type="vanished">Невалиден файл: %1</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="395"/>

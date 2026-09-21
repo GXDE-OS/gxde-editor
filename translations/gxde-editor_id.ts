@@ -64,12 +64,12 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="133"/>
         <source>Undo</source>
-        <translation>Sebelum</translation>
+        <translation>Urungkan</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="134"/>
         <source>Redo</source>
-        <translation>Sesudah</translation>
+        <translation>Ulangi</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="135"/>
@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Mode Tampilan</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">Penyunting Deepin adalah sebuah penyunting teks desktop yang mendukung fitur penyunting teks umum.</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Penyunting Deepin</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Penyunting Deepin</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Urungkan</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Ulangi</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Potong</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Salin</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Tempel</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Pilih Semua</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Wrap Kata</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Jendela</translation>
     </message>
@@ -845,12 +867,12 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
-        <translation>Sebelum</translation>
+        <translation>Urungkan</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
-        <translation>Sesudah</translation>
+        <translation>Ulangi</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="101"/>
@@ -926,7 +948,7 @@
     <message>
         <location filename="../src/settings.cpp" line="91"/>
         <source>Fullscreen</source>
-        <translation>Layarpenuh</translation>
+        <translation>Layar Penuh</translation>
     </message>
 </context>
 <context>
@@ -968,10 +990,10 @@
         <translation>Buka berkas</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
-        <translation>Simpan bagai</translation>
+        <translation>Simpan sebagai</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="192"/>
@@ -1008,10 +1030,6 @@
         <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>Anda tidak mempunyai ijin untuk buka %1</translation>
-    </message>
-    <message>
-        <source>Invalid file: %1</source>
-        <translation type="vanished">Berkas tidak valid: %1</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="395"/>

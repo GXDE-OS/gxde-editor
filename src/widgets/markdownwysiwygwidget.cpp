@@ -21,6 +21,7 @@
 #include "markdownwysiwygwidget.h"
 #include "wysiwygtranslations.h"
 
+#include <QAction>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -135,6 +136,10 @@ void MarkdownWysiwygBridge::markdownChanged(const QString &markdown) {
     emit markdownChangedReceived(markdown);
 }
 
+void MarkdownWysiwygBridge::historyState(bool canUndo, bool canRedo) {
+    emit historyStateReceived(canUndo, canRedo);
+}
+
 MarkdownWysiwygWidget::MarkdownWysiwygWidget(QWidget *parent)
         : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -142,7 +147,37 @@ MarkdownWysiwygWidget::MarkdownWysiwygWidget(QWidget *parent)
     layout->setSpacing(0);
 
     m_webView = new QWebEngineView(this);
-    m_webView->setContextMenuPolicy(Qt::NoContextMenu);
+    m_webView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_webView, &QWidget::customContextMenuRequested, this,
+            [this](const QPoint &position) {
+        emit contextMenuRequested(m_webView->mapToGlobal(position));
+    });
+
+    m_undoAction = new QAction(tr("Undo"), this);
+    m_redoAction = new QAction(tr("Redo"), this);
+    m_cutAction = new QAction(tr("Cut"), this);
+    m_copyAction = new QAction(tr("Copy"), this);
+    m_pasteAction = new QAction(tr("Paste"), this);
+    m_selectAllAction = new QAction(tr("Select All"), this);
+
+    connect(m_cutAction, &QAction::triggered, this, [this] {
+        m_webView->page()->triggerAction(QWebEnginePage::Cut);
+    });
+    connect(m_copyAction, &QAction::triggered, this, [this] {
+        m_webView->page()->triggerAction(QWebEnginePage::Copy);
+    });
+    connect(m_pasteAction, &QAction::triggered, this, [this] {
+        m_webView->page()->triggerAction(QWebEnginePage::Paste);
+    });
+    connect(m_undoAction, &QAction::triggered, this, [this] {
+        runScript(QStringLiteral("window.gxdeEditor.undo()"));
+    });
+    connect(m_redoAction, &QAction::triggered, this, [this] {
+        runScript(QStringLiteral("window.gxdeEditor.redo()"));
+    });
+    connect(m_selectAllAction, &QAction::triggered, this, [this] {
+        runScript(QStringLiteral("window.gxdeEditor.selectAll()"));
+    });
 
     // 得赶在 setUrl() 之前挂上，否则首次加载就走不到我们的处理器。
     m_schemeHandler = new MarkdownWysiwygSchemeHandler(this);
@@ -164,6 +199,11 @@ MarkdownWysiwygWidget::MarkdownWysiwygWidget(QWidget *parent)
             this, &MarkdownWysiwygWidget::handleMarkdownLoaded);
     connect(m_bridge, &MarkdownWysiwygBridge::markdownChangedReceived,
             this, &MarkdownWysiwygWidget::handleMarkdownChanged);
+    connect(m_bridge, &MarkdownWysiwygBridge::historyStateReceived,
+            this, [this](bool canUndo, bool canRedo) {
+        m_canUndo = canUndo;
+        m_canRedo = canRedo;
+    });
     connect(m_webView, &QWebEngineView::loadFinished, this, [](bool ok) {
         if (!ok) {
             qWarning() << "Failed to load Milkdown:"
@@ -281,6 +321,34 @@ void MarkdownWysiwygWidget::handleMarkdownChanged(const QString &markdown) {
     m_markdown = markdown;
     m_edited = true;
     emit markdownEdited(markdown);
+}
+
+QList<QAction *> MarkdownWysiwygWidget::contextMenuActions() {
+    refreshActionStates();
+
+    return { m_undoAction, m_redoAction, m_cutAction, m_copyAction,
+        m_pasteAction, m_selectAllAction };
+}
+
+void MarkdownWysiwygWidget::refreshActionStates() {
+    QWebEnginePage *page = m_webView->page();
+
+    const struct {
+        QAction *action;
+        QWebEnginePage::WebAction webAction;
+    } pageActions[] = {
+        { m_cutAction, QWebEnginePage::Cut },
+        { m_copyAction, QWebEnginePage::Copy },
+        { m_pasteAction, QWebEnginePage::Paste },
+    };
+    for (const auto &entry : pageActions) {
+        if (QAction *webAction = page->action(entry.webAction)) {
+            entry.action->setEnabled(webAction->isEnabled());
+        }
+    }
+
+    m_undoAction->setEnabled(m_canUndo && !m_readOnly);
+    m_redoAction->setEnabled(m_canRedo && !m_readOnly);
 }
 
 #endif

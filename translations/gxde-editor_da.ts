@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Visningstilstand</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">Deepin editor er et tekstredigeringsprogram til skrivebordet som understøtter almindelige tekstredigeringsfunktioner.</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin editor</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin editor</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Fortryd</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Omgør</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Klip</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Kopiér</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Indsæt</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Markér alt</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Ordombrydning</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Vindue</translation>
     </message>
@@ -968,8 +990,8 @@
         <translation>Åbn fil</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Gem som</translation>
     </message>
@@ -1008,10 +1030,6 @@
         <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>Du har ikke tilladelse til at åbne %1</translation>
-    </message>
-    <message>
-        <source>Invalid file: %1</source>
-        <translation type="vanished">Ugyldig fil: %1</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="395"/>

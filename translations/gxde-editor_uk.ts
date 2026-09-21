@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Режим перегляду</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">Редактор Deepin — графічний текстовий редактор із типовими можливостями щодо редагування тексту.</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Редактор Deepin</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Редактор Deepin</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Скасувати</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Повторити</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Вирізати</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Копіювати</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Вставити</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Позначити усе</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Перенесення рядків</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Вікно</translation>
     </message>
@@ -968,8 +990,8 @@
         <translation>Відкрити файл</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Зберегти як</translation>
     </message>
@@ -1008,10 +1030,6 @@
         <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>У вас немає прав на відкриття %1</translation>
-    </message>
-    <message>
-        <source>Invalid file: %1</source>
-        <translation type="vanished">Некоректний файл: %1</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="395"/>

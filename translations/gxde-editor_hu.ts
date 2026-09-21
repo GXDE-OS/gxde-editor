@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Nézetmód</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">A Deepin Editor egy asztali szövegszerkesztő, amely támogatja a legtöbb alapvető szövegszerkesztési funkciót.</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin Editor</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin Editor</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Visszavonás</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Újra</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Kivágás</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Másolás</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Beillesztés</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Összes kijelölése</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Szöveg tördelése</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Ablak</translation>
     </message>
@@ -968,8 +990,8 @@
         <translation>Fájl megnyitása</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Mentés másként</translation>
     </message>
@@ -1008,10 +1030,6 @@
         <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>Nincs engedélye %1 megnyitásához</translation>
-    </message>
-    <message>
-        <source>Invalid file: %1</source>
-        <translation type="vanished">Érvénytelen fájl: %1</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="395"/>

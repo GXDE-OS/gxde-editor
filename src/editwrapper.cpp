@@ -516,6 +516,16 @@ void EditWrapper::ensureWysiwygCreated() {
 
     connect(m_wysiwyg, &MarkdownWysiwygWidget::markdownEdited,
             this, &EditWrapper::handleWysiwygEdited);
+
+    connect(m_wysiwyg, &MarkdownWysiwygWidget::contextMenuRequested,
+            this, [this](const QPoint &globalPosition) {
+        QMenu menu;
+        menu.addActions(m_wysiwyg->contextMenuActions());
+        menu.addSeparator();
+        QMenu *viewMenu = menu.addMenu(tr("View Mode"));
+        viewMenu->addActions(m_textEdit->viewModeActions());
+        menu.exec(globalPosition);
+    });
 #endif
 }
 

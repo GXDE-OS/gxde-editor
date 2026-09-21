@@ -32,18 +32,28 @@ import {
   parserCtx,
 } from '@milkdown/kit/core'
 import type { Ctx } from '@milkdown/kit/ctx'
+import { redoCommand, undoCommand } from '@milkdown/kit/plugin/history'
+import { selectAll } from '@milkdown/kit/prose/commands'
+import { redoDepth, undoDepth } from '@milkdown/kit/prose/history'
+import type { Node as ProseNode } from '@milkdown/kit/prose/model'
+import { Plugin } from '@milkdown/kit/prose/state'
+import type {
+  EditorView,
+  NodeView,
+  NodeViewConstructor,
+} from '@milkdown/kit/prose/view'
+import '@milkdown/kit/prose/view/style/prosemirror.css'
+import '@milkdown/kit/prose/gapcursor/style/gapcursor.css'
 import {
   addBlockTypeCommand,
   clearTextInCurrentBlockCommand,
   selectTextNearPosCommand,
 } from '@milkdown/kit/preset/commonmark'
 import { createTable } from '@milkdown/kit/preset/gfm'
-import type { Node as ProseNode } from '@milkdown/kit/prose/model'
-import type { NodeView, NodeViewConstructor } from '@milkdown/kit/prose/view'
-import '@milkdown/kit/prose/view/style/prosemirror.css'
-import '@milkdown/kit/prose/gapcursor/style/gapcursor.css'
+import { $prose } from '@milkdown/kit/utils'
 import {
   connectHost,
+  notifyHistoryState,
   notifyMarkdownChanged,
   notifyMarkdownLoaded,
   notifyReady,
@@ -67,6 +77,17 @@ interface GxdeEditorApi {
    * 才落在磁盘上真正的位置。
    */
   setBaseUrl(url: string): void
+  /**
+   * 撤销 / 重做。
+   *
+   * 必须走 Milkdown 自己的历史栈：宿主的右键菜单如果去调
+   * QWebEnginePage::Undo，用的是浏览器那套原生撤销栈 —— 跟 ProseMirror 的
+   * history 插件各记各的，撤一次就会把 DOM 改成编辑器不知道的样子。
+   */
+  undo(): void
+  redo(): void
+  /** 全选。选的是文档，不是整个页面。 */
+  selectAll(): void
   /** 让编辑区获得焦点。 */
   focus(): void
 }
@@ -91,12 +112,17 @@ function requireCrepe(): CrepeBuilder {
   return crepe
 }
 
+/** 在编辑器上下文里跑一段操作。编辑器还没建起来时直接抛错。 */
+function inEditor(run: (ctx: Ctx) => void): void {
+  requireCrepe().editor.action(run)
+}
+
 function readMarkdown(): string {
   return requireCrepe().getMarkdown()
 }
 
 function writeMarkdown(markdown: string): void {
-  requireCrepe().editor.action((ctx) => {
+  inEditor((ctx) => {
     const view = ctx.get(editorViewCtx)
     const doc = ctx.get(parserCtx)(markdown)
     if (!doc) {
@@ -260,11 +286,55 @@ function exposeApi(): void {
       requireCrepe().setReadonly(value)
     },
     setBaseUrl: applyBaseUrl,
+    undo() {
+      inEditor((ctx) => {
+        ctx.get(commandsCtx).call(undoCommand.key)
+        ctx.get(editorViewCtx).focus()
+      })
+    },
+    redo() {
+      inEditor((ctx) => {
+        ctx.get(commandsCtx).call(redoCommand.key)
+        ctx.get(editorViewCtx).focus()
+      })
+    },
+    selectAll() {
+      inEditor((ctx) => {
+        const view = ctx.get(editorViewCtx)
+        selectAll(view.state, view.dispatch)
+        view.focus()
+      })
+    },
     focus() {
-      requireCrepe().editor.action((ctx) => ctx.get(editorViewCtx).focus())
+      inEditor((ctx) => ctx.get(editorViewCtx).focus())
     },
   }
 }
+
+/**
+ * 把撤销/重做的可用状态推给宿主。
+ *
+ * 宿主的右键菜单要按这个灰掉对应两项，而 runJavaScript 是异步的：等菜单弹出来
+ * 再问，菜单就得慢半拍。改成这边主动推 —— 历史栈深度只在编辑、撤销、载入时变，
+ * 去重之后一条消息都用不了几条。
+ */
+const historyStateReporter = $prose(() => new Plugin({
+  view: () => {
+    let reported: [boolean, boolean] | null = null
+
+    return {
+      update(view: EditorView) {
+        const canUndo = undoDepth(view.state) > 0
+        const canRedo = redoDepth(view.state) > 0
+        if (reported && reported[0] === canUndo && reported[1] === canRedo) {
+          return
+        }
+        reported = [canUndo, canRedo]
+        notifyHistoryState(canUndo, canRedo)
+      },
+    }
+  },
+}))
 
 const CODE_HIGHLIGHT = syntaxHighlighting(HighlightStyle.define([
   { tag: tags.keyword, class: 'tok-keyword' },
@@ -399,6 +469,8 @@ async function main(): Promise<void> {
     // 这是 schema 里写死的，没有配置能关。图片该不该有缩放句柄是小事，把用户写的
     // alt 文字吃掉是大事。不挂它，图片仍按 commonmark 的 image 节点渲染成普通 <img>，
     // alt/title 原样保留。
+
+  crepe.editor.use(historyStateReporter)
 
   // Crepe 构造时用 ctx.set 整个替换了 editorViewOptionsCtx，原来挂在这儿的 class
   // 被冲掉了，得补回去。

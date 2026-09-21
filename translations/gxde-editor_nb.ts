@@ -69,7 +69,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="134"/>
         <source>Redo</source>
-        <translation>Gjør om</translation>
+        <translation>Gjenta</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="135"/>
@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Visningsmodus</translation>
     </message>
@@ -446,6 +447,39 @@
     </message>
 </context>
 <context>
+    <name>MarkdownWysiwygWidget</name>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>Angre</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>Gjenta</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Klipp ut</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Kopier</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Lim inn</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Merk alle</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
@@ -514,9 +548,9 @@
         <translation>Ordbryting</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Vindu</translation>
     </message>
@@ -783,18 +817,12 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="88"/>
         <source>Copy</source>
-        <translation>Krav:
-1. Returner bare oversettelsesresultatet, uten noen forklaringer, kommentarer eller ekstra innhold
-2. Behold originalformateringen og tegnsettingen
-3. Sørg for at oversettelsen er nøyaktig, naturlig og idiomatisk på målspråket
-
-Originaltekst:
-Kopier</translation>
+        <translation>Kopier</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="89"/>
         <source>Cut</source>
-        <translation>Klipp</translation>
+        <translation>Klipp ut</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="90"/>
@@ -814,13 +842,7 @@ Kopier</translation>
     <message>
         <location filename="../src/settingsdialog.cpp" line="94"/>
         <source>Copy line</source>
-        <translation>Krav:
-1. Returner bare oversettelsen, uten forklaringer, kommentarer eller ekstra innhold
-2. Behold originalformateringen og tegnsettingen
-3. Sørg for at oversettelsen er nøyaktig, naturlig og idiomatisk på målspråket
-
-Originaltekst:
-Kopier linje</translation>
+        <translation>Kopier linje</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="95"/>
@@ -845,12 +867,12 @@ Kopier linje</translation>
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
-        <translation>Avbryt</translation>
+        <translation>Angre</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
-        <translation>Gjør om</translation>
+        <translation>Gjenta</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="101"/>
@@ -955,7 +977,7 @@ Kopier linje</translation>
     <message>
         <location filename="../src/window.cpp" line="187"/>
         <source>New window</source>
-        <translation>Ny vindu</translation>
+        <translation>Nytt vindu</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="188"/>
@@ -968,8 +990,8 @@ Kopier linje</translation>
         <translation>Åpne fil</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Lagre som</translation>
     </message>

@@ -141,7 +141,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="148"/>
         <source>Toggle comment</source>
-        <translation>Prepnúť komentáre</translation>
+        <translation>Prepnúť komentár</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="149"/>
@@ -171,7 +171,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="200"/>
         <source>Capitalize</source>
-        <translation>Kapitálky</translation>
+        <translation>Veľké písmená</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="251"/>
@@ -195,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>Režim zobrazenia</translation>
     </message>
@@ -253,14 +254,6 @@
 </context>
 <context>
     <name>MainWindow</name>
-    <message>
-        <source>Deepin Editor is a desktop text editor that supports common text editing features.</source>
-        <translation type="vanished">Deepin Editor je textový editor pre desktop s podporou mnohých funkcií</translation>
-    </message>
-    <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin Editor</translation>
-    </message>
     <message>
         <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
@@ -454,11 +447,40 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>MarkdownWysiwygWidget</name>
     <message>
-        <source>Deepin Editor</source>
-        <translation type="vanished">Deepin Editor</translation>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>O krok späť</translation>
     </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>O krok vpred</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>Vystrihnúť</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>Kopírovať</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>Vložiť</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>Vybrať všetko</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
@@ -526,9 +548,9 @@
         <translation>Slovo obal</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>Okno</translation>
     </message>
@@ -765,7 +787,7 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="82"/>
         <source>Capitalize</source>
-        <translation>Hlavné</translation>
+        <translation>Veľké písmená</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="83"/>
@@ -805,7 +827,7 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="90"/>
         <source>Paste</source>
-        <translation>Prilepiť</translation>
+        <translation>Vložiť</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="92"/>
@@ -840,17 +862,17 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="98"/>
         <source>Toggle comment</source>
-        <translation>Zapnúť komentár</translation>
+        <translation>Prepnúť komentár</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
-        <translation>Vrátiť</translation>
+        <translation>O krok späť</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
-        <translation>Prerobiť</translation>
+        <translation>O krok vpred</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="101"/>
@@ -926,7 +948,7 @@
     <message>
         <location filename="../src/settings.cpp" line="91"/>
         <source>Fullscreen</source>
-        <translation>Celý obrazovka</translation>
+        <translation>Na celú obrazovku</translation>
     </message>
 </context>
 <context>
@@ -968,8 +990,8 @@
         <translation>Otvoriť súbor</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>Uložiť ako</translation>
     </message>

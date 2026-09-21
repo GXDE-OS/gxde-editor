@@ -79,10 +79,7 @@
     <message>
         <location filename="../src/dtextedit.cpp" line="136"/>
         <source>Copy</source>
-        <translation>अनुवाद परिणाम:
-1. केवल अनुवाद परिणाम लौटाएं, बिना किसी स्पष्टीकरण, टिप्पणी या अतिरिक्त सामग्री के
-2. मूल प्रारूप और विराम चिह्नों को बनाए रखें
-3. सुनिश्चित करें कि अनुवाद लक्ष्य भाषा में सटीक, प्राकृतिक और मुहावरेदार हो</translation>
+        <translation>कॉपी</translation>
     </message>
     <message>
         <location filename="../src/dtextedit.cpp" line="137"/>
@@ -198,6 +195,7 @@
     <name>EditWrapper</name>
     <message>
         <location filename="../src/editwrapper.cpp" line="487"/>
+        <location filename="../src/editwrapper.cpp" line="525"/>
         <source>View Mode</source>
         <translation>दृश्य मोड</translation>
     </message>
@@ -449,6 +447,39 @@
     </message>
 </context>
 <context>
+    <name>MarkdownWysiwygWidget</name>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="156"/>
+        <source>Undo</source>
+        <translation>पूर्ववत</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="157"/>
+        <source>Redo</source>
+        <translation>फिर से करना</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="158"/>
+        <source>Cut</source>
+        <translation>कट</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="159"/>
+        <source>Copy</source>
+        <translation>कॉपी</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="160"/>
+        <source>Paste</source>
+        <translation>पेस्ट</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/markdownwysiwygwidget.cpp" line="161"/>
+        <source>Select All</source>
+        <translation>सभी चुनें</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../src/settingsdialog.cpp" line="24"/>
@@ -517,9 +548,9 @@
         <translation>शब्द लपेटना</translation>
     </message>
     <message>
+        <location filename="../src/window.cpp" line="930"/>
         <location filename="../src/settingsdialog.cpp" line="31"/>
         <location filename="../src/settingsdialog.cpp" line="102"/>
-        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>खिड़की</translation>
     </message>
@@ -786,10 +817,7 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="88"/>
         <source>Copy</source>
-        <translation>अनुवाद परिणाम:
-1. केवल अनुवाद परिणाम लौटाएं, बिना किसी स्पष्टीकरण, टिप्पणी या अतिरिक्त सामग्री के
-2. मूल प्रारूप और विराम चिह्नों को बनाए रखें
-3. सुनिश्चित करें कि अनुवाद लक्ष्य भाषा में सटीक, प्राकृतिक और मुहावरेदार हो</translation>
+        <translation>कॉपी</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="89"/>
@@ -839,12 +867,12 @@
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
-        <translation>वापस लेना</translation>
+        <translation>पूर्ववत</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
-        <translation>दोहराएँ</translation>
+        <translation>फिर से करना</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="101"/>
@@ -962,8 +990,8 @@
         <translation>फाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39"/>
         <location filename="../src/window.cpp" line="191"/>
+        <location filename="../src/widgets/toast.cpp" line="39"/>
         <source>Save as</source>
         <translation>बचाएं</translation>
     </message>

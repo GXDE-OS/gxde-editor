@@ -21,6 +21,13 @@ export interface HostBridge {
   markdownLoaded(markdown: string): void
   /** 文档内容发生变化（参数为序列化后的 Markdown）。 */
   markdownChanged(markdown: string): void
+  /**
+   * 撤销/重做当前是否可用（历史栈深度变了才发一次）。
+   *
+   * 宿主的右键菜单要按这个灰掉对应两项，而宿主问过来是异步的 —— 弹菜单时再问
+   * 就得多等一个来回。改成这边主动推。
+   */
+  historyState(canUndo: boolean, canRedo: boolean): void
 }
 
 interface QWebChannelInstance {
@@ -100,3 +107,5 @@ function emit<K extends keyof HostBridge>(method: K, ...args: Parameters<HostBri
 export const notifyReady = (): void => emit('ready')
 export const notifyMarkdownLoaded = (markdown: string): void => emit('markdownLoaded', markdown)
 export const notifyMarkdownChanged = (markdown: string): void => emit('markdownChanged', markdown)
+export const notifyHistoryState = (canUndo: boolean, canRedo: boolean): void =>
+  emit('historyState', canUndo, canRedo)

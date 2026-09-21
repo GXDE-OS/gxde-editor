@@ -28,6 +28,7 @@
 #include <QWebEngineView>
 #include <QWidget>
 
+class QAction;
 class QWebChannel;
 
 /**
@@ -68,11 +69,13 @@ public slots:
     void ready();
     void markdownLoaded(const QString &markdown);
     void markdownChanged(const QString &markdown);
+    void historyState(bool canUndo, bool canRedo);
 
 signals:
     void readyReceived();
     void markdownLoadedReceived(const QString &markdown);
     void markdownChangedReceived(const QString &markdown);
+    void historyStateReceived(bool canUndo, bool canRedo);
 };
 
 class MarkdownWysiwygWidget : public QWidget {
@@ -92,9 +95,12 @@ public:
     void setReadOnly(bool readOnly);
     void focusEditor();
 
+    QList<QAction *> contextMenuActions();
+
 signals:
     void ready();
     void markdownEdited(const QString &markdown);
+    void contextMenuRequested(const QPoint &globalPosition);
 
 private:
     void runScript(const QString &script);
@@ -102,11 +108,19 @@ private:
     void handleReady();
     void handleMarkdownLoaded(const QString &markdown);
     void handleMarkdownChanged(const QString &markdown);
+    void refreshActionStates();
 
     QWebEngineView *m_webView = nullptr;
     QWebChannel *m_webChannel = nullptr;
     MarkdownWysiwygBridge *m_bridge = nullptr;
     MarkdownWysiwygSchemeHandler *m_schemeHandler = nullptr;
+
+    QAction *m_undoAction = nullptr;
+    QAction *m_redoAction = nullptr;
+    QAction *m_cutAction = nullptr;
+    QAction *m_copyAction = nullptr;
+    QAction *m_pasteAction = nullptr;
+    QAction *m_selectAllAction = nullptr;
 
     QString m_documentDirectory;
     QString m_markdown;
@@ -115,6 +129,8 @@ private:
     bool m_ready = false;
     bool m_edited = false;
     bool m_readOnly = false;
+    bool m_canUndo = false;
+    bool m_canRedo = false;
 };
 
 #endif
