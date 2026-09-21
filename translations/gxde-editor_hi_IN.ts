@@ -1,34 +1,40 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
 <TS version="2.1" language="hi_IN">
 <context>
     <name>BottomBar</name>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="53" />
+        <location filename="../src/widgets/bottombar.cpp" line="53"/>
         <source>Edit</source>
         <translation>संपादित करें</translation>
     </message>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="54" />
+        <location filename="../src/widgets/bottombar.cpp" line="54"/>
         <source>Read</source>
         <translation>पढ़ें</translation>
     </message>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="55" />
+        <location filename="../src/widgets/bottombar.cpp" line="55"/>
         <source>Live Preview</source>
         <translation>लाइव पूर्वावलोकन</translation>
     </message>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="36" />
+        <location filename="../src/widgets/bottombar.cpp" line="56"/>
+        <source>WYSIWYG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/bottombar.cpp" line="37"/>
         <source>Row</source>
         <translation>पंक्ति</translation>
     </message>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="37" />
+        <location filename="../src/widgets/bottombar.cpp" line="38"/>
         <source>Column</source>
         <translation>स्तंभ</translation>
     </message>
     <message>
-        <location filename="../src/widgets/bottombar.cpp" line="38" />
+        <location filename="../src/widgets/bottombar.cpp" line="39"/>
         <source>Characters %1</source>
         <translation>कृतियाँ %1</translation>
     </message>
@@ -36,42 +42,42 @@
 <context>
     <name>DTextEdit</name>
     <message>
-        <location filename="../src/dtextedit.cpp" line="150" />
+        <location filename="../src/dtextedit.cpp" line="150"/>
         <source>View Mode</source>
         <translation>दृश्य मोड</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="151" />
+        <location filename="../src/dtextedit.cpp" line="151"/>
         <source>Edit</source>
         <translation>संपादित करें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="152" />
+        <location filename="../src/dtextedit.cpp" line="152"/>
         <source>Read</source>
         <translation>पढ़ें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="153" />
+        <location filename="../src/dtextedit.cpp" line="153"/>
         <source>Live Preview</source>
         <translation>लाइव पूर्वावलोकन</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="108" />
+        <location filename="../src/dtextedit.cpp" line="133"/>
         <source>Undo</source>
         <translation>पूर्ववत</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="109" />
+        <location filename="../src/dtextedit.cpp" line="134"/>
         <source>Redo</source>
         <translation>फिर से करना</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="110" />
+        <location filename="../src/dtextedit.cpp" line="135"/>
         <source>Cut</source>
         <translation>कट</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="111" />
+        <location filename="../src/dtextedit.cpp" line="136"/>
         <source>Copy</source>
         <translation>अनुवाद परिणाम:
 1. केवल अनुवाद परिणाम लौटाएं, बिना किसी स्पष्टीकरण, टिप्पणी या अतिरिक्त सामग्री के
@@ -79,105 +85,111 @@
 3. सुनिश्चित करें कि अनुवाद लक्ष्य भाषा में सटीक, प्राकृतिक और मुहावरेदार हो</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="112" />
+        <location filename="../src/dtextedit.cpp" line="137"/>
         <source>Paste</source>
         <translation>पेस्ट</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="113" />
+        <location filename="../src/dtextedit.cpp" line="138"/>
         <source>Delete</source>
         <translation>हटाएँ</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="114" />
+        <location filename="../src/dtextedit.cpp" line="139"/>
         <source>Select All</source>
         <translation>सभी चुनें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="115" />
-        <location filename="../src/window.cpp" line="186" />
+        <location filename="../src/dtextedit.cpp" line="140"/>
+        <location filename="../src/window.cpp" line="195"/>
         <source>Find</source>
         <translation>पाएं</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="116" />
-        <location filename="../src/window.cpp" line="187" />
+        <location filename="../src/dtextedit.cpp" line="141"/>
+        <location filename="../src/window.cpp" line="196"/>
         <source>Replace</source>
         <translation>बदलें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="117" />
+        <location filename="../src/dtextedit.cpp" line="142"/>
         <source>Go to Line</source>
         <translation>लाइन पर जाओ</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="118" />
+        <location filename="../src/dtextedit.cpp" line="143"/>
         <source>Turn on Read-Only mode</source>
         <translation>रेड-ऑनली मोड को ऑन करें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="119" />
+        <location filename="../src/dtextedit.cpp" line="144"/>
         <source>Turn off Read-Only mode</source>
         <translation>रेड-ओनली मोड को बंद करें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="120" />
+        <location filename="../src/dtextedit.cpp" line="145"/>
         <source>Fullscreen</source>
         <translation>पूर्ण स्क्रीन</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="121" />
+        <location filename="../src/dtextedit.cpp" line="146"/>
         <source>Exit fullscreen</source>
         <translation>पूर्ण स्क्रीन से बाहर निकलें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="122" />
+        <location filename="../src/dtextedit.cpp" line="147"/>
         <source>Display in file manager</source>
         <translation>फाइल मैनेजर में प्रदर्शित करें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="123" />
+        <location filename="../src/dtextedit.cpp" line="148"/>
         <source>Toggle comment</source>
         <translation>टॉगल टिप्पणी</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="124" />
+        <location filename="../src/dtextedit.cpp" line="149"/>
         <source>Speak text</source>
         <translation>बोलने वाला पाठ</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="147" />
+        <location filename="../src/dtextedit.cpp" line="154"/>
+        <source>WYSIWYG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="197"/>
         <source>Change Case</source>
         <translation>केस बदलें</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="148" />
+        <location filename="../src/dtextedit.cpp" line="198"/>
         <source>Upper Case</source>
         <translation>अप्पर केस</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="149" />
+        <location filename="../src/dtextedit.cpp" line="199"/>
         <source>Lower Case</source>
         <translation>लोअर केस</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="150" />
+        <location filename="../src/dtextedit.cpp" line="200"/>
         <source>Capitalize</source>
         <translation>Capitalize</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="201" />
-        <location filename="../src/widgets/bottombar.cpp" line="51" />
+        <location filename="../src/dtextedit.cpp" line="251"/>
+        <location filename="../src/dtextedit.cpp" line="1954"/>
+        <location filename="../src/widgets/bottombar.cpp" line="52"/>
         <source>None</source>
         <translation>कुछ भी नहीं</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="2210" />
+        <location filename="../src/dtextedit.cpp" line="2368"/>
         <source>Read-Only mode is off</source>
         <translation>रीड-ऑनली मोड ऑफ है</translation>
     </message>
     <message>
-        <location filename="../src/dtextedit.cpp" line="2214" />
+        <location filename="../src/dtextedit.cpp" line="2372"/>
         <source>Read-Only mode is on</source>
         <translation>रेड-ऑनली मोड ऑन है</translation>
     </message>
@@ -185,33 +197,33 @@
 <context>
     <name>EditWrapper</name>
     <message>
-        <location filename="../src/editwrapper.cpp" line="485" />
+        <location filename="../src/editwrapper.cpp" line="487"/>
         <source>View Mode</source>
         <translation>दृश्य मोड</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="293" />
+        <location filename="../src/editwrapper.cpp" line="312"/>
         <source>File has changed on disk. Reload?</source>
         <translation>फाइल डिस्क पर बदल गई है। रिलोड करें?</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="296" />
+        <location filename="../src/editwrapper.cpp" line="315"/>
         <source>File removed on the disk. Save it now?</source>
         <translation>फाइल डिस्क से हटा दी गई है। क्या इसे अब सेव करें?</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="339" />
-        <location filename="../src/widgets/bottombar.cpp" line="45" />
+        <location filename="../src/editwrapper.cpp" line="358"/>
+        <location filename="../src/widgets/bottombar.cpp" line="46"/>
         <source>INSERT</source>
         <translation>इन्सर्ट</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="342" />
+        <location filename="../src/editwrapper.cpp" line="361"/>
         <source>OVERWRITE</source>
         <translation>ओवरराइट</translation>
     </message>
     <message>
-        <location filename="../src/editwrapper.cpp" line="345" />
+        <location filename="../src/editwrapper.cpp" line="364"/>
         <source>R/O</source>
         <translation>आर/ओ</translation>
     </message>
@@ -219,17 +231,17 @@
 <context>
     <name>FindBar</name>
     <message>
-        <location filename="../src/findbar.cpp" line="38" />
+        <location filename="../src/findbar.cpp" line="38"/>
         <source>Find: </source>
         <translation>खोजें:</translation>
     </message>
     <message>
-        <location filename="../src/findbar.cpp" line="40" />
+        <location filename="../src/findbar.cpp" line="40"/>
         <source>Next</source>
         <translation>अगला</translation>
     </message>
     <message>
-        <location filename="../src/findbar.cpp" line="41" />
+        <location filename="../src/findbar.cpp" line="41"/>
         <source>Previous</source>
         <translation>पिछला</translation>
     </message>
@@ -237,7 +249,7 @@
 <context>
     <name>JumpLineBar</name>
     <message>
-        <location filename="../src/jumplinebar.cpp" line="40" />
+        <location filename="../src/jumplinebar.cpp" line="40"/>
         <source>Go to Line: </source>
         <translation>लाइन पर जाएँ:</translation>
     </message>
@@ -245,12 +257,12 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/main.cpp" line="50" />
+        <location filename="../src/main.cpp" line="73"/>
         <source>GXDE Editor is a desktop text editor that supports common text editing features.</source>
         <translation>GXDE Editor एक डेस्कटॉप टेक्स्ट एडिटर है जो सामान्य टेक्स्ट एडिटिंग फीचर्स का समर्थन करता है।</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="62" />
+        <location filename="../src/main.cpp" line="85"/>
         <source>GXDE Editor</source>
         <translation>GXDE संपादक</translation>
     </message>
@@ -258,340 +270,340 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="24" />
+        <location filename="../src/settingsdialog.cpp" line="24"/>
         <source>Basic</source>
         <translation>बुनियादी</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="25" />
+        <location filename="../src/settingsdialog.cpp" line="25"/>
         <source>Font Style</source>
         <translation>फॉन्ट स्टाइल</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="26" />
+        <location filename="../src/settingsdialog.cpp" line="26"/>
         <source>Font</source>
         <translation>फ़ॉन्ट</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="27" />
+        <location filename="../src/settingsdialog.cpp" line="27"/>
         <source>Font Size</source>
         <translation>फॉन्ट साइज़</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="29" />
-        <location filename="../src/settingsdialog.cpp" line="30" />
+        <location filename="../src/settingsdialog.cpp" line="29"/>
+        <location filename="../src/settingsdialog.cpp" line="30"/>
         <source>Keymap</source>
         <translation>कीमैप</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="28" />
+        <location filename="../src/settingsdialog.cpp" line="28"/>
         <source>Shortcuts</source>
         <translation>शॉर्टकट्स</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="42" />
+        <location filename="../src/settingsdialog.cpp" line="42"/>
         <source>Increase font size</source>
         <translation>फॉन्ट साइज़ बढ़ाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="43" />
+        <location filename="../src/settingsdialog.cpp" line="43"/>
         <source>Decrease font size</source>
         <translation>फॉन्ट साइज़ कम करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="57" />
+        <location filename="../src/settingsdialog.cpp" line="57"/>
         <source>Forward character</source>
         <translation>आगे की पात्र</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="58" />
+        <location filename="../src/settingsdialog.cpp" line="58"/>
         <source>Backward character</source>
         <translation>पिछला वर्ण</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="91" />
+        <location filename="../src/settingsdialog.cpp" line="91"/>
         <source>Transpose character</source>
         <translation>ट्रांसपोज़ चरित्र</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="104" />
+        <location filename="../src/settingsdialog.cpp" line="104"/>
         <source>Tab width</source>
         <translation>टैब चौड़ाई</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="106" />
+        <location filename="../src/settingsdialog.cpp" line="106"/>
         <source>Word Wrap</source>
         <translation>शब्द लपेटना</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="31" />
-        <location filename="../src/settingsdialog.cpp" line="102" />
-        <location filename="../src/window.cpp" line="900" />
+        <location filename="../src/settingsdialog.cpp" line="31"/>
+        <location filename="../src/settingsdialog.cpp" line="102"/>
+        <location filename="../src/window.cpp" line="930"/>
         <source>Window</source>
         <translation>खिड़की</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="32" />
+        <location filename="../src/settingsdialog.cpp" line="32"/>
         <source>New tab</source>
         <translation>नया टैब</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="33" />
+        <location filename="../src/settingsdialog.cpp" line="33"/>
         <source>New window</source>
         <translation>नया विंडो</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="34" />
+        <location filename="../src/settingsdialog.cpp" line="34"/>
         <source>Save</source>
         <translation>बचाओ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="35" />
+        <location filename="../src/settingsdialog.cpp" line="35"/>
         <source>Save as</source>
         <translation>बचाएं</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="36" />
+        <location filename="../src/settingsdialog.cpp" line="36"/>
         <source>Next tab</source>
         <translation>अगला टैब</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="37" />
+        <location filename="../src/settingsdialog.cpp" line="37"/>
         <source>Previous tab</source>
         <translation>पिछला टैब</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="38" />
+        <location filename="../src/settingsdialog.cpp" line="38"/>
         <source>Close tab</source>
         <translation>टैब बंद करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="39" />
+        <location filename="../src/settingsdialog.cpp" line="39"/>
         <source>Close other tabs</source>
         <translation>अन्य टैब बंद करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="40" />
+        <location filename="../src/settingsdialog.cpp" line="40"/>
         <source>Restore tab</source>
         <translation>टैब रिस्टोर करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="41" />
+        <location filename="../src/settingsdialog.cpp" line="41"/>
         <source>Open file</source>
         <translation>फाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="44" />
+        <location filename="../src/settingsdialog.cpp" line="44"/>
         <source>Reset font size</source>
         <translation>फॉन्ट साइज़ रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="45" />
+        <location filename="../src/settingsdialog.cpp" line="45"/>
         <source>Toggle fullscreen</source>
         <translation>पूरा स्क्रीन दिखाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="46" />
+        <location filename="../src/settingsdialog.cpp" line="46"/>
         <source>Find</source>
         <translation>पाएं</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="47" />
+        <location filename="../src/settingsdialog.cpp" line="47"/>
         <source>Replace</source>
         <translation>बदलें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="48" />
+        <location filename="../src/settingsdialog.cpp" line="48"/>
         <source>Go to line</source>
         <translation>जाइए लाइन पर</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="49" />
+        <location filename="../src/settingsdialog.cpp" line="49"/>
         <source>Save cursor position</source>
         <translation>कर्सर की स्थिति बचाएं</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="50" />
+        <location filename="../src/settingsdialog.cpp" line="50"/>
         <source>Reset cursor position</source>
         <translation>कर्सर की स्थिति रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="51" />
+        <location filename="../src/settingsdialog.cpp" line="51"/>
         <source>Exit</source>
         <translation>बाहर निकलें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="52" />
+        <location filename="../src/settingsdialog.cpp" line="52"/>
         <source>Display shortcuts</source>
         <translation>डिस्प्ले शॉर्टकट्स</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="53" />
+        <location filename="../src/settingsdialog.cpp" line="53"/>
         <source>Print</source>
         <translation>प्रिंट</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="54" />
+        <location filename="../src/settingsdialog.cpp" line="54"/>
         <source>Editor</source>
         <translation>संपादक</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="55" />
+        <location filename="../src/settingsdialog.cpp" line="55"/>
         <source>Increase indent</source>
         <translation>बढ़ाएँ इंडेंट</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="56" />
+        <location filename="../src/settingsdialog.cpp" line="56"/>
         <source>Decrease indent</source>
         <translation>कम करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="59" />
+        <location filename="../src/settingsdialog.cpp" line="59"/>
         <source>Forward word</source>
         <translation>आगे की शब्द</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="60" />
+        <location filename="../src/settingsdialog.cpp" line="60"/>
         <source>Backward word</source>
         <translation>पिछला शब्द</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="61" />
+        <location filename="../src/settingsdialog.cpp" line="61"/>
         <source>Next line</source>
         <translation>अगला पंक्ति</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="62" />
+        <location filename="../src/settingsdialog.cpp" line="62"/>
         <source>Previous line</source>
         <translation>पिछला पंक्ति</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="63" />
+        <location filename="../src/settingsdialog.cpp" line="63"/>
         <source>New line</source>
         <translation>नया लाइन</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="64" />
+        <location filename="../src/settingsdialog.cpp" line="64"/>
         <source>New line above</source>
         <translation>नया लाइन ऊपर</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="65" />
+        <location filename="../src/settingsdialog.cpp" line="65"/>
         <source>New line below</source>
         <translation>नया लाइन नीचे</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="66" />
+        <location filename="../src/settingsdialog.cpp" line="66"/>
         <source>Duplicate line</source>
         <translation>डुप्लिकेट लाइन</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="67" />
+        <location filename="../src/settingsdialog.cpp" line="67"/>
         <source>Delete to end of line</source>
         <translation>पंक्ति के अंत तक हटाएं</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="68" />
+        <location filename="../src/settingsdialog.cpp" line="68"/>
         <source>Delete current line</source>
         <translation>वर्तमान पंक्ति को हटा दें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="69" />
+        <location filename="../src/settingsdialog.cpp" line="69"/>
         <source>Swap line up</source>
         <translation>लाइन अप स्वैप करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="70" />
+        <location filename="../src/settingsdialog.cpp" line="70"/>
         <source>Swap line down</source>
         <translation>लाइन को नीचे बदलें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="71" />
+        <location filename="../src/settingsdialog.cpp" line="71"/>
         <source>Scroll up one line</source>
         <translation>एक लाइन ऊपर स्क्रॉल करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="72" />
+        <location filename="../src/settingsdialog.cpp" line="72"/>
         <source>Scroll down one line</source>
         <translation>एक लाइन नीचे स्क्रॉल करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="73" />
+        <location filename="../src/settingsdialog.cpp" line="73"/>
         <source>Page up</source>
         <translation>पृष्ठ ऊपर</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="74" />
+        <location filename="../src/settingsdialog.cpp" line="74"/>
         <source>Page down</source>
         <translation>पेज डाउन</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="75" />
+        <location filename="../src/settingsdialog.cpp" line="75"/>
         <source>Move to end of line</source>
         <translation>पंक्ति के अंत तक चलें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="76" />
+        <location filename="../src/settingsdialog.cpp" line="76"/>
         <source>Move to start of line</source>
         <translation>लाइन के शुरूआत पर जाने</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="77" />
+        <location filename="../src/settingsdialog.cpp" line="77"/>
         <source>Move to end of text</source>
         <translation>पाठ के अंत तक जाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="78" />
+        <location filename="../src/settingsdialog.cpp" line="78"/>
         <source>Move to start of text</source>
         <translation>पाठ के आरंभ पर जाने</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="79" />
+        <location filename="../src/settingsdialog.cpp" line="79"/>
         <source>Move to line indentation</source>
         <translation>लाइन इंडेंटेशन पर जाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="80" />
+        <location filename="../src/settingsdialog.cpp" line="80"/>
         <source>Upper case</source>
         <translation>अपर केस</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="81" />
+        <location filename="../src/settingsdialog.cpp" line="81"/>
         <source>Lower case</source>
         <translation>लॉवर केस</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="82" />
+        <location filename="../src/settingsdialog.cpp" line="82"/>
         <source>Capitalize</source>
         <translation>Capitalize</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="83" />
+        <location filename="../src/settingsdialog.cpp" line="83"/>
         <source>Delete backward word</source>
         <translation>पिछला शब्द हटाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="84" />
+        <location filename="../src/settingsdialog.cpp" line="84"/>
         <source>Delete forward word</source>
         <translation>अगले शब्द को हटाएं</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="85" />
+        <location filename="../src/settingsdialog.cpp" line="85"/>
         <source>Forward over a pair</source>
         <translation>आगे एक जोड़ी</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="86" />
+        <location filename="../src/settingsdialog.cpp" line="86"/>
         <source>Backward over a pair</source>
         <translation>पिछले जोड़े पर पीछे</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="87" />
+        <location filename="../src/settingsdialog.cpp" line="87"/>
         <source>Select all</source>
         <translation>सभी चुनें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="88" />
+        <location filename="../src/settingsdialog.cpp" line="88"/>
         <source>Copy</source>
         <translation>अनुवाद परिणाम:
 1. केवल अनुवाद परिणाम लौटाएं, बिना किसी स्पष्टीकरण, टिप्पणी या अतिरिक्त सामग्री के
@@ -599,72 +611,72 @@
 3. सुनिश्चित करें कि अनुवाद लक्ष्य भाषा में सटीक, प्राकृतिक और मुहावरेदार हो</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="89" />
+        <location filename="../src/settingsdialog.cpp" line="89"/>
         <source>Cut</source>
         <translation>कट</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="90" />
+        <location filename="../src/settingsdialog.cpp" line="90"/>
         <source>Paste</source>
         <translation>पेस्ट</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="92" />
+        <location filename="../src/settingsdialog.cpp" line="92"/>
         <source>Mark</source>
         <translation>मार्क</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="93" />
+        <location filename="../src/settingsdialog.cpp" line="93"/>
         <source>Unmark</source>
         <translation>अनचिह्नित</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="94" />
+        <location filename="../src/settingsdialog.cpp" line="94"/>
         <source>Copy line</source>
         <translation>कृपया पंक्ति को कॉपी करें</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="95" />
+        <location filename="../src/settingsdialog.cpp" line="95"/>
         <source>Cut line</source>
         <translation>कट लाइन</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="96" />
+        <location filename="../src/settingsdialog.cpp" line="96"/>
         <source>Merge lines</source>
         <translation>लाइनों को मिलाएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="97" />
+        <location filename="../src/settingsdialog.cpp" line="97"/>
         <source>Read-Only mode</source>
         <translation>अनुक्रमणीय मोड</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="98" />
+        <location filename="../src/settingsdialog.cpp" line="98"/>
         <source>Toggle comment</source>
         <translation>टॉगल टिप्पणी</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="99" />
+        <location filename="../src/settingsdialog.cpp" line="99"/>
         <source>Undo</source>
         <translation>वापस लेना</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="100" />
+        <location filename="../src/settingsdialog.cpp" line="100"/>
         <source>Redo</source>
         <translation>दोहराएँ</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="101" />
+        <location filename="../src/settingsdialog.cpp" line="101"/>
         <source>Advanced</source>
         <translation>उन्नत</translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.cpp" line="103" />
+        <location filename="../src/settingsdialog.cpp" line="103"/>
         <source>Window size</source>
         <translation>विंडो साइज़</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="59" />
+        <location filename="../src/main.cpp" line="82"/>
         <source>GXDE Editor</source>
         <translation>GXDE संपादक</translation>
     </message>
@@ -672,32 +684,32 @@
 <context>
     <name>ReplaceBar</name>
     <message>
-        <location filename="../src/replacebar.cpp" line="38" />
+        <location filename="../src/replacebar.cpp" line="38"/>
         <source>Replace: </source>
         <translation>बदलें:</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="40" />
+        <location filename="../src/replacebar.cpp" line="40"/>
         <source>With: </source>
         <translation>साथ:</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="42" />
+        <location filename="../src/replacebar.cpp" line="42"/>
         <source>Replace</source>
         <translation>बदलें</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="43" />
+        <location filename="../src/replacebar.cpp" line="43"/>
         <source>Skip</source>
         <translation>छोड़ दें</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="44" />
+        <location filename="../src/replacebar.cpp" line="44"/>
         <source>Replace Rest</source>
         <translation>बदलें शेष</translation>
     </message>
     <message>
-        <location filename="../src/replacebar.cpp" line="45" />
+        <location filename="../src/replacebar.cpp" line="45"/>
         <source>Replace All</source>
         <translation>सभी बदलें</translation>
     </message>
@@ -705,27 +717,27 @@
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../src/settings.cpp" line="80" />
+        <location filename="../src/settings.cpp" line="80"/>
         <source>Standard</source>
         <translation>मानक</translation>
     </message>
     <message>
-        <location filename="../src/settings.cpp" line="80" />
+        <location filename="../src/settings.cpp" line="80"/>
         <source>Customize</source>
         <translation>कस्टमाइज़</translation>
     </message>
     <message>
-        <location filename="../src/settings.cpp" line="91" />
+        <location filename="../src/settings.cpp" line="91"/>
         <source>Normal</source>
         <translation>सामान्य</translation>
     </message>
     <message>
-        <location filename="../src/settings.cpp" line="91" />
+        <location filename="../src/settings.cpp" line="91"/>
         <source>Maximum</source>
         <translation>अधिकतम</translation>
     </message>
     <message>
-        <location filename="../src/settings.cpp" line="91" />
+        <location filename="../src/settings.cpp" line="91"/>
         <source>Fullscreen</source>
         <translation>पूर्ण स्क्रीन</translation>
     </message>
@@ -733,12 +745,12 @@
 <context>
     <name>Tabbar</name>
     <message>
-        <location filename="../src/tabbar.cpp" line="317" />
+        <location filename="../src/tabbar.cpp" line="318"/>
         <source>Close tab</source>
         <translation>टैब बंद करें</translation>
     </message>
     <message>
-        <location filename="../src/tabbar.cpp" line="318" />
+        <location filename="../src/tabbar.cpp" line="319"/>
         <source>Close other tabs</source>
         <translation>अन्य टैब बंद करें</translation>
     </message>
@@ -746,7 +758,7 @@
 <context>
     <name>Toast</name>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="38" />
+        <location filename="../src/widgets/toast.cpp" line="38"/>
         <source>Reload</source>
         <translation>रिलोड</translation>
     </message>
@@ -754,126 +766,126 @@
 <context>
     <name>Window</name>
     <message>
-        <location filename="../src/window.cpp" line="178" />
+        <location filename="../src/window.cpp" line="187"/>
         <source>New window</source>
         <translation>नया विंडो</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="179" />
+        <location filename="../src/window.cpp" line="188"/>
         <source>New tab</source>
         <translation>नया टैब</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="180" />
+        <location filename="../src/window.cpp" line="189"/>
         <source>Open file</source>
         <translation>फाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../src/widgets/toast.cpp" line="39" />
-        <location filename="../src/window.cpp" line="182" />
+        <location filename="../src/widgets/toast.cpp" line="39"/>
+        <location filename="../src/window.cpp" line="191"/>
         <source>Save as</source>
         <translation>बचाएं</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="183" />
+        <location filename="../src/window.cpp" line="192"/>
         <source>Print</source>
         <translation>प्रिंट</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="184" />
+        <location filename="../src/window.cpp" line="193"/>
         <source>Switch theme</source>
         <translation>थीम बदलें</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="264" />
-        <location filename="../src/window.cpp" line="1353" />
+        <location filename="../src/window.cpp" line="273"/>
+        <location filename="../src/window.cpp" line="1384"/>
         <source>Read-Only</source>
         <translation>अन्योन्यमात्र</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="590" />
+        <location filename="../src/window.cpp" line="618"/>
         <source>Saved successfully</source>
         <translation>सफलतापूर्वक सहेजा गया</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1325" />
+        <location filename="../src/window.cpp" line="1356"/>
         <source>Discard</source>
         <translation>छोड़ दें</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="185" />
+        <location filename="../src/window.cpp" line="194"/>
         <source>Settings</source>
         <translation>सेटिंग्स</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="292" />
+        <location filename="../src/window.cpp" line="301"/>
         <source>You do not have permission to open %1</source>
         <translation>आपको %1 खोलने की अनुमति नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="368" />
-        <location filename="../src/window.cpp" line="607" />
-        <location filename="../src/window.cpp" line="1029" />
-        <location filename="../src/window.cpp" line="1397" />
+        <location filename="../src/window.cpp" line="395"/>
+        <location filename="../src/window.cpp" line="635"/>
+        <location filename="../src/window.cpp" line="1059"/>
+        <location filename="../src/window.cpp" line="1428"/>
         <source>Save File</source>
         <translation>फाइल सहेजें</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="368" />
+        <location filename="../src/window.cpp" line="395"/>
         <source>Do you want to save this file?</source>
         <translation>क्या आप इस फ़ाइल को सेव करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="609" />
-        <location filename="../src/window.cpp" line="624" />
+        <location filename="../src/window.cpp" line="637"/>
+        <location filename="../src/window.cpp" line="652"/>
         <source>Encoding</source>
         <translation>एन्कोडिंग</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="610" />
-        <location filename="../src/window.cpp" line="625" />
+        <location filename="../src/window.cpp" line="638"/>
+        <location filename="../src/window.cpp" line="653"/>
         <source>Line Endings</source>
         <translation>लाइन समापन</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="931" />
+        <location filename="../src/window.cpp" line="961"/>
         <source>Editor</source>
         <translation>संपादक</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="544" />
+        <location filename="../src/window.cpp" line="572"/>
         <source>You do not have permission to save %1</source>
         <translation>आपको %1 को सेव करने की अनुमति नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="577" />
+        <location filename="../src/window.cpp" line="605"/>
         <source>Unable to save the file</source>
         <translation>फाइल को सेव नहीं कर पा रहे हैं</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="577" />
+        <location filename="../src/window.cpp" line="605"/>
         <source>Do you want to save as another?</source>
         <translation>क्या आप इसे दूसरे के रूप में सेव करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1029" />
-        <location filename="../src/window.cpp" line="1397" />
+        <location filename="../src/window.cpp" line="1059"/>
+        <location filename="../src/window.cpp" line="1428"/>
         <source>Do you want to save all the files?</source>
         <translation>क्या आप सभी फाइलों को सेव करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="988" />
+        <location filename="../src/window.cpp" line="1018"/>
         <source>Blank document %1</source>
         <translation>खाली दस्तावेज़ %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1324" />
+        <location filename="../src/window.cpp" line="1355"/>
         <source>Cancel</source>
         <translation>रद्द करें</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="181" />
-        <location filename="../src/window.cpp" line="1326" />
+        <location filename="../src/window.cpp" line="190"/>
+        <location filename="../src/window.cpp" line="1357"/>
         <source>Save</source>
         <translation>बचाओ</translation>
     </message>
