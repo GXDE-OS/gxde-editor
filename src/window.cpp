@@ -785,7 +785,6 @@ void Window::popupSettingsDialog()
     DSettingsDialog *dialog = new DSettingsDialog(this);
 
     dialog->widgetFactory()->registerWidget("fontcombobox", Settings::createFontComBoBoxHandle);
-    dialog->setProperty("_d_dtk_theme", "dark");
     dialog->setProperty("_d_QSSFilename", "DSettingsDialog");
     DThemeManager::instance()->registerWidget(dialog);
 
