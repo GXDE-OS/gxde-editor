@@ -21,6 +21,7 @@
  */
 
 #include "dtextedit.h"
+#include "jsonformatter.h"
 #include "syntaxutils.h"
 #include "utils.h"
 #include "window.h"
@@ -146,6 +147,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     m_exitFullscreenAction = new QAction(tr("Exit fullscreen"), this);
     m_openInFileManagerAction = new QAction(tr("Display in file manager"), this);
     m_toggleCommentAction = new QAction(tr("Toggle comment"), this);
+    m_formatJsonAction = new QAction(tr("Format JSON"), this);
     m_speakText = new QAction(tr("Speak text"), this);
     m_viewModeMenu = new QMenu(tr("View Mode"), this);
     m_editViewAction = m_viewModeMenu->addAction(tr("Edit"));
@@ -179,6 +181,7 @@ DTextEdit::DTextEdit(QWidget *parent)
     connect(m_openInFileManagerAction, &QAction::triggered, this, &DTextEdit::clickOpenInFileManagerAction);
     connect(m_toggleCommentAction, &QAction::triggered, this, &DTextEdit::toggleComment);
     connect(m_speakText, &QAction::triggered, this, &DTextEdit::toggleSpeakText);
+    connect(m_formatJsonAction, &QAction::triggered, this, &DTextEdit::formatJsonDocument);
     connect(m_editViewAction, &QAction::triggered, this, [this] {
         emit viewModeRequested(ViewMode::Edit);
     });
@@ -2409,6 +2412,66 @@ void DTextEdit::toggleComment()
     }
 }
 
+bool DTextEdit::isJsonDocument() const
+{
+    return JsonFormatter::isJsonDocument(filepath, m_highlighter->definition().name());
+}
+
+void DTextEdit::formatJsonDocument()
+{
+    const QString source = toPlainText();
+
+    if (source.trimmed().isEmpty()) {
+        popupNotify(tr("There is no JSON content to format"));
+        return;
+    }
+
+    JsonFormatter::Error error;
+    const QString indent = JsonFormatter::indentUnit(m_tabSpaceNumber, useRealTabForIndent());
+    const QString formatted = JsonFormatter::format(source, indent, &error);
+
+    if (error.hasError) {
+        popupNotify(tr("Invalid JSON at line %1, column %2: %3")
+                        .arg(error.line)
+                        .arg(error.column)
+                        .arg(error.message));
+
+        if (error.offset >= 0) {
+            QTextCursor errorCursor(document());
+            errorCursor.setPosition(qMin(error.offset, document()->characterCount() - 1));
+            setTextCursor(errorCursor);
+            highlightCurrentLine();
+        }
+
+        return;
+    }
+
+    if (formatted == source) {
+        popupNotify(tr("The JSON document is already formatted"));
+        return;
+    }
+
+    // Keep the cursor and the viewport roughly where the user left them.
+    const int restorePosition = qMin(textCursor().position(), formatted.size());
+    const int restoreScrollOffset = verticalScrollBar()->value();
+
+    QTextCursor cursor = textCursor();
+    cursor.beginEditBlock();
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(formatted);
+    cursor.endEditBlock();
+
+    cursor.setPosition(qMin(restorePosition, document()->characterCount() - 1));
+    setTextCursor(cursor);
+    verticalScrollBar()->setValue(restoreScrollOffset);
+
+    highlightCurrentLine();
+    updateLineNumber();
+    updateWordCount();
+
+    popupNotify(tr("The JSON document has been formatted"));
+}
+
 void DTextEdit::toggleSpeakText()
 {
     // 获取选中文本
@@ -2689,6 +2752,8 @@ void DTextEdit::keyPressEvent(QKeyEvent *e)
             copyLines();
         } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "togglereadonlymode")) {
             toggleReadOnlyMode();
+        } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "formatjson")) {
+            formatJsonDocument();
         } else if (key == "Shift+/" && e->modifiers() == Qt::ControlModifier) {
             e->ignore();
         } else {
@@ -2785,6 +2850,8 @@ void DTextEdit::keyPressEvent(QKeyEvent *e)
             toggleReadOnlyMode();
         } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "togglecomment")) {
             toggleComment();
+        } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "formatjson")) {
+            formatJsonDocument();
         } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "undo")) {
             QTextEdit::undo();
         } else if (key == Utils::getKeyshortcutFromKeymap(m_settings, "editor", "redo")) {
@@ -2894,6 +2961,10 @@ void DTextEdit::contextMenuEvent(QContextMenuEvent *event)
     }
     if (!wordAtCursor.isEmpty()) {
         m_rightMenu->addMenu(m_convertCaseMenu);
+    }
+
+    if (!toPlainText().isEmpty() && isJsonDocument()) {
+        m_rightMenu->addAction(m_formatJsonAction);
     }
 
     // intelligent judge whether to support comments.

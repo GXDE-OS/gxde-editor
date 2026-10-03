@@ -40,6 +40,99 @@
     </message>
 </context>
 <context>
+    <name>JsonFormatter</name>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="72"/>
+        <source>The document does not contain any JSON value.</source>
+        <translation>文档中没有任何 JSON 值。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="85"/>
+        <source>Unexpected content after the top-level value.</source>
+        <translation>顶层 JSON 值之后存在多余内容。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="148"/>
+        <source>The document is nested too deeply.</source>
+        <translation>文档嵌套层级过深。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="156"/>
+        <source>Unexpected end of document.</source>
+        <translation>文档意外结束。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="181"/>
+        <source>Unexpected character '%1'.</source>
+        <translation>意外的字符「%1」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="190"/>
+        <source>Invalid literal, '%1' was expected.</source>
+        <translation>无效的字面量，应为「%1」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="209"/>
+        <source>Invalid number.</source>
+        <translation>无效的数字。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="222"/>
+        <source>Incomplete unicode escape sequence.</source>
+        <translation>Unicode 转义序列不完整。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="240"/>
+        <source>Invalid unicode escape sequence.</source>
+        <translation>无效的 Unicode 转义序列。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="269"/>
+        <source>Unescaped control character inside a string.</source>
+        <translation>字符串中存在未转义的控制字符。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="336"/>
+        <source>Invalid escape sequence '\%1'.</source>
+        <translation>无效的转义序列「\%1」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="342"/>
+        <source>Unterminated string.</source>
+        <translation>字符串未闭合。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="380"/>
+        <source>Unterminated array, ']' is missing.</source>
+        <translation>数组未闭合，缺少「]」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="381"/>
+        <source>Expected ',' or ']' inside the array.</source>
+        <translation>数组中应为「,」或「]」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="400"/>
+        <source>Expected a quoted object key.</source>
+        <translation>应为带引号的对象键名。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="411"/>
+        <source>Expected ':' after the object key.</source>
+        <translation>对象键名之后应为「:」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="434"/>
+        <source>Unterminated object, '}' is missing.</source>
+        <translation>对象未闭合，缺少「}」。</translation>
+    </message>
+    <message>
+        <location filename="../src/jsonformatter.cpp" line="435"/>
+        <source>Expected ',' or '}' inside the object.</source>
+        <translation>对象中应为「,」或「}」。</translation>
+    </message>
+</context>
+<context>
     <name>DTextEdit</name>
     <message>
         <location filename="../src/dtextedit.cpp" line="133"/>
@@ -189,6 +282,31 @@
         <location filename="../src/dtextedit.cpp" line="2372"/>
         <source>Read-Only mode is on</source>
         <translation>只读模式已开启</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="150"/>
+        <source>Format JSON</source>
+        <translation>格式化 JSON</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="2417"/>
+        <source>There is no JSON content to format</source>
+        <translation>没有可格式化的 JSON 内容</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="2426"/>
+        <source>Invalid JSON at line %1, column %2: %3</source>
+        <translation>第 %1 行第 %2 列的 JSON 无效：%3</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="2442"/>
+        <source>The JSON document is already formatted</source>
+        <translation>JSON 文档已是规范格式</translation>
+    </message>
+    <message>
+        <location filename="../src/dtextedit.cpp" line="2464"/>
+        <source>The JSON document has been formatted</source>
+        <translation>JSON 文档已格式化</translation>
     </message>
 </context>
 <context>
@@ -863,6 +981,11 @@
         <location filename="../src/settingsdialog.cpp" line="98"/>
         <source>Toggle comment</source>
         <translation>切换注释</translation>
+    </message>
+    <message>
+        <location filename="../src/settingsdialog.cpp" line="99"/>
+        <source>Format JSON</source>
+        <translation>格式化 JSON</translation>
     </message>
     <message>
         <location filename="../src/settingsdialog.cpp" line="99"/>

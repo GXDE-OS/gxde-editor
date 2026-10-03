@@ -126,6 +126,16 @@ if (BUILD_TESTING)
         Qt6::Test
     )
     add_test(NAME gxde-editor-markdown-tests COMMAND gxde-editor-markdown-tests)
+
+    add_executable(gxde-editor-json-tests
+        tests/jsonformatter_test.cpp
+        src/jsonformatter.cpp
+    )
+    target_link_libraries(gxde-editor-json-tests
+        Qt6::Core
+        Qt6::Test
+    )
+    add_test(NAME gxde-editor-json-tests COMMAND gxde-editor-json-tests)
 endif ()
 
 # Install qm files

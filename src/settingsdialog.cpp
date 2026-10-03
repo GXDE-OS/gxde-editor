@@ -96,6 +96,7 @@ void GenerateSettingTranslate()
     auto shortcuts_editor_joinlinesName = QObject::tr("Merge lines");
     auto shortcuts_editor_togglereadonlymodeName = QObject::tr("Read-Only mode");
     auto shortcuts_editor_togglecommentName = QObject::tr("Toggle comment");
+    auto shortcuts_editor_formatjsonName = QObject::tr("Format JSON");
     auto shortcuts_editor_undoName = QObject::tr("Undo");
     auto shortcuts_editor_redoName = QObject::tr("Redo");
     auto group_advanceName = QObject::tr("Advanced");

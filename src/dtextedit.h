@@ -178,6 +178,9 @@ public:
     void updateViewModeActions(ViewMode mode, bool markdownAvailable);
     void toggleComment();
 
+    // Whether the current document should be handled as JSON.
+    bool isJsonDocument() const;
+
     void toggleSpeakText();
 
     int getNextWordPosition(QTextCursor cursor, QTextCursor::MoveMode moveMode);
@@ -220,6 +223,8 @@ public slots:
     void downcaseWord();
     void capitalizeWord();
     void transposeChar();
+
+    void formatJsonDocument();
 
     void handleCursorMarkChanged(bool mark, QTextCursor cursor);
 
@@ -294,6 +299,7 @@ private:
     QAction *m_exitFullscreenAction;
     QAction *m_openInFileManagerAction;
     QAction *m_toggleCommentAction;
+    QAction *m_formatJsonAction;
     QAction *m_speakText;
     QMenu *m_viewModeMenu;
     QAction *m_editViewAction;

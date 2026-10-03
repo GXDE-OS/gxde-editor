@@ -3,6 +3,9 @@ gxde-editor (2.0.6) UNRELEASED; urgency=medium
   * 新增Markdown可见即所得编辑模式
   * 修复了设置窗口黑底黑字看不清字的问题
 
+  [ gfdgd_xi ]
+  * 支持 JSON 文件格式化
+
  -- CharOfString <root@charofstring.cc>  Mon, 21 Sep 2026 15:24:10 +0800
 
 gxde-editor (2.0.5) UNRELEASED; urgency=medium
@@ -12,8 +15,9 @@ gxde-editor (2.0.5) UNRELEASED; urgency=medium
 
   [ gfdgd_xi ]
   * 修复编辑 Makefile 文件时错误将 tab 替换为 4 个空格的问题（https://gitee.com/GXDE-OS/gxde-editor/issues/IKCJH4 ）
+  * 支持 JSON 文件格式化
 
- -- gfdgd_xi <3025613752@qq.com>  Thu, 03 Sep 2026 22:33:39 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Sat, 03 Oct 2026 23:20:50 +0800
 
 gxde-editor (2.0.3) UNRELEASED; urgency=medium
 
