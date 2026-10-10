@@ -495,7 +495,7 @@ private:
                 break;
             default:
                 if (c.unicode() < 0x20) {
-                    out += QStringLiteral("\\u%1").arg(c.unicode(), 4, 16, QLatin1Char('0'));
+                    out += QStringLiteral("\\u%1").arg(uint(c.unicode()), 4, 16, QLatin1Char('0'));
                 } else {
                     out += c;
                 }

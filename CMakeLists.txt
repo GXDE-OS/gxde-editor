@@ -55,7 +55,12 @@ find_package(Qt6WebEngineCore QUIET)
 find_package(Qt6WebEngineWidgets QUIET)
 find_package(Qt6WebChannel QUIET)
 
-include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
+# Qt 6.10 起私有模块要单独 find_package，且不再设置 Qt6Gui_PRIVATE_INCLUDE_DIRS，
+# 改为从 Qt6::GuiPrivate 目标取头文件路径（Qt 6.8 上该目标同样存在）
+if(NOT TARGET Qt6::GuiPrivate)
+    find_package(Qt6 REQUIRED COMPONENTS GuiPrivate)
+endif()
+include_directories($<TARGET_PROPERTY:Qt6::GuiPrivate,INTERFACE_INCLUDE_DIRECTORIES>)
 
 # Tell CMake to create the executable
 add_executable(gxde-editor ${SRCS} src/gxde-editor.qrc)
