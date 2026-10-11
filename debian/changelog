@@ -1,8 +1,12 @@
-gxde-editor (2.0.8) UNRELEASED; urgency=medium
+gxde-editor (2.0.9) UNRELEASED; urgency=medium
 
+  [ CharOfString ]
   * 支持Qt6.10构建
 
- -- CharOfString <root@charofstring.cc>  Fri, 9 Oct 2026 21:43:44 -0500
+  [ gfdgd_xi ]
+  * 添加markdown所见即所得模式暗黑模式支持
+
+ -- gfdgd_xi <3025613752@qq.com>  Sun, 11 Oct 2026 11:13:55 +0800
 
 gxde-editor (2.0.7) UNRELEASED; urgency=medium
 
