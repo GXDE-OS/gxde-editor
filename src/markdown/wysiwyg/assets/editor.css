@@ -1924,3 +1924,45 @@ body {
 .milkdown .tok-meta {
   color: var(--gxde-code-meta);
 }
+
+/* 暗黑主题。
+   由 C++ 侧在 <html> 上挂/摘 .gxde-dark class（见 MarkdownWysiwygWidget::setDarkTheme）。
+   Crepe 的配色全是从这里那组 --crepe-color-* / --gxde-code-* 变量取的，所以只要把
+   它们换成暗色值，工具栏、代码高亮、表格面板等就一起跟着反色，不用逐个重写。
+   选择器带 html.gxde-dark 前缀，特异度压过上面的 :root 与 .milkdown，确保只在暗色时生效。 */
+html.gxde-dark {
+  --gxde-editor-bg: #202124;
+  --gxde-editor-fg: #e3e6ea;
+  --gxde-editor-caret: #669df6;
+}
+
+html.gxde-dark .milkdown {
+  --crepe-color-background: #202124; /* background */
+  --crepe-color-on-background: #e3e6ea; /* onBackground */
+  --crepe-color-surface: #2a2b2e; /* surfaceContainerLow */
+  --crepe-color-surface-low: #25262a; /* surfaceContainer */
+  --crepe-color-on-surface: #e3e6ea; /* onSurface */
+  --crepe-color-on-surface-variant: #9aa0a6; /* onSurfaceVariant */
+  /* outline 同时是列表序号（- / 1.）和工具栏图标的取色，暗色下必须调亮才看得清。 */
+  --crepe-color-outline: #bdc1c6; /* outline */
+  --crepe-color-primary: #669df6; /* primary */
+  --crepe-color-secondary: #1e3a5f; /* secondaryContainer */
+  --crepe-color-on-secondary: #c7dbff; /* onSecondaryContainer */
+  --crepe-color-inverse: #e3e6ea; /* inverseSurface */
+  --crepe-color-on-inverse: #202124; /* inverseOnSurface */
+  --crepe-color-inline-code: #f28b82; /* error */
+  --crepe-color-error: #f28b82; /* error */
+  --crepe-color-hover: #3a3b3f; /* surfaceContainerHigh */
+  --crepe-color-selected: #45474b; /* surfaceContainerHighest */
+  --crepe-color-inline-area: #35363a; /* surfaceVariant */
+  --gxde-code-keyword: #c58be0; /* 关键字：紫 */
+  --gxde-code-string: #7ec699; /* 字符串：绿 */
+  --gxde-code-number: #f5a97f; /* 数字/字面量：橙 */
+  --gxde-code-comment: #9aa0a6; /* 注释 */
+  --gxde-code-function: #82aaff; /* 函数名 */
+  --gxde-code-type: #80cbc4; /* 类型/类名：偏青 */
+  --gxde-code-property: #b2ccd6; /* 属性名 */
+  --gxde-code-variable: #e3e6ea; /* 变量：正文色一致 */
+  --gxde-code-operator: #9aa0a6; /* 运算符/标点 */
+  --gxde-code-meta: #9aa0a6; /* 元信息 */
+}

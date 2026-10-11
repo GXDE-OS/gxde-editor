@@ -92,6 +92,10 @@ public:
     bool isEdited() const { return m_edited; }
     bool isReady() const { return m_ready; }
 
+    /// 跟随窗口主题切换暗黑样式。
+    /// 在 <html> 上挂/摘 gxde-dark class，具体配色见 editor.css 里的 .gxde-dark 规则。
+    void setDarkTheme(bool enabled);
+
     void setReadOnly(bool readOnly);
     void focusEditor();
 
@@ -128,6 +132,7 @@ private:
     bool m_hasPendingMarkdown = false;
     bool m_ready = false;
     bool m_edited = false;
+    bool m_darkTheme = false;
     bool m_readOnly = false;
     bool m_canUndo = false;
     bool m_canRedo = false;

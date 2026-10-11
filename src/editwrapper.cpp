@@ -381,6 +381,9 @@ void EditWrapper::setDarkTheme(bool enabled)
     if (m_markdownPreview) {
         m_markdownPreview->setDarkTheme(enabled);
     }
+    if (m_wysiwyg) {
+        m_wysiwyg->setDarkTheme(enabled);
+    }
 #endif
 }
 
@@ -512,6 +515,7 @@ void EditWrapper::ensureWysiwygCreated() {
 
     m_wysiwyg = new MarkdownWysiwygWidget(m_wysiwygPage);
     layout->addWidget(m_wysiwyg);
+    m_wysiwyg->setDarkTheme(m_darkTheme);
     m_viewStack->addWidget(m_wysiwygPage);
 
     connect(m_wysiwyg, &MarkdownWysiwygWidget::markdownEdited,

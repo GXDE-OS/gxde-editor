@@ -273,6 +273,15 @@ void MarkdownWysiwygWidget::focusEditor() {
     }
 }
 
+void MarkdownWysiwygWidget::setDarkTheme(bool enabled) {
+    m_darkTheme = enabled;
+    if (m_ready) {
+        runScript(QStringLiteral(
+            "document.documentElement.classList.toggle('gxde-dark', %1)")
+            .arg(enabled ? QStringLiteral("true") : QStringLiteral("false")));
+    }
+}
+
 void MarkdownWysiwygWidget::runScript(const QString &script) {
     m_webView->page()->runJavaScript(script);
 }
@@ -298,6 +307,10 @@ void MarkdownWysiwygWidget::applyPendingMarkdown() {
 void MarkdownWysiwygWidget::handleReady() {
     m_ready = true;
 
+    if (m_darkTheme) {
+        runScript(QStringLiteral(
+            "document.documentElement.classList.add('gxde-dark')"));
+    }
     if (m_readOnly) {
         runScript(QStringLiteral("window.gxdeEditor.setReadOnly(true)"));
     }
