@@ -1,6 +1,6 @@
 # Maintainer: CharOfString <root@charofstring.cc>
 pkgname=gxde-editor-git
-pkgver=2.0.9
+pkgver=2.0.10
 pkgrel=1
 pkgdesc='DTK based text editor'
 arch=('x86_64' 'aarch64')
