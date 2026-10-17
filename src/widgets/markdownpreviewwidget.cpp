@@ -2,6 +2,9 @@
 #ifdef USE_WEBENGINE
 #include "markdownpreviewwidget.h"
 #include "../markdownlogic.h"
+#include <QAction>
+#include <QCoreApplication>
+#include <QKeySequence>
 #include <QScrollBar>
 #include <QTimer>
 #include <QFile>
@@ -95,6 +98,36 @@ MarkdownPreviewWidget::MarkdownPreviewWidget(QWidget* parent)
     connect(m_webView, &QWidget::customContextMenuRequested, this, [this](const QPoint &position) {
         emit contextMenuRequested(m_webView->mapToGlobal(position));
     });
+
+    // 预览区是只读的，能做的编辑操作只有复制和全选。
+    //
+    // 以前这两项既不在右键菜单里，也没有能兜底的快捷键动作：右键只弹得出
+    // “视图模式”，用户选中文字后虽然能用快捷键复制，但没有任何可见入口。这里把
+    // 动作挂在 webView 上，快捷键只在预览获得焦点时生效，不会抢走左侧编辑器
+    // 的 Ctrl+C / Ctrl+A。动作本身仍然是 QWebEnginePage 的 Copy / SelectAll，
+    // 剪贴板内容和浏览器原生复制完全一致。
+    // 文案复用 DTextEdit 的既有翻译上下文：复制/全选是编辑器本来就有的词条，
+    // 没必要为一个只读预览再引入一套只含这两个词的新翻译。
+    m_copyAction = new QAction(QCoreApplication::translate("DTextEdit", "Copy"), this);
+    m_copyAction->setShortcut(QKeySequence::Copy);
+    m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_copyAction->setEnabled(false);
+    connect(m_copyAction, &QAction::triggered, this, [this] {
+        m_webView->triggerPageAction(QWebEnginePage::Copy);
+    });
+    m_webView->addAction(m_copyAction);
+
+    m_selectAllAction = new QAction(
+        QCoreApplication::translate("DTextEdit", "Select All"), this);
+    m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+    m_selectAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(m_selectAllAction, &QAction::triggered, this, [this] {
+        m_webView->triggerPageAction(QWebEnginePage::SelectAll);
+    });
+    m_webView->addAction(m_selectAllAction);
+
+    connect(m_webView, &QWebEngineView::selectionChanged,
+            this, &MarkdownPreviewWidget::refreshActionStates);
 }
 bool MarkdownPreviewWidget::isSupport()
 {
@@ -162,6 +195,20 @@ void MarkdownPreviewWidget::setReadMode(bool enabled)
     m_readMode = enabled;
     if (m_sourceEditor)
         refreshNow();
+}
+
+QList<QAction *> MarkdownPreviewWidget::contextMenuActions()
+{
+    refreshActionStates();
+    return {m_copyAction, m_selectAllAction};
+}
+
+void MarkdownPreviewWidget::refreshActionStates()
+{
+    // Copy 的可用状态跟着选区走：没有选中内容时菜单项灰掉，快捷键也不生效，
+    // 与浏览器原生行为一致。SelectAll 在预览里始终可用。
+    m_copyAction->setEnabled(m_webView->hasSelection());
+    m_selectAllAction->setEnabled(true);
 }
 
 void MarkdownPreviewWidget::refreshNow()

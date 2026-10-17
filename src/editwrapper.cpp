@@ -487,6 +487,9 @@ void EditWrapper::ensureMarkdownPreviewCreated()
     connect(m_markdownPreview, &MarkdownPreviewWidget::contextMenuRequested,
             this, [this](const QPoint &globalPosition) {
         QMenu menu;
+        // 预览是只读的：给出复制、全选，再把视图模式挂在下面。
+        menu.addActions(m_markdownPreview->contextMenuActions());
+        menu.addSeparator();
         QMenu *viewMenu = menu.addMenu(tr("View Mode"));
         viewMenu->addActions(m_textEdit->viewModeActions());
         menu.exec(globalPosition);

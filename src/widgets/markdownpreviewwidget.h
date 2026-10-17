@@ -3,6 +3,7 @@
 #ifdef USE_WEBENGINE
 // markdownpreviewwidget.h
 #pragma once
+#include <QList>
 #include <QWidget>
 #include <QWebEngineView>
 #include <QTextEdit>
@@ -13,6 +14,7 @@
 #include <QVariantMap>
 
 // 用于实现调用浏览器打开超链接
+class QAction;
 class QWebChannel;
 class MarkdownPreviewWidget;
 
@@ -60,6 +62,10 @@ public:
 
     void syncPreviewToEditor(double ratio);
 
+    /// 预览区的右键菜单项（复制、全选）。
+    /// 预览是只读的，所以只有这两项；取消/粘贴之类不适用。
+    QList<QAction *> contextMenuActions();
+
 signals:
     void contextMenuRequested(const QPoint &globalPosition);
 
@@ -76,6 +82,7 @@ private:
     void initWebView();
     QString generateHtml(const QString& markdown);
     void setPreviewScrollRatio(double ratio);
+    void refreshActionStates();
 
     QWebEngineView* m_webView = nullptr;
     MarkdownWebPage* m_webPage = nullptr;
@@ -84,6 +91,8 @@ private:
     QTextEdit* m_sourceEditor = nullptr;
     QTimer* m_updateTimer = nullptr;
     QTimer* m_scrollSyncTimer = nullptr;
+    QAction* m_copyAction = nullptr;
+    QAction* m_selectAllAction = nullptr;
     bool m_syncing = false;
     bool m_darkMode = false;
     bool m_readMode = false;
