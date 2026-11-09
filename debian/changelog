@@ -1,3 +1,10 @@
+gxde-editor (2.0.11) UNRELEASED; urgency=medium
+
+  [ shenmo ]
+  * 修复打开 Markdown 文件时窗口闪一下、关闭再打开的问题
+
+ -- shenmo <shenmo@spark-app.store>  Mon, 09 Nov 2026 20:04:13 +0800
+
 gxde-editor (2.0.10) UNRELEASED; urgency=medium
 
   [ shenmo ]
