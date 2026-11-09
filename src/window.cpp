@@ -128,6 +128,24 @@ Window::Window(DMainWindow *parent)
         showFullScreen();
     }
 
+#if defined(USE_WEBENGINE) && QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    // 修掉“打开 Markdown 文件时窗口闪一下、像被关掉又打开”的问题。
+    //
+    // Qt 6.8 起，QWidget 顶层窗口是否用 RHI（OpenGL）合成是在创建窗口时按子控件
+    // 决定的。QWebEngineView 内部渲染用的 QQuickWidget 要等第一次打开 Markdown
+    // 预览（实时预览/所见即所得）时才被 reparent 进窗口树，此时 QWidget::setParent()
+    // 发现顶层窗口的 surfaceType 还是 RasterSurface，就会销毁并重建整个平台窗口 ——
+    // 用户看到的就是窗口消失一下再出现，附带窗口句柄、DTK 窗口特效全部重建。
+    //
+    // 这里在窗口刚创建时就把 surface 类型标成 OpenGLSurface：之后 QQuickWidget 加进
+    // 来时类型一致，Qt 只在现有窗口上创建 RHI 后端，不再重建窗口。没有 Markdown
+    // 预览的普通文本编辑不会出现 QQuickWidget，窗口仍按原来的光栅路径绘制，不受影响。
+    if (QWindow *handle = windowHandle()) {
+        if (handle->surfaceType() != QSurface::OpenGLSurface)
+            handle->setSurfaceType(QSurface::OpenGLSurface);
+    }
+#endif
+
     // Init find bar.
     connect(m_findBar, &FindBar::findNext, this, &Window::handleFindNext, Qt::QueuedConnection);
     connect(m_findBar, &FindBar::findPrev, this, &Window::handleFindPrev, Qt::QueuedConnection);
