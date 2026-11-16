@@ -1,3 +1,9 @@
+gxde-editor (2.0.12) UNRELEASED; urgency=medium
+
+  * 修复在Wayland下窗体冻结的问题
+
+ -- CharOfString <root@charofstring.cc>  Sun, 15 Nov 2026 19:52:51 -0600
+
 gxde-editor (2.0.11) UNRELEASED; urgency=medium
 
   [ shenmo ]
