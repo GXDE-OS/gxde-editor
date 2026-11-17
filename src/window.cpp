@@ -70,7 +70,8 @@ Window::Window(DMainWindow *parent)
       m_titlebarStyleSheet(titlebar()->styleSheet())
 {
     const QString platformName = QGuiApplication::platformName();
-    if (platformName == QLatin1String("xcb") || platformName == QLatin1String("dxcb")) {
+    const bool isX11 = platformName == QLatin1String("xcb") || platformName == QLatin1String("dxcb");
+    if (isX11) {
         setWindowFlag(Qt::FramelessWindowHint, true);
     }
 
@@ -107,12 +108,16 @@ Window::Window(DMainWindow *parent)
     // However, it is inapportiate to force modify the OGL surface to avoid the flashing.
     // On X11 that's fine but on Wayland it's going to freeze.
     // We create the RHI backend as window initializes to force load the backend as the editor starts up.
-    QRhiWidget *rhiSurfaceAnchor = new QRhiWidget(m_centralWidget);
-    rhiSurfaceAnchor->setObjectName(QStringLiteral("markdownRhiSurfaceAnchor"));
-    rhiSurfaceAnchor->setFixedHeight(0);
-    rhiSurfaceAnchor->setFocusPolicy(Qt::NoFocus);
-    rhiSurfaceAnchor->setAttribute(Qt::WA_TransparentForMouseEvents);
-    m_centralLayout->addWidget(rhiSurfaceAnchor);
+    //
+    // Only works on FlakeWM. On X11 plz use Shenmo's fix.
+    if (!isX11) {
+        QRhiWidget *rhiSurfaceAnchor = new QRhiWidget(m_centralWidget);
+        rhiSurfaceAnchor->setObjectName(QStringLiteral("markdownRhiSurfaceAnchor"));
+        rhiSurfaceAnchor->setFixedHeight(0);
+        rhiSurfaceAnchor->setFocusPolicy(Qt::NoFocus);
+        rhiSurfaceAnchor->setAttribute(Qt::WA_TransparentForMouseEvents);
+        m_centralLayout->addWidget(rhiSurfaceAnchor);
+    }
 #endif
     m_centralLayout->addWidget(m_editorWidget);
     setWindowIcon(QIcon::fromTheme("deepin-editor"));
@@ -144,6 +149,21 @@ Window::Window(DMainWindow *parent)
     } else if (windowState == "fullscreen") {
         showFullScreen();
     }
+
+#if defined(USE_WEBENGINE) && QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    // X11: mark the existing platform window as OpenGLSurface so that when the
+    // Markdown preview's QQuickWidget is reparented in, Qt only creates the RHI
+    // backend on the current window instead of recreating it (no flashing).
+    // This keeps the QWindow* cached by DPlatformWindowHandle valid.
+
+    // This is Shenmo's fix
+    if (isX11) {
+        if (QWindow *handle = windowHandle()) {
+            if (handle->surfaceType() != QSurface::OpenGLSurface)
+                handle->setSurfaceType(QSurface::OpenGLSurface);
+        }
+    }
+#endif
 
     // Init find bar.
     connect(m_findBar, &FindBar::findNext, this, &Window::handleFindNext, Qt::QueuedConnection);
