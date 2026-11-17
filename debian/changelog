@@ -1,3 +1,9 @@
+gxde-editor (2.0.13) UNRELEASED; urgency=medium
+
+  * 修复在X11下崩溃的问题
+
+ -- CharOfString <root@charofstring.cc>  Tue, 17 Nov 2026 01:56:07 -0600
+
 gxde-editor (2.0.12) UNRELEASED; urgency=medium
 
   * 修复在Wayland下窗体冻结的问题
