@@ -1,5 +1,5 @@
 # Maintainer: CharOfString <root@charofstring.cc>
-pkgname=gxde-editor-git
+pkgname=gxde-editor
 pkgver=2.0.13
 pkgrel=1
 pkgdesc='DTK based text editor'
@@ -7,12 +7,13 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/GXDE-OS/gxde-editor"
 license=('GPL-3.0-or-later')
 # 与 Debian 相同启用可选的 Qt WebEngine（Markdown 预览） ・ Like Debian, enable the optional Qt WebEngine (Markdown preview).
-depends=('dtk2widget-qt6-git' 'dtk6core-git' 'qt6-base' 'qt6-5compat' 'wayland' 'qt6-webengine'
+depends=('dtk2widget-qt6' 'gxde-dtk6core' 'qt6-base' 'qt6-5compat' 'wayland' 'qt6-webengine'
          'qt6-webchannel' 'syntax-highlighting' 'kcodecs' 'libgcc' 'libstdc++' 'glibc')
 makedepends=('git' 'cmake' 'ninja' 'pkgconf' 'qt6-tools' 'qt6-wayland')
-optdepends=('gxde-qt6integration-git: GXDE Qt6 style')
-provides=('gxde-editor')
-conflicts=('gxde-editor')
+optdepends=('gxde-qt6integration: GXDE Qt6 style')
+provides=("gxde-editor-git=$pkgver")
+conflicts=('gxde-editor-git')
+replaces=('gxde-editor-git')
 source=()
 sha512sums=()
 
