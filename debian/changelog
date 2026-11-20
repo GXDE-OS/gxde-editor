@@ -1,3 +1,11 @@
+gxde-editor (2.0.14) UNRELEASED; urgency=medium
+
+  * 修复Wayland下搜索框糊满屏幕的问题
+  * 修复行号错位的问题
+  * 修复Wayland下状态栏上的菜单边距过大的问题
+
+ -- CharOfString <root@charofstring.cc>  Fri, 20 Nov 2026 01:07:54 -0600
+
 gxde-editor (2.0.13) UNRELEASED; urgency=medium
 
   * 修复在X11下崩溃的问题
