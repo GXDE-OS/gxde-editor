@@ -62,17 +62,24 @@ Window::Window(DMainWindow *parent)
       m_centralLayout(new QVBoxLayout(m_centralWidget)),
       m_tabbar(new Tabbar),
       m_jumpLineBar(new JumpLineBar(this)),
-      m_replaceBar(new ReplaceBar),
+      m_replaceBar(new ReplaceBar(m_centralWidget)),
       m_themePanel(new ThemePanel(this)),
-      m_findBar(new FindBar),
+      m_findBar(new FindBar(m_centralWidget)),
       m_settings(new Settings(this)),
       m_menu(new QMenu),
       m_titlebarStyleSheet(titlebar()->styleSheet())
 {
+    m_findBar->hide();
+    m_replaceBar->hide();
+
     const QString platformName = QGuiApplication::platformName();
-    const bool isX11 = platformName == QLatin1String("xcb") || platformName == QLatin1String("dxcb");
-    if (isX11) {
+    m_isX11 = platformName == QLatin1String("xcb") || platformName == QLatin1String("dxcb");
+    if (m_isX11) {
         setWindowFlag(Qt::FramelessWindowHint, true);
+        m_normalWindowRadius = windowRadius();
+        m_normalShadowRadius = shadowRadius();
+        m_normalShadowOffset = shadowOffset();
+        m_normalBorderWidth = borderWidth();
     }
 
     m_blankFileDir = QDir(QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first()).filePath("blank-files");
@@ -110,7 +117,7 @@ Window::Window(DMainWindow *parent)
     // We create the RHI backend as window initializes to force load the backend as the editor starts up.
     //
     // Only works on FlakeWM. On X11 plz use Shenmo's fix.
-    if (!isX11) {
+    if (!m_isX11) {
         QRhiWidget *rhiSurfaceAnchor = new QRhiWidget(m_centralWidget);
         rhiSurfaceAnchor->setObjectName(QStringLiteral("markdownRhiSurfaceAnchor"));
         rhiSurfaceAnchor->setFixedHeight(0);
@@ -157,7 +164,7 @@ Window::Window(DMainWindow *parent)
     // This keeps the QWindow* cached by DPlatformWindowHandle valid.
 
     // This is Shenmo's fix
-    if (isX11) {
+    if (m_isX11) {
         if (QWindow *handle = windowHandle()) {
             if (handle->surfaceType() != QSurface::OpenGLSurface)
                 handle->setSurfaceType(QSurface::OpenGLSurface);
@@ -1269,19 +1276,26 @@ void Window::handleUpdateSearchKeyword(QWidget *widget, const QString &file, con
 
 void Window::addBottomWidget(QWidget *widget)
 {
-    if (m_centralLayout->count() >= 2) {
-        removeBottomWidget();
-    }
-
+    removeBottomWidget();
     m_centralLayout->addWidget(widget);
 }
 
 void Window::removeBottomWidget()
 {
-    auto item = m_centralLayout->takeAt(1);
+    // Don't rely on fixed layout position here.
+    // When RHI surface dynamically inserted itself in the front of editor,
+    // the original algo failed, and in that case index 1 is actually editor
+    // itself rather than a find/replace bar.
+    const QList<QWidget *> bottomWidgets = {
+        m_findBar,
+        m_replaceBar
+    };
 
-    if (item) {
-        item->widget()->hide();
+    for (QWidget *widget : bottomWidgets) {
+        if (m_centralLayout->indexOf(widget) >= 0) {
+            m_centralLayout->removeWidget(widget);
+            widget->hide();
+        }
     }
 }
 
@@ -1425,6 +1439,21 @@ void Window::checkTabbarForReload()
     }
 
     m_tabbar->setTabText(m_tabbar->currentIndex(), tabName);
+}
+
+void Window::changeEvent(QEvent *event)
+{
+    DMainWindow::changeEvent(event);
+
+    if (!m_isX11 || event->type() != QEvent::WindowStateChange) {
+        return;
+    }
+
+    const bool expanded = isMaximized() || isFullScreen();
+    setWindowRadius(expanded ? 0 : m_normalWindowRadius);
+    setShadowRadius(expanded ? 0 : m_normalShadowRadius);
+    setShadowOffset(expanded ? QPoint() : m_normalShadowOffset);
+    setBorderWidth(expanded ? 0 : m_normalBorderWidth);
 }
 
 void Window::resizeEvent(QResizeEvent *e)

@@ -47,6 +47,7 @@
 #include <QScrollBar>
 #include <QStyleFactory>
 #include <QTextBlock>
+#include <QTextLayout>
 #include <QActionGroup>
 #include <QMimeData>
 #include <QTimer>
@@ -1595,48 +1596,36 @@ void DTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     painter.fillRect(QRect(event->rect().x() + event->rect().width() - 1,
                            event->rect().y(), 1, event->rect().height()), splitLineColor);
 
-    int blockNumber = getFirstVisibleBlockId();
-    QTextBlock block = document()->findBlockByNumber(blockNumber);
-    QTextBlock prev_block = (blockNumber > 0) ? document()->findBlockByNumber(blockNumber-1) : block;
-    int translate_y = (blockNumber > 0) ? -verticalScrollBar()->sliderPosition() : 0;
+    painter.setFont(document()->defaultFont());
+    const QFontMetricsF numberMetrics(painter.font());
+    const int viewportTop = lineNumberArea->mapFromGlobal(viewport()->mapToGlobal(QPoint(0, 0))).y();
+    const qreal documentOffset = viewportTop - verticalScrollBar()->value();
+    painter.setClipRect(QRect(0, viewportTop, lineNumberArea->width(), viewport()->height()));
 
-    int top = this->viewport()->geometry().top();
+    QTextBlock block = cursorForPosition(QPoint(0, 0)).block();
+    while (block.isValid()) {
+        const QRectF blockRect = document()->documentLayout()->blockBoundingRect(block);
+        const qreal top = blockRect.top() + documentOffset;
+        if (top > event->rect().bottom()) {
+            break;
+        }
 
-    // Adjust text position according to the previous "non entirely visible" block
-    // if applicable. Also takes in consideration the document's margin offset.
-    int additional_margin;
-    if (blockNumber == 0)
-        // Simply adjust to document's margin
-        additional_margin = document()->documentMargin() -1 - this->verticalScrollBar()->sliderPosition();
-    else
-        // Getting the height of the visible part of the previous "non entirely visible" block
-        additional_margin = document()->documentLayout()->blockBoundingRect(prev_block)
-                .translated(0, translate_y).intersected(this->viewport()->geometry()).height();
-
-    // Shift the starting point
-    top += additional_margin;
-
-    int bottom = top + document()->documentLayout()->blockBoundingRect(block).height();
-
-    Utils::setFontSize(painter, document()->defaultFont().pointSize() - 2);
-    // Draw the numbers (displaying the current line number in green)
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            if (blockNumber + 1 == m_markStartLine) {
+        const QTextLayout *layout = block.layout();
+        if (block.isVisible() && layout && layout->lineCount() > 0
+                && top + blockRect.height() >= event->rect().top()) {
+            if (block.blockNumber() + 1 == m_markStartLine) {
                 painter.setPen(m_regionMarkerColor);
             } else {
                 painter.setPen(m_lineNumbersColor);
             }
 
-            painter.drawText(0, top,
-                             lineNumberArea->width(), fontMetrics().height(),
-                             Qt::AlignTop | Qt::AlignHCenter, QString::number(blockNumber + 1));
+            const QTextLine firstLine = layout->lineAt(0);
+            const QString number = QString::number(block.blockNumber() + 1);
+            const qreal x = (lineNumberArea->width() - numberMetrics.horizontalAdvance(number)) / 2;
+            painter.drawText(QPointF(x, top + firstLine.y() + firstLine.ascent()), number);
         }
 
         block = block.next();
-        top = bottom;
-        bottom = top + document()->documentLayout()->blockBoundingRect(block).height();
-        ++blockNumber;
     }
 }
 
