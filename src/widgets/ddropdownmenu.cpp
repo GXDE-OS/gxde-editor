@@ -50,7 +50,14 @@ DDropdownMenu::DDropdownMenu(QWidget *parent)
     });
 
     connect(this, &DDropdownMenu::requestContextMenu, this, [=] {
-        const QSize menuSize = m_menu->sizeHint();
+        m_menu->ensurePolished();
+        QSize menuSize = m_menu->sizeHint();
+
+        if (m_menu->property("_dtk_menu_effect_installed").toBool()) {
+            const QMargins margins = m_menu->contentsMargins();
+            menuSize -= QSize(margins.left() + margins.right(),
+                              margins.top() + margins.bottom());
+        }
         const QPoint buttonTopCenter = mapToGlobal(QPoint(width() / 2, 0));
         const QPoint popupPosition(buttonTopCenter.x() - menuSize.width() / 2,
                                    buttonTopCenter.y() - menuSize.height());
