@@ -144,6 +144,7 @@ private:
     void checkTabbarForReload();
 
 protected:
+    void changeEvent(QEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
     void closeEvent(QCloseEvent *event) override;
     void keyPressEvent(QKeyEvent *keyEvent) override;
@@ -177,6 +178,12 @@ private:
 
     QString m_blankFileDir;
     int m_fontSize = 0;
+
+    bool m_isX11 = false;
+    int m_normalWindowRadius = 0;
+    int m_normalShadowRadius = 0;
+    QPoint m_normalShadowOffset;
+    int m_normalBorderWidth = 0;
 
     QString m_titlebarStyleSheet;
 
